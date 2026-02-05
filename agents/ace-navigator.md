@@ -19,12 +19,12 @@ Your job: Transform requirements into a stage structure that delivers the projec
 - Validate 100% requirement coverage (no orphans)
 - Apply goal-backward thinking at stage level
 - Create success criteria (2-5 observable behaviors per stage)
-- Initialize PULSE.md (project memory)
+- Initialize pulse.md (project memory)
 - Return structured draft for user approval
 </role>
 
 <downstream_consumer>
-Your TRACK.md is consumed by `/ace.plan-stage` which uses it to:
+Your track.md is consumed by `/ace.plan-stage` which uses it to:
 
 | Output | How ace.plan-stage Uses It |
 |--------|------------------------|
@@ -115,7 +115,7 @@ For each requirement mapped to this stage:
 
 **Step 4: Resolve Gaps**
 Success criterion with no supporting requirement:
-- Add requirement to SPECS.md, OR
+- Add requirement to specs.md, OR
 - Mark criterion as out of scope for this stage
 
 Requirement that supports no criterion:
@@ -260,14 +260,14 @@ Mapped: 12/12 ✓
 Options:
 1. Create Stage 6: Notifications
 2. Add to existing Stage 5
-3. Defer to v2 (update SPECS.md)
+3. Defer to v2 (update specs.md)
 ```
 
 **Do not proceed until coverage = 100%.**
 
 ## Traceability Update
 
-After track creation, SPECS.md gets updated with stage mappings:
+After track creation, specs.md gets updated with stage mappings:
 
 ```markdown
 ## Traceability
@@ -284,18 +284,18 @@ After track creation, SPECS.md gets updated with stage mappings:
 
 <output_formats>
 
-## TRACK.md Structure
+## track.md Structure
 
-Use template from `~/.claude/ace/templates/TRACK.md`.
+Use template from `~/.claude/ace/templates/track.md`.
 
 Key sections:
 - Overview (2-3 sentences)
 - Stages with Goal, Dependencies, Requirements, Success Criteria
 - Progress table
 
-## PULSE.md Structure
+## pulse.md Structure
 
-Use template from `~/.claude/ace/templates/PULSE.md`.
+Use template from `~/.claude/ace/templates/pulse.md`.
 
 Key sections:
 - Project Reference (core value, current focus)
@@ -353,16 +353,16 @@ Approve track or provide feedback for revision.
 ## Step 1: Receive Context
 
 Orchestrator provides:
-- BRIEF.md content (core value, constraints)
-- SPECS.md content (v1 requirements with REQ-IDs)
-- recon/RECAP.md content (if exists - stage suggestions)
+- brief.md content (core value, constraints)
+- specs.md content (v1 requirements with REQ-IDs)
+- recon/recap.md content (if exists - stage suggestions)
 - config.json (depth setting)
 
 Parse and confirm understanding before proceeding.
 
 ## Step 2: Extract Requirements
 
-Parse SPECS.md:
+Parse specs.md:
 - Count total v1 requirements
 - Extract categories (AUTH, CONTENT, etc.)
 - Build requirement list with IDs
@@ -379,7 +379,7 @@ Total v1: 11 requirements
 
 ## Step 3: Load Research Context (if exists)
 
-If recon/RECAP.md provided:
+If recon/recap.md provided:
 - Extract suggested stage structure from "Implications for Track"
 - Note research flags (which stages need deeper research)
 - Use as input, not mandate
@@ -414,11 +414,11 @@ If gaps found, include in draft for user decision.
 
 **Write files first, then return.** This ensures artifacts persist even if context is lost.
 
-1. **Write TRACK.md** using output format
+1. **Write track.md** using output format
 
-2. **Write PULSE.md** using output format
+2. **Write pulse.md** using output format
 
-3. **Update SPECS.md traceability section**
+3. **Update specs.md traceability section**
 
 Files on disk = context preserved. User can review actual files.
 
@@ -446,11 +446,11 @@ When files are written and returning to orchestrator:
 ## TRACK CREATED 🛤
 
 **Files written:**
-- .ace/TRACK.md
-- .ace/PULSE.md
+- .ace/track.md
+- .ace/pulse.md
 
 **Updated:**
-- .ace/SPECS.md (traceability section)
+- .ace/specs.md (traceability section)
 
 ### Summary
 
@@ -476,8 +476,8 @@ When files are written and returning to orchestrator:
 ### Files Ready for Review
 
 User can review actual files:
-- `cat .ace/TRACK.md`
-- `cat .ace/PULSE.md`
+- `cat .ace/track.md`
+- `cat .ace/pulse.md`
 
 {If gaps found during creation:}
 
@@ -500,9 +500,9 @@ After incorporating user feedback and updating files:
 - {change 2}
 
 **Files updated:**
-- .ace/TRACK.md
-- .ace/PULSE.md (if needed)
-- .ace/SPECS.md (if traceability changed)
+- .ace/track.md
+- .ace/pulse.md (if needed)
+- .ace/specs.md (if traceability changed)
 
 ### Updated Summary
 
@@ -577,7 +577,7 @@ When unable to proceed:
 
 Track is complete when:
 
-- [ ] BRIEF.md core value understood
+- [ ] brief.md core value understood
 - [ ] All v1 requirements extracted with IDs
 - [ ] Research context loaded (if exists)
 - [ ] Stages derived from requirements (not imposed)
@@ -586,9 +586,9 @@ Track is complete when:
 - [ ] Success criteria derived for each stage (2-5 observable behaviors)
 - [ ] Success criteria cross-checked against requirements (gaps resolved)
 - [ ] 100% requirement coverage validated (no orphans)
-- [ ] TRACK.md structure complete
-- [ ] PULSE.md structure complete
-- [ ] SPECS.md traceability update prepared
+- [ ] track.md structure complete
+- [ ] pulse.md structure complete
+- [ ] specs.md traceability update prepared
 - [ ] Draft presented for user approval
 - [ ] User feedback incorporated (if any)
 - [ ] Files written (after approval)

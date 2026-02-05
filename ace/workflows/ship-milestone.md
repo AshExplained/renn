@@ -1,6 +1,6 @@
 <purpose>
 
-Mark a shipped version (v1.0, v1.1, v2.0) as complete. This creates a historical record in MILESTONES.md, performs full BRIEF.md evolution review, reorganizes TRACK.md with milestone groupings, and tags the release in git.
+Mark a shipped version (v1.0, v1.1, v2.0) as complete. This creates a historical record in milestones.md, performs full brief.md evolution review, reorganizes track.md with milestone groupings, and tags the release in git.
 
 This is the ritual that separates "development" from "shipped."
 
@@ -12,9 +12,9 @@ This is the ritual that separates "development" from "shipped."
 
 1. templates/milestone.md
 2. templates/milestone-archive.md
-3. `.ace/TRACK.md`
-4. `.ace/SPECS.md`
-5. `.ace/BRIEF.md`
+3. `.ace/track.md`
+4. `.ace/specs.md`
+5. `.ace/brief.md`
 
 </required_reading>
 
@@ -22,14 +22,14 @@ This is the ritual that separates "development" from "shipped."
 
 When a milestone completes, this workflow:
 
-1. Extracts full milestone details to `.ace/milestones/v[X.Y]-TRACK.md`
-2. Archives specs to `.ace/milestones/v[X.Y]-SPECS.md`
-3. Updates TRACK.md to replace milestone details with one-line summary
-4. Deletes SPECS.md (fresh one created for next milestone)
-5. Performs full BRIEF.md evolution review
+1. Extracts full milestone details to `.ace/milestones/v[X.Y]-track.md`
+2. Archives specs to `.ace/milestones/v[X.Y]-specs.md`
+3. Updates track.md to replace milestone details with one-line summary
+4. Deletes specs.md (fresh one created for next milestone)
+5. Performs full brief.md evolution review
 6. Offers to create next milestone inline
 
-**Context Efficiency:** Archives keep TRACK.md constant-size and SPECS.md milestone-scoped.
+**Context Efficiency:** Archives keep track.md constant-size and specs.md milestone-scoped.
 
 **Archive Format:**
 
@@ -52,8 +52,8 @@ When a milestone completes, this workflow:
 Check if milestone is truly complete:
 
 ```bash
-cat .ace/TRACK.md
-ls .ace/stages/*/RECAP.md 2>/dev/null | wc -l
+cat .ace/track.md
+ls .ace/stages/*/recap.md 2>/dev/null | wc -l
 ```
 
 **Questions to ask:**
@@ -154,11 +154,11 @@ Milestone Stats:
 
 <step name="extract_accomplishments">
 
-Read all stage RECAP.md files in milestone range:
+Read all stage recap.md files in milestone range:
 
 ```bash
-cat .ace/stages/01-*/01-*-RECAP.md
-cat .ace/stages/02-*/02-*-RECAP.md
+cat .ace/stages/01-*/01-*-recap.md
+cat .ace/stages/02-*/02-*-recap.md
 # ... for each stage in milestone
 ```
 
@@ -179,12 +179,12 @@ Key accomplishments for this milestone:
 
 <step name="create_milestone_entry">
 
-Create or update `.ace/MILESTONES.md`.
+Create or update `.ace/milestones.md`.
 
 If file doesn't exist:
 
 ```markdown
-# Project Milestones: [Project Name from BRIEF.md]
+# Project Milestones: [Project Name from brief.md]
 
 [New entry]
 ```
@@ -222,12 +222,12 @@ Use template from `templates/milestone.md`:
 
 <step name="evolve_brief_full_review">
 
-Perform full BRIEF.md evolution review at milestone completion.
+Perform full brief.md evolution review at milestone completion.
 
 **Read all stage recaps in this milestone:**
 
 ```bash
-cat .ace/stages/*-*/*-RECAP.md
+cat .ace/stages/*-*/*-recap.md
 ```
 
 **Full review checklist:**
@@ -272,7 +272,7 @@ cat .ace/stages/*-*/*-RECAP.md
    - Any constraints that changed during development?
    - Update as needed
 
-**Update BRIEF.md:**
+**Update brief.md:**
 
 Make all edits inline. Update "Last updated" footer:
 
@@ -296,7 +296,7 @@ Make all edits inline. Update "Last updated" footer:
 
 <step name="reorganize_track">
 
-Update `.ace/TRACK.md` to group completed milestone stages.
+Update `.ace/track.md` to group completed milestone stages.
 
 Add milestone headers and collapse completed work:
 
@@ -346,48 +346,48 @@ Extract completed milestone details and create archive file.
 
 **Process:**
 
-1. Create archive file path: `.ace/milestones/v[X.Y]-TRACK.md`
+1. Create archive file path: `.ace/milestones/v[X.Y]-track.md`
 
 2. Read `~/.claude/ace/templates/milestone-archive.md` template
 
-3. Extract data from current TRACK.md:
+3. Extract data from current track.md:
    - All stages belonging to this milestone (by stage number range)
    - Full stage details (goals, runs, dependencies, status)
    - Stage run lists with completion checkmarks
 
-4. Extract data from BRIEF.md:
+4. Extract data from brief.md:
    - Key decisions made during this milestone
    - Specs that were validated
 
 5. Fill template {{PLACEHOLDERS}}:
    - {{VERSION}} — Milestone version (e.g., "1.0")
-   - {{MILESTONE_NAME}} — From TRACK.md milestone header
+   - {{MILESTONE_NAME}} — From track.md milestone header
    - {{DATE}} — Today's date
    - {{STAGE_START}} — First stage number in milestone
    - {{STAGE_END}} — Last stage number in milestone
    - {{TOTAL_RUNS}} — Count of all runs in milestone
-   - {{MILESTONE_DESCRIPTION}} — From TRACK.md overview
+   - {{MILESTONE_DESCRIPTION}} — From track.md overview
    - {{STAGES_SECTION}} — Full stage details extracted
-   - {{DECISIONS_FROM_BRIEF}} — Key decisions from BRIEF.md
+   - {{DECISIONS_FROM_BRIEF}} — Key decisions from brief.md
    - {{ISSUES_RESOLVED_DURING_MILESTONE}} — From recaps
 
-6. Write filled template to `.ace/milestones/v[X.Y]-TRACK.md`
+6. Write filled template to `.ace/milestones/v[X.Y]-track.md`
 
-7. Delete TRACK.md (fresh one created for next milestone):
+7. Delete track.md (fresh one created for next milestone):
    ```bash
-   rm .ace/TRACK.md
+   rm .ace/track.md
    ```
 
 8. Verify archive exists:
    ```bash
-   ls .ace/milestones/v[X.Y]-TRACK.md
+   ls .ace/milestones/v[X.Y]-track.md
    ```
 
 9. Confirm track archive complete:
 
    ```
-   ✅ v[X.Y] track archived to milestones/v[X.Y]-TRACK.md
-   ✅ TRACK.md deleted (fresh one for next milestone)
+   ✅ v[X.Y] track archived to milestones/v[X.Y]-track.md
+   ✅ track.md deleted (fresh one for next milestone)
    ```
 
 **Note:** Stage directories (`.ace/stages/`) are NOT deleted. They accumulate across milestones as the raw execution history. Stage numbering continues (v1.0 stages 1-4, v1.1 stages 5-8, etc.).
@@ -400,12 +400,12 @@ Archive specs and prepare for fresh specs in next milestone.
 
 **Process:**
 
-1. Read current SPECS.md:
+1. Read current specs.md:
    ```bash
-   cat .ace/SPECS.md
+   cat .ace/specs.md
    ```
 
-2. Create archive file: `.ace/milestones/v[X.Y]-SPECS.md`
+2. Create archive file: `.ace/milestones/v[X.Y]-specs.md`
 
 3. Transform specs for archive:
    - Mark all v1 specs as `[x]` complete
@@ -424,11 +424,11 @@ Archive specs and prepare for fresh specs in next milestone.
    **Status:** ✅ SHIPPED
 
    This is the archived specs for v[X.Y].
-   For current specs, see `.ace/SPECS.md` (created for next milestone).
+   For current specs, see `.ace/specs.md` (created for next milestone).
 
    ---
 
-   [Full SPECS.md content with checkboxes marked complete]
+   [Full specs.md content with checkboxes marked complete]
 
    ---
 
@@ -442,18 +442,18 @@ Archive specs and prepare for fresh specs in next milestone.
    *Archived: [DATE] as part of v[X.Y] milestone completion*
    ```
 
-5. Delete original SPECS.md:
+5. Delete original specs.md:
    ```bash
-   rm .ace/SPECS.md
+   rm .ace/specs.md
    ```
 
 6. Confirm:
    ```
-   ✅ Specs archived to milestones/v[X.Y]-SPECS.md
-   ✅ SPECS.md deleted (fresh one needed for next milestone)
+   ✅ Specs archived to milestones/v[X.Y]-specs.md
+   ✅ specs.md deleted (fresh one needed for next milestone)
    ```
 
-**Important:** The next milestone workflow starts with `/ace.new-milestone` which includes specs definition. BRIEF.md's Validated section carries the cumulative record across milestones.
+**Important:** The next milestone workflow starts with `/ace.new-milestone` which includes specs definition. brief.md's Validated section carries the cumulative record across milestones.
 
 </step>
 
@@ -477,16 +477,16 @@ Confirm:
 
 <step name="update_pulse">
 
-Update PULSE.md to reflect milestone completion.
+Update pulse.md to reflect milestone completion.
 
 **Project Reference:**
 
 ```markdown
 ## Project Reference
 
-See: .ace/BRIEF.md (updated [today])
+See: .ace/brief.md (updated [today])
 
-**Core value:** [Current core value from BRIEF.md]
+**Core value:** [Current core value from brief.md]
 **Current focus:** [Next milestone or "Planning next milestone"]
 ```
 
@@ -503,7 +503,7 @@ Progress: [updated progress bar]
 
 **Accumulated Context:**
 
-- Clear decisions summary (full log in BRIEF.md)
+- Clear decisions summary (full log in brief.md)
 - Clear resolved blockers
 - Keep open blockers for next milestone
 
@@ -671,7 +671,7 @@ Key accomplishments:
 - [Item 2]
 - [Item 3]
 
-See .ace/MILESTONES.md for full details.
+See .ace/milestones.md for full details.
 EOF
 )"
 ```
@@ -705,14 +705,14 @@ git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
 
 ```bash
 # Stage archive files (new)
-git add .ace/milestones/v[X.Y]-TRACK.md
-git add .ace/milestones/v[X.Y]-SPECS.md
+git add .ace/milestones/v[X.Y]-track.md
+git add .ace/milestones/v[X.Y]-specs.md
 git add .ace/milestones/v[X.Y]-MILESTONE-AUDIT.md 2>/dev/null || true
 
 # Stage updated files
-git add .ace/MILESTONES.md
-git add .ace/BRIEF.md
-git add .ace/PULSE.md
+git add .ace/milestones.md
+git add .ace/brief.md
+git add .ace/pulse.md
 
 # Stage deletions
 git add -u .ace/
@@ -722,18 +722,18 @@ git commit -m "$(cat <<'EOF'
 chore: complete v[X.Y] milestone
 
 Archived:
-- milestones/v[X.Y]-TRACK.md
-- milestones/v[X.Y]-SPECS.md
+- milestones/v[X.Y]-track.md
+- milestones/v[X.Y]-specs.md
 - milestones/v[X.Y]-MILESTONE-AUDIT.md (if audit was run)
 
 Deleted (fresh for next milestone):
-- TRACK.md
-- SPECS.md
+- track.md
+- specs.md
 
 Updated:
-- MILESTONES.md (new entry)
-- BRIEF.md (specs → Validated)
-- PULSE.md (reset for next milestone)
+- milestones.md (new entry)
+- brief.md (specs → Validated)
+- pulse.md (reset for next milestone)
 
 Tagged: v[X.Y]
 EOF
@@ -754,10 +754,10 @@ Shipped:
 - [One sentence of what shipped]
 
 Archived:
-- milestones/v[X.Y]-TRACK.md
-- milestones/v[X.Y]-SPECS.md
+- milestones/v[X.Y]-track.md
+- milestones/v[X.Y]-specs.md
 
-Summary: .ace/MILESTONES.md
+Summary: .ace/milestones.md
 Tag: v[X.Y]
 
 ---
@@ -817,15 +817,15 @@ If yes → milestone. If no → keep working.
 
 Milestone completion is successful when:
 
-- [ ] MILESTONES.md entry created with stats and accomplishments
-- [ ] BRIEF.md full evolution review completed
-- [ ] All shipped specs moved to Validated in BRIEF.md
+- [ ] milestones.md entry created with stats and accomplishments
+- [ ] brief.md full evolution review completed
+- [ ] All shipped specs moved to Validated in brief.md
 - [ ] Key Decisions updated with outcomes
-- [ ] TRACK.md reorganized with milestone grouping
-- [ ] Track archive created (milestones/v[X.Y]-TRACK.md)
-- [ ] Specs archive created (milestones/v[X.Y]-SPECS.md)
-- [ ] SPECS.md deleted (fresh for next milestone)
-- [ ] PULSE.md updated with fresh project reference
+- [ ] track.md reorganized with milestone grouping
+- [ ] Track archive created (milestones/v[X.Y]-track.md)
+- [ ] Specs archive created (milestones/v[X.Y]-specs.md)
+- [ ] specs.md deleted (fresh for next milestone)
+- [ ] pulse.md updated with fresh project reference
 - [ ] Git tag created (v[X.Y])
 - [ ] Milestone commit made (includes archive files and deletion)
 - [ ] User knows next step (/ace.new-milestone)

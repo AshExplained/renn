@@ -65,7 +65,7 @@ Runs:
 {{DECISIONS_FROM_PULSE}}
 [Example:]
 
-- Decision: Use TRACK.md split (Rationale: Constant context cost)
+- Decision: Use track.md split (Rationale: Constant context cost)
 - Decision: Decimal stage numbering (Rationale: Clear insertion semantics)
 
 **Issues Resolved:**
@@ -79,7 +79,7 @@ Runs:
 {{ISSUES_DEFERRED_TO_LATER}}
 [Example:]
 
-- BRIEF-PULSE.md tiering (deferred until decisions > 300)
+- brief-pulse.md tiering (deferred until decisions > 300)
 
 **Technical Debt Incurred:**
 {{SHORTCUTS_NEEDING_FUTURE_WORK}}
@@ -89,7 +89,7 @@ Runs:
 
 ---
 
-_For current project status, see .ace/TRACK.md_
+_For current project status, see .ace/track.md_
 
 ---
 
@@ -104,9 +104,9 @@ _For current project status, see .ace/TRACK.md_
 **How to fill template:**
 
 - Replace {{PLACEHOLDERS}} with actual values
-- Extract stage details from TRACK.md
+- Extract stage details from track.md
 - Document decimal stages with (INSERTED) marker
-- Include key decisions from PULSE.md or RECAP files
+- Include key decisions from pulse.md or RECAP files
 - List issues resolved vs deferred
 - Capture technical debt for future reference
 
@@ -117,7 +117,7 @@ _For current project status, see .ace/TRACK.md_
 
 **After archiving:**
 
-- Update TRACK.md to collapse completed milestone in `<details>` tag
-- Update BRIEF.md to brownfield format with Current State section
+- Update track.md to collapse completed milestone in `<details>` tag
+- Update brief.md to brownfield format with Current State section
 - Continue stage numbering in next milestone (never restart at 01)
 </guidelines>

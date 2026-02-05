@@ -64,7 +64,7 @@ Per-project default: Set in `.ace/config.json`:
 Planning involves architecture decisions, goal decomposition, and task design. This is where model quality has the highest impact.
 
 **Why Sonnet for ace-runner?**
-Runners follow explicit RUN.md instructions. The run already contains the reasoning; execution is implementation.
+Runners follow explicit run.md instructions. The run already contains the reasoning; execution is implementation.
 
 **Why Sonnet (not Haiku) for auditors in balanced?**
 Verification requires goal-backward reasoning - checking if code *delivers* what the stage promised, not just pattern matching. Sonnet handles this well; Haiku may miss subtle gaps.

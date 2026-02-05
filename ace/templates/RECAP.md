@@ -1,6 +1,6 @@
 # Recap Template
 
-Template for `.ace/stages/XX-name/{stage}-{run}-RECAP.md` - stage completion documentation.
+Template for `.ace/stages/XX-name/{stage}-{run}-recap.md` - stage completion documentation.
 
 ---
 
@@ -138,7 +138,7 @@ None - no external service configuration required.
 
 **Tags:** Searchable technical keywords (libraries, frameworks, tools) for tech stack awareness.
 
-**Key-files:** Important files for @context references in RUN.md.
+**Key-files:** Important files for @context references in run.md.
 
 **Patterns:** Established conventions future stages should maintain.
 
@@ -239,8 +239,8 @@ The one-liner should tell someone what actually shipped.
 
 **Decisions section:**
 - Key decisions made during execution with rationale
-- Extracted to PULSE.md accumulated context
+- Extracted to pulse.md accumulated context
 - Use "None - followed run as specified" if no drifts
 
-**After creation:** PULSE.md updated with position, decisions, issues.
+**After creation:** pulse.md updated with position, decisions, issues.
 </guidelines>

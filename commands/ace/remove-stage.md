@@ -17,8 +17,8 @@ Output: Stage deleted, all subsequent stages renumbered, git commit as historica
 </objective>
 
 <execution_context>
-@.ace/TRACK.md
-@.ace/PULSE.md
+@.ace/track.md
+@.ace/pulse.md
 </execution_context>
 
 <process>
@@ -44,15 +44,15 @@ Exit.
 Load project state:
 
 ```bash
-cat .ace/PULSE.md 2>/dev/null
-cat .ace/TRACK.md 2>/dev/null
+cat .ace/pulse.md 2>/dev/null
+cat .ace/track.md 2>/dev/null
 ```
 
-Parse current stage number from PULSE.md "Current Position" section.
+Parse current stage number from pulse.md "Current Position" section.
 </step>
 
 <step name="validate_stage_exists">
-Verify the target stage exists in TRACK.md:
+Verify the target stage exists in track.md:
 
 1. Search for `### Stage {target}:` heading
 2. If not found:
@@ -68,7 +68,7 @@ Verify the target stage exists in TRACK.md:
 <step name="validate_future_stage">
 Verify the stage is a future stage (not started):
 
-1. Compare target stage to current stage from PULSE.md
+1. Compare target stage to current stage from pulse.md
 2. Target must be > current stage number
 
 If target <= current stage:
@@ -85,19 +85,19 @@ To abandon current work, use /ace.pause instead.
 
 Exit.
 
-3. Check for RECAP.md files in stage directory:
+3. Check for recap.md files in stage directory:
 
 ```bash
-ls .ace/stages/{target}-*/*-RECAP.md 2>/dev/null
+ls .ace/stages/{target}-*/*-recap.md 2>/dev/null
 ```
 
-If any RECAP.md files exist:
+If any recap.md files exist:
 
 ```
 ERROR: Stage {target} has completed work
 
 Found executed runs:
-- {list of RECAP.md files}
+- {list of recap.md files}
 
 Cannot remove stages with completed work.
 ```
@@ -108,7 +108,7 @@ Exit.
 <step name="gather_stage_info">
 Collect information about the stage being removed:
 
-1. Extract stage name from TRACK.md heading: `### Stage {target}: {Name}`
+1. Extract stage name from track.md heading: `### Stage {target}: {Name}`
 2. Find stage directory: `.ace/stages/{target}-{slug}/`
 3. Find all subsequent stages (integer and decimal) that need renumbering
 
@@ -183,17 +183,17 @@ For each renumbered directory, rename files that contain the stage number:
 
 ```bash
 # Inside 17-dashboard (was 18-dashboard):
-mv "18-01-RUN.md" "17-01-RUN.md"
-mv "18-02-RUN.md" "17-02-RUN.md"
-mv "18-01-RECAP.md" "17-01-RECAP.md"  # if exists
+mv "18-01-run.md" "17-01-run.md"
+mv "18-02-run.md" "17-02-run.md"
+mv "18-01-recap.md" "17-01-recap.md"  # if exists
 # etc.
 ```
 
-Also handle INTEL.md and RECON.md (these don't have stage prefixes, so no rename needed).
+Also handle intel.md and recon.md (these don't have stage prefixes, so no rename needed).
 </step>
 
 <step name="update_track">
-Update TRACK.md:
+Update track.md:
 
 1. **Remove the stage section entirely:**
    - Delete from `### Stage {target}:` to the next stage heading (or section end)
@@ -219,11 +219,11 @@ Update TRACK.md:
    - `### Stage 17.1:` → `### Stage 16.1:` (if integer 17 removed)
    - Update all references consistently
 
-Write updated TRACK.md.
+Write updated track.md.
 </step>
 
 <step name="update_pulse">
-Update PULSE.md:
+Update pulse.md:
 
 1. **Update total stage count:**
    - `Stage: 16 of 20` → `Stage: 16 of 19`
@@ -233,7 +233,7 @@ Update PULSE.md:
 
 Do NOT add a "Track Evolution" note - the git commit is the record.
 
-Write updated PULSE.md.
+Write updated pulse.md.
 </step>
 
 <step name="update_file_contents">
@@ -280,7 +280,7 @@ Stage {target} ({original-name}) removed.
 Changes:
 - Deleted: .ace/stages/{target}-{slug}/
 - Renumbered: Stages {first-renumbered}-{last-old} → {first-renumbered-1}-{last-new}
-- Updated: TRACK.md, PULSE.md
+- Updated: track.md, pulse.md
 - Committed: chore: remove stage {target} ({original-name})
 
 Current track: {total-remaining} stages
@@ -303,10 +303,10 @@ Would you like to:
 
 <anti_patterns>
 
-- Don't remove completed stages (have RECAP.md files)
+- Don't remove completed stages (have recap.md files)
 - Don't remove current or past stages
 - Don't leave gaps in numbering - always renumber
-- Don't add "removed stage" notes to PULSE.md - git commit is the record
+- Don't add "removed stage" notes to pulse.md - git commit is the record
 - Don't ask about each decimal stage - just renumber them
 - Don't modify completed stage directories
 </anti_patterns>
@@ -320,11 +320,11 @@ Would you like to:
 
 **No subsequent stages to renumber:**
 - Removing the last stage (e.g., Stage 20 when that's the end)
-- Just delete and update TRACK.md, no renumbering needed
+- Just delete and update track.md, no renumbering needed
 
 **Stage directory doesn't exist:**
-- Stage may be in TRACK.md but directory not created yet
-- Skip directory deletion, proceed with TRACK.md updates
+- Stage may be in track.md but directory not created yet
+- Skip directory deletion, proceed with track.md updates
 
 **Decimal stages under removed integer:**
 - Removing Stage 17 when 17.1, 17.2 exist
@@ -339,9 +339,9 @@ Stage removal is complete when:
 - [ ] Target stage validated as future/unstarted
 - [ ] Stage directory deleted (if existed)
 - [ ] All subsequent stage directories renumbered
-- [ ] Files inside directories renamed ({old}-01-RUN.md → {new}-01-RUN.md)
-- [ ] TRACK.md updated (section removed, all references renumbered)
-- [ ] PULSE.md updated (stage count, progress percentage)
+- [ ] Files inside directories renamed ({old}-01-run.md → {new}-01-run.md)
+- [ ] track.md updated (section removed, all references renumbered)
+- [ ] pulse.md updated (stage count, progress percentage)
 - [ ] Dependency references updated in subsequent stages
 - [ ] Changes committed with descriptive message
 - [ ] No gaps in stage numbering

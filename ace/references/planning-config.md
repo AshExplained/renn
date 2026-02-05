@@ -28,7 +28,7 @@ Configuration options for `.ace/` directory behavior.
 
 **When `commit_docs: true` (default):**
 - Planning files committed normally
-- RECAP.md, PULSE.md, TRACK.md tracked in git
+- recap.md, pulse.md, track.md tracked in git
 - Full history of planning decisions preserved
 
 **When `commit_docs: false`:**
@@ -52,7 +52,7 @@ git check-ignore -q .ace 2>/dev/null && COMMIT_DOCS=false
 
 ```bash
 if [ "$COMMIT_DOCS" = "true" ]; then
-  git add .ace/PULSE.md
+  git add .ace/pulse.md
   git commit -m "docs: update state"
 fi
 ```

@@ -14,7 +14,7 @@ allowed-tools:
 <objective>
 Verify milestone achieved its definition of done. Check requirements coverage, cross-stage integration, and end-to-end flows.
 
-**This command IS the orchestrator.** Reads existing PROOF.md files (stages already verified during run-stage), aggregates tech debt and deferred gaps, then spawns integration checker for cross-stage wiring.
+**This command IS the orchestrator.** Reads existing proof.md files (stages already verified during run-stage), aggregates tech debt and deferred gaps, then spawns integration checker for cross-stage wiring.
 </objective>
 
 <execution_context>
@@ -25,16 +25,16 @@ Verify milestone achieved its definition of done. Check requirements coverage, c
 Version: $ARGUMENTS (optional — defaults to current milestone)
 
 **Original Intent:**
-@.ace/BRIEF.md
-@.ace/SPECS.md
+@.ace/brief.md
+@.ace/specs.md
 
 **Planned Work:**
-@.ace/TRACK.md
+@.ace/track.md
 @.ace/config.json (if exists)
 
 **Completed Work:**
-Glob: .ace/stages/*/*-RECAP.md
-Glob: .ace/stages/*/*-PROOF.md
+Glob: .ace/stages/*/*-recap.md
+Glob: .ace/stages/*/*-proof.md
 </context>
 
 <process>
@@ -64,29 +64,29 @@ Store resolved model for use in Task call below.
 ls -d .ace/stages/*/ | sort -V
 ```
 
-- Parse version from arguments or detect current from TRACK.md
+- Parse version from arguments or detect current from track.md
 - Identify all stage directories in scope
-- Extract milestone definition of done from TRACK.md
-- Extract requirements mapped to this milestone from SPECS.md
+- Extract milestone definition of done from track.md
+- Extract requirements mapped to this milestone from specs.md
 
 ## 2. Read All Stage Verifications
 
-For each stage directory, read the PROOF.md:
+For each stage directory, read the proof.md:
 
 ```bash
-cat .ace/stages/01-*/*-PROOF.md
-cat .ace/stages/02-*/*-PROOF.md
+cat .ace/stages/01-*/*-proof.md
+cat .ace/stages/02-*/*-proof.md
 # etc.
 ```
 
-From each PROOF.md, extract:
+From each proof.md, extract:
 - **Status:** passed | gaps_found
 - **Critical gaps:** (if any — these are blockers)
 - **Non-critical gaps:** tech debt, deferred items, warnings
 - **Anti-patterns found:** TODOs, stubs, placeholders
 - **Requirements coverage:** which requirements satisfied/blocked
 
-If a stage is missing PROOF.md, flag it as "unverified stage" — this is a blocker.
+If a stage is missing proof.md, flag it as "unverified stage" — this is a blocker.
 
 ## 3. Spawn Integration Checker
 
@@ -114,7 +114,7 @@ Combine:
 
 ## 5. Check Requirements Coverage
 
-For each requirement in SPECS.md mapped to this milestone:
+For each requirement in specs.md mapped to this milestone:
 - Find owning stage
 - Check stage verification status
 - Determine: satisfied | partial | unsatisfied
@@ -269,7 +269,7 @@ All requirements met. No critical blockers. Accumulated tech debt needs review.
 
 <success_criteria>
 - [ ] Milestone scope identified
-- [ ] All stage PROOF.md files read
+- [ ] All stage proof.md files read
 - [ ] Tech debt and deferred gaps aggregated
 - [ ] Integration checker spawned for cross-stage wiring
 - [ ] v{version}-MILESTONE-AUDIT.md created

@@ -17,8 +17,8 @@ Purpose: Add planned work discovered during execution that belongs at the end of
 </objective>
 
 <execution_context>
-@.ace/TRACK.md
-@.ace/PULSE.md
+@.ace/track.md
+@.ace/pulse.md
 </execution_context>
 
 <process>
@@ -44,10 +44,10 @@ Exit.
 Load the track file:
 
 ```bash
-if [ -f .ace/TRACK.md ]; then
-  TRACK=".ace/TRACK.md"
+if [ -f .ace/track.md ]; then
+  TRACK=".ace/track.md"
 else
-  echo "ERROR: No track found (.ace/TRACK.md)"
+  echo "ERROR: No track found (.ace/track.md)"
   exit 1
 fi
 ```
@@ -140,9 +140,9 @@ Preserve all other content exactly (formatting, spacing, other stages).
 </step>
 
 <step name="update_pulse">
-Update PULSE.md to reflect the new stage:
+Update pulse.md to reflect the new stage:
 
-1. Read `.ace/PULSE.md`
+1. Read `.ace/pulse.md`
 2. Under "## Current Position" → "**Next Stage:**" add reference to new stage
 3. Under "## Accumulated Context" → "### Track Evolution" add entry:
    ```
@@ -162,7 +162,7 @@ Stage {N} added to current milestone:
 - Status: Not planned yet
 
 Track updated: {track-path}
-Pulse updated: .ace/PULSE.md
+Pulse updated: .ace/pulse.md
 
 ---
 
@@ -200,7 +200,7 @@ Stage addition is complete when:
 
 - [ ] Stage directory created: `.ace/stages/{NN}-{slug}/`
 - [ ] Track updated with new stage entry
-- [ ] PULSE.md updated with track evolution note
+- [ ] pulse.md updated with track evolution note
 - [ ] New stage appears at end of current milestone
 - [ ] Next stage number calculated correctly (ignoring decimals)
 - [ ] User informed of next steps

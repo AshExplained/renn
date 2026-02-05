@@ -12,43 +12,43 @@ allowed-tools:
 ---
 
 <objective>
-Extract implementation decisions that downstream agents need — scout and architect will use INTEL.md to know what to investigate and what choices are locked.
+Extract implementation decisions that downstream agents need — scout and architect will use intel.md to know what to investigate and what choices are locked.
 
 **How it works:**
 1. Analyze the stage to identify gray areas (UI, UX, behavior, etc.)
 2. Present gray areas — user selects which to discuss
 3. Deep-dive each selected area until satisfied
-4. Create INTEL.md with decisions that guide recon and architecting
+4. Create intel.md with decisions that guide recon and architecting
 
-**Output:** `{stage}-INTEL.md` — decisions clear enough that downstream agents can act without asking the user again
+**Output:** `{stage}-intel.md` — decisions clear enough that downstream agents can act without asking the user again
 </objective>
 
 <execution_context>
 @~/.claude/ace/workflows/scope-stage.md
-@~/.claude/ace/templates/INTEL.md
+@~/.claude/ace/templates/intel.md
 </execution_context>
 
 <context>
 Stage number: $ARGUMENTS (required)
 
 **Load project state:**
-@.ace/PULSE.md
+@.ace/pulse.md
 
 **Load track:**
-@.ace/TRACK.md
+@.ace/track.md
 </context>
 
 <process>
 1. Validate stage number (error if missing or not in track)
-2. Check if INTEL.md exists (offer update/view/skip if yes)
+2. Check if intel.md exists (offer update/view/skip if yes)
 3. **Analyze stage** — Identify domain and generate stage-specific gray areas
 4. **Present gray areas** — Multi-select: which to discuss? (NO skip option)
 5. **Deep-dive each area** — 4 questions per area, then offer more/next
-6. **Write INTEL.md** — Sections match areas discussed
+6. **Write intel.md** — Sections match areas discussed
 7. Offer next steps (recon or architect)
 
 **CRITICAL: Scope guardrail**
-- Stage boundary from TRACK.md is FIXED
+- Stage boundary from track.md is FIXED
 - Discussion clarifies HOW to implement, not WHETHER to add more
 - If user suggests new capabilities: "That's its own stage. I'll note it for later."
 - Capture deferred ideas — don't lose them, don't act on them
@@ -81,6 +81,6 @@ Generate 3-4 **stage-specific** gray areas, not generic categories.
 - User chose which areas to discuss
 - Each selected area explored until satisfied
 - Scope creep redirected to deferred ideas
-- INTEL.md captures decisions, not vague vision
+- intel.md captures decisions, not vague vision
 - User knows next steps
 </success_criteria>

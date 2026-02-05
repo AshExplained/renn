@@ -27,7 +27,7 @@ Output: .ace/codebase/ folder with 7 structured documents about the codebase sta
 Focus area: $ARGUMENTS (optional - if provided, tells agents to focus on specific subsystem)
 
 **Load project state if exists:**
-Check for .ace/PULSE.md - loads context if project already initialized
+Check for .ace/pulse.md - loads context if project already initialized
 
 **This command can run:**
 - Before ace.start (brownfield codebases) - creates codebase map first
@@ -41,7 +41,7 @@ Check for .ace/PULSE.md - loads context if project already initialized
 - Refreshing codebase map after significant changes
 - Onboarding to an unfamiliar codebase
 - Before major refactoring (understand current state)
-- When PULSE.md references outdated codebase info
+- When pulse.md references outdated codebase info
 
 **Skip map-codebase for:**
 - Greenfield projects with no code yet (nothing to map)

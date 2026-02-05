@@ -1,13 +1,13 @@
 <purpose>
-Execute all runs in a stage using batch-based parallel execution. Orchestrator stays lean by delegating plan execution to subagents.
+Execute all runs in a stage using batch-based parallel execution. Orchestrator stays lean by delegating run execution to subagents.
 </purpose>
 
 <core_principle>
-The orchestrator's job is coordination, not execution. Each subagent loads the full execute-plan context itself. Orchestrator discovers plans, analyzes dependencies, groups into batchs, spawns agents, handles checkpoints, collects results.
+The orchestrator's job is coordination, not execution. Each subagent loads the full run-plan context itself. Orchestrator discovers runs, analyzes dependencies, groups into batches, spawns agents, handles gates, collects results.
 </core_principle>
 
 <required_reading>
-Read PULSE.md before any operation to load project context.
+Read pulse.md before any operation to load project context.
 Read config.json for planning behavior settings.
 </required_reading>
 
@@ -37,7 +37,7 @@ Store resolved models for use in Task calls below.
 Before any operation, read project state:
 
 ```bash
-cat .ace/PULSE.md 2>/dev/null
+cat .ace/pulse.md 2>/dev/null
 ```
 
 **If file exists:** Parse and internalize:
@@ -47,7 +47,7 @@ cat .ace/PULSE.md 2>/dev/null
 
 **If file missing but .ace/ exists:**
 ```
-PULSE.md missing but planning artifacts exist.
+pulse.md missing but planning artifacts exist.
 Options:
 1. Reconstruct from existing artifacts
 2. Continue without project state (may lose accumulated context)
@@ -61,7 +61,7 @@ Options:
 # Check if planning docs should be committed (default: true)
 COMMIT_PLANNING_DOCS=$(cat .ace/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
 # Auto-detect gitignored (overrides config)
-git check-ignore -q .planning 2>/dev/null && COMMIT_PLANNING_DOCS=false
+git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
 ```
 
 Store `COMMIT_PLANNING_DOCS` for use in git operations.
@@ -73,7 +73,7 @@ Store `COMMIT_PLANNING_DOCS` for use in git operations.
 PARALLELIZATION=$(cat .ace/config.json 2>/dev/null | grep -o '"parallelization"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
 ```
 
-Store `PARALLELIZATION` for use in batch execution step. When `false`, plans within a batch execute sequentially instead of in parallel.
+Store `PARALLELIZATION` for use in batch execution step. When `false`, runs within a batch execute sequentially instead of in parallel.
 
 **Load git branching config:**
 
@@ -125,9 +125,9 @@ fi
 
 ```bash
 if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
-  # Get current milestone info from TRACK.md
-  MILESTONE_VERSION=$(grep -oE 'v[0-9]+\.[0-9]+' .ace/TRACK.md | head -1 || echo "v1.0")
-  MILESTONE_NAME=$(grep -A1 "## .*$MILESTONE_VERSION" .ace/TRACK.md | tail -1 | sed 's/.*- //' | cut -d'(' -f1 | tr -d ' ' || echo "milestone")
+  # Get current milestone info from track.md
+  MILESTONE_VERSION=$(grep -oE 'v[0-9]+\.[0-9]+' .ace/track.md | head -1 || echo "v1.0")
+  MILESTONE_NAME=$(grep -A1 "## .*$MILESTONE_VERSION" .ace/track.md | tail -1 | sed 's/.*- //' | cut -d'(' -f1 | tr -d ' ' || echo "milestone")
 
   # Create slug
   MILESTONE_SLUG=$(echo "$MILESTONE_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
@@ -148,7 +148,7 @@ fi
 Branching: {strategy} → {branch_name}
 ```
 
-**Note:** All subsequent plan commits go to this branch. User handles merging based on their workflow.
+**Note:** All subsequent run commits go to this branch. User handles merging based on their workflow.
 </step>
 
 <step name="validate_stage">
@@ -163,65 +163,65 @@ if [ -z "$STAGE_DIR" ]; then
   exit 1
 fi
 
-PLAN_COUNT=$(ls -1 "$STAGE_DIR"/*-RUN.md 2>/dev/null | wc -l | tr -d ' ')
-if [ "$PLAN_COUNT" -eq 0 ]; then
-  echo "ERROR: No plans found in $STAGE_DIR"
+RUN_COUNT=$(ls -1 "$STAGE_DIR"/*-run.md 2>/dev/null | wc -l | tr -d ' ')
+if [ "$RUN_COUNT" -eq 0 ]; then
+  echo "ERROR: No runs found in $STAGE_DIR"
   exit 1
 fi
 ```
 
-Report: "Found {N} plans in {stage_dir}"
+Report: "Found {N} runs in {stage_dir}"
 </step>
 
-<step name="discover_plans">
-List all plans and extract metadata:
+<step name="discover_runs">
+List all runs and extract metadata:
 
 ```bash
-# Get all plans
-ls -1 "$STAGE_DIR"/*-RUN.md 2>/dev/null | sort
+# Get all runs
+ls -1 "$STAGE_DIR"/*-run.md 2>/dev/null | sort
 
-# Get completed plans (have RECAP.md)
-ls -1 "$STAGE_DIR"/*-RECAP.md 2>/dev/null | sort
+# Get completed runs (have recap.md)
+ls -1 "$STAGE_DIR"/*-recap.md 2>/dev/null | sort
 ```
 
-For each plan, read frontmatter to extract:
+For each run, read frontmatter to extract:
 - `batch: N` - Execution batch (pre-computed)
-- `autonomous: true/false` - Whether plan has checkpoints
-- `gap_closure: true/false` - Whether plan closes gaps from verification/UAT
+- `autonomous: true/false` - Whether run has gates
+- `gap_closure: true/false` - Whether run closes gaps from verification/UAT
 
-Build plan inventory:
-- Plan path
-- Plan ID (e.g., "03-01")
+Build run inventory:
+- Run path
+- Run ID (e.g., "03-01")
 - Batch number
 - Autonomous flag
 - Gap closure flag
 - Completion status (RECAP exists = complete)
 
 **Filtering:**
-- Skip completed plans (have RECAP.md)
-- If `--gaps-only` flag: also skip plans where `gap_closure` is not `true`
+- Skip completed runs (have recap.md)
+- If `--gaps-only` flag: also skip runs where `gap_closure` is not `true`
 
-If all plans filtered out, report "No matching incomplete plans" and exit.
+If all runs filtered out, report "No matching incomplete runs" and exit.
 </step>
 
 <step name="group_by_batch">
-Read `batch` from each plan's frontmatter and group by batch number:
+Read `batch` from each run's frontmatter and group by batch number:
 
 ```bash
-# For each plan, extract batch from frontmatter
-for plan in $STAGE_DIR/*-RUN.md; do
-  batch=$(grep "^batch:" "$plan" | cut -d: -f2 | tr -d ' ')
-  autonomous=$(grep "^autonomous:" "$plan" | cut -d: -f2 | tr -d ' ')
-  echo "$plan:$batch:$autonomous"
+# For each run, extract batch from frontmatter
+for run in $STAGE_DIR/*-run.md; do
+  batch=$(grep "^batch:" "$run" | cut -d: -f2 | tr -d ' ')
+  autonomous=$(grep "^autonomous:" "$run" | cut -d: -f2 | tr -d ' ')
+  echo "$run:$batch:$autonomous"
 done
 ```
 
-**Group plans:**
+**Group runs:**
 ```
-batchs = {
-  1: [plan-01, plan-02],
-  2: [plan-03, plan-04],
-  3: [plan-05]
+batches = {
+  1: [run-01, run-02],
+  2: [run-03, run-04],
+  3: [run-05]
 }
 ```
 
@@ -231,29 +231,29 @@ Report batch structure with context:
 ```
 ## Execution Plan
 
-**Stage {X}: {Name}** — {total_plans} runs across {batch_count} batchs
+**Stage {X}: {Name}** — {total_runs} runs across {batch_count} batches
 
-| Batch | Plans | What it builds |
+| Batch | Runs | What it builds |
 |------|-------|----------------|
-| 1 | 01-01, 01-02 | {from plan objectives} |
-| 2 | 01-03 | {from plan objectives} |
-| 3 | 01-04 [checkpoint] | {from plan objectives} |
+| 1 | 01-01, 01-02 | {from run objectives} |
+| 2 | 01-03 | {from run objectives} |
+| 3 | 01-04 [checkpoint] | {from run objectives} |
 
 ```
 
-The "What it builds" column comes from skimming plan names/objectives. Keep it brief (3-8 words).
+The "What it builds" column comes from skimming run names/objectives. Keep it brief (3-8 words).
 </step>
 
-<step name="execute_batchs">
-Execute each batch in sequence. Autonomous plans within a batch run in parallel **only if `PARALLELIZATION=true`**.
+<step name="execute_batches">
+Execute each batch in sequence. Autonomous runs within a batch run in parallel **only if `PARALLELIZATION=true`**.
 
-**If `PARALLELIZATION=false`:** Execute plans within each batch sequentially (one at a time). This prevents side effects from concurrent operations like tests, linting, and code generation.
+**If `PARALLELIZATION=false`:** Execute runs within each batch sequentially (one at a time). This prevents side effects from concurrent operations like tests, linting, and code generation.
 
 **For each batch:**
 
 1. **Describe what's being built (BEFORE spawning):**
 
-   Read each plan's `<objective>` section. Extract what's being built and why it matters.
+   Read each run's `<objective>` section. Extract what's being built and why it matters.
 
    **Output:**
    ```
@@ -261,10 +261,10 @@ Execute each batch in sequence. Autonomous plans within a batch run in parallel 
 
    ## Batch {N}
 
-   **{Plan ID}: {Plan Name}**
+   **{Run ID}: {Run Name}**
    {2-3 sentences: what this builds, key technical approach, why it matters in context}
 
-   **{Plan ID}: {Plan Name}** (if parallel)
+   **{Run ID}: {Run Name}** (if parallel)
    {same format}
 
    Spawning {count} agent(s)...
@@ -273,7 +273,7 @@ Execute each batch in sequence. Autonomous plans within a batch run in parallel 
    ```
 
    **Examples:**
-   - Bad: "Executing terrain generation plan"
+   - Bad: "Executing terrain generation run"
    - Good: "Procedural terrain generator using Perlin noise — creates height maps, biome zones, and collision meshes. Required before vehicle physics can interact with ground."
 
 2. **Read files and spawn agents:**
@@ -281,9 +281,9 @@ Execute each batch in sequence. Autonomous plans within a batch run in parallel 
    Before spawning, read file contents. The `@` syntax does not work across Task() boundaries - content must be inlined.
 
    ```bash
-   # Read each plan in the batch
-   PLAN_CONTENT=$(cat "{plan_path}")
-   STATE_CONTENT=$(cat .ace/PULSE.md)
+   # Read each run in the batch
+   RUN_CONTENT=$(cat "{run_path}")
+   STATE_CONTENT=$(cat .ace/pulse.md)
    CONFIG_CONTENT=$(cat .ace/config.json 2>/dev/null)
    ```
 
@@ -295,21 +295,21 @@ Execute each batch in sequence. Autonomous plans within a batch run in parallel 
 
    ```
    <objective>
-   Execute plan {plan_number} of stage {stage_number}-{stage_name}.
+   Execute run {run_number} of stage {stage_number}-{stage_name}.
 
-   Commit each task atomically. Create RECAP.md. Update PULSE.md.
+   Commit each task atomically. Create recap.md. Update pulse.md.
    </objective>
 
    <execution_context>
    @~/.claude/ace/workflows/run-plan.md
-   @~/.claude/ace/templates/RECAP.md
+   @~/.claude/ace/templates/recap.md
    @~/.claude/ace/references/gates.md
    @~/.claude/ace/references/tdd.md
    </execution_context>
 
    <context>
-   Plan:
-   {plan_content}
+   Run:
+   {run_content}
 
    Project state:
    {state_content}
@@ -321,8 +321,8 @@ Execute each batch in sequence. Autonomous plans within a batch run in parallel 
    <success_criteria>
    - [ ] All tasks executed
    - [ ] Each task committed individually
-   - [ ] RECAP.md created in plan directory
-   - [ ] PULSE.md updated with position and decisions
+   - [ ] recap.md created in run directory
+   - [ ] pulse.md updated with position and decisions
    </success_criteria>
    ```
 
@@ -333,9 +333,9 @@ Execute each batch in sequence. Autonomous plans within a batch run in parallel 
 3. **Report completion and what was built:**
 
    For each completed agent:
-   - Verify RECAP.md exists at expected path
-   - Read RECAP.md to extract what was built
-   - Note any issues or deviations
+   - Verify recap.md exists at expected path
+   - Read recap.md to extract what was built
+   - Note any issues or drift
 
    **Output:**
    ```
@@ -343,14 +343,14 @@ Execute each batch in sequence. Autonomous plans within a batch run in parallel 
 
    ## Batch {N} Complete
 
-   **{Plan ID}: {Plan Name}**
-   {What was built — from RECAP.md deliverables}
-   {Notable deviations or discoveries, if any}
+   **{Run ID}: {Run Name}**
+   {What was built — from recap.md deliverables}
+   {Notable drift or discoveries, if any}
 
-   **{Plan ID}: {Plan Name}** (if parallel)
+   **{Run ID}: {Run Name}** (if parallel)
    {same format}
 
-   {If more batchs: brief note on what this enables for next batch}
+   {If more batches: brief note on what this enables for next batch}
 
    ---
    ```
@@ -362,52 +362,52 @@ Execute each batch in sequence. Autonomous plans within a batch run in parallel 
 4. **Handle failures:**
 
    If any agent in batch fails:
-   - Report which plan failed and why
-   - Ask user: "Continue with remaining batchs?" or "Stop execution?"
-   - If continue: proceed to next batch (dependent plans may also fail)
+   - Report which run failed and why
+   - Ask user: "Continue with remaining batches?" or "Stop execution?"
+   - If continue: proceed to next batch (dependent runs may also fail)
    - If stop: exit with partial completion report
 
-5. **Execute checkpoint plans between batchs:**
+5. **Execute gate runs between batches:**
 
-   See `<checkpoint_handling>` for details.
+   See `<gate_handling>` for details.
 
 6. **Proceed to next batch**
 
 </step>
 
-<step name="checkpoint_handling">
-Plans with `autonomous: false` require user interaction.
+<step name="gate_handling">
+Runs with `autonomous: false` require user interaction.
 
 **Detection:** Check `autonomous` field in frontmatter.
 
-**Execution flow for checkpoint plans:**
+**Execution flow for gate runs:**
 
-1. **Spawn agent for checkpoint plan:**
+1. **Spawn agent for gate run:**
    ```
-   Task(prompt="{subagent-task-prompt}", subagent_type="ace-runner", model="{executor_model}")
+   Task(prompt="{subagent-task-prompt}", subagent_type="ace-runner", model="{runner_model}")
    ```
 
-2. **Agent runs until checkpoint:**
+2. **Agent runs until gate:**
    - Executes auto tasks normally
-   - Reaches checkpoint task (e.g., `type="checkpoint:human-verify"`) or auth gate
-   - Agent returns with structured checkpoint (see checkpoint-return.md template)
+   - Reaches gate task (e.g., `type="checkpoint:human-verify"`) or auth gate
+   - Agent returns with structured gate state
 
 3. **Agent return includes (structured format):**
    - Completed Tasks table with commit hashes and files
    - Current task name and blocker
-   - Checkpoint type and details for user
+   - Gate type and details for user
    - What's awaited from user
 
-4. **Orchestrator presents checkpoint to user:**
+4. **Orchestrator presents gate to user:**
 
-   Extract and display the "Checkpoint Details" and "Awaiting" sections from agent return:
+   Extract and display the "Gate Details" and "Awaiting" sections from agent return:
    ```
-   ## Checkpoint: [Type]
+   ## Gate: [Type]
 
-   **Plan:** 03-03 Dashboard Layout
+   **Run:** 03-03 Dashboard Layout
    **Progress:** 2/3 tasks complete
 
-   [Checkpoint Details section from agent return]
+   [Gate Details section from agent return]
 
    [Awaiting section from agent return]
    ```
@@ -424,61 +424,61 @@ Plans with `autonomous: false` require user interaction.
    Task(
      prompt=filled_continuation_template,
      subagent_type="ace-runner",
-     model="{executor_model}"
+     model="{runner_model}"
    )
    ```
 
    Fill template with:
-   - `{completed_tasks_table}`: From agent's checkpoint return
-   - `{resume_task_number}`: Current task from checkpoint
-   - `{resume_task_name}`: Current task name from checkpoint
+   - `{completed_tasks_table}`: From agent's gate return
+   - `{resume_task_number}`: Current task from gate
+   - `{resume_task_name}`: Current task name from gate
    - `{user_response}`: What user provided
-   - `{resume_instructions}`: Based on checkpoint type (see continuation-prompt.md)
+   - `{resume_instructions}`: Based on gate type (see continuation-prompt.md)
 
 7. **Continuation agent executes:**
    - Verifies previous commits exist
    - Continues from resume point
-   - May hit another checkpoint (repeat from step 4)
-   - Or completes plan
+   - May hit another gate (repeat from step 4)
+   - Or completes run
 
-8. **Repeat until plan completes or user stops**
+8. **Repeat until run completes or user stops**
 
 **Why fresh agent instead of resume:**
 Resume relies on Claude Code's internal serialization which breaks with parallel tool calls.
 Fresh agents with explicit state are more reliable and maintain full context.
 
-**Checkpoint in parallel context:**
-If a plan in a parallel batch has a checkpoint:
+**Gate in parallel context:**
+If a run in a parallel batch has a gate:
 - Spawn as normal
-- Agent pauses at checkpoint and returns with structured state
+- Agent pauses at gate and returns with structured state
 - Other parallel agents may complete while waiting
-- Present checkpoint to user
+- Present gate to user
 - Spawn continuation agent with user response
 - Wait for all agents to finish before next batch
 </step>
 
 <step name="aggregate_results">
-After all batchs complete, aggregate results:
+After all batches complete, aggregate results:
 
 ```markdown
 ## Stage {X}: {Name} Execution Complete
 
-**Batchs executed:** {N}
-**Plans completed:** {M} of {total}
+**Batches executed:** {N}
+**Runs completed:** {M} of {total}
 
 ### Batch Summary
 
-| Batch | Plans | Status |
+| Batch | Runs | Status |
 |------|-------|--------|
-| 1 | plan-01, plan-02 | ✓ Complete |
-| CP | plan-03 | ✓ Verified |
-| 2 | plan-04 | ✓ Complete |
-| 3 | plan-05 | ✓ Complete |
+| 1 | run-01, run-02 | ✓ Complete |
+| CP | run-03 | ✓ Verified |
+| 2 | run-04 | ✓ Complete |
+| 3 | run-05 | ✓ Complete |
 
-### Plan Details
+### Run Details
 
-1. **03-01**: [one-liner from RECAP.md]
-2. **03-02**: [one-liner from RECAP.md]
+1. **03-01**: [one-liner from recap.md]
+2. **03-02**: [one-liner from recap.md]
 ...
 
 ### Issues Encountered
@@ -496,9 +496,9 @@ Task(
   prompt="Verify stage {stage_number} goal achievement.
 
 Stage directory: {stage_dir}
-Stage goal: {goal from TRACK.md}
+Stage goal: {goal from track.md}
 
-Check must_haves against actual codebase. Create PROOF.md.
+Check must_haves against actual codebase. Create proof.md.
 Verify what actually exists in the code.",
   subagent_type="ace-auditor",
   model="{auditor_model}"
@@ -508,7 +508,7 @@ Verify what actually exists in the code.",
 **Read verification status:**
 
 ```bash
-grep "^status:" "$STAGE_DIR"/*-PROOF.md | cut -d: -f2 | tr -d ' '
+grep "^status:" "$STAGE_DIR"/*-proof.md | cut -d: -f2 | tr -d ' '
 ```
 
 **Route by status:**
@@ -532,7 +532,7 @@ All automated checks passed. {N} items need human testing:
 
 ### Human Verification Checklist
 
-{Extract from PROOF.md human_verification section}
+{Extract from proof.md human_verification section}
 
 ---
 
@@ -552,17 +552,17 @@ Present gaps and offer next command:
 ## ⚠ Stage {X}: {Name} — Gaps Found
 
 **Score:** {N}/{M} must-haves verified
-**Report:** {stage_dir}/{stage}-PROOF.md
+**Report:** {stage_dir}/{stage}-proof.md
 
 ### What's Missing
 
-{Extract gap summaries from PROOF.md gaps section}
+{Extract gap summaries from proof.md gaps section}
 
 ---
 
 ## ▶ Next Up
 
-**Plan gap closure** — create additional plans to complete the stage
+**Plan gap closure** — create additional runs to complete the stage
 
 `/ace.plan-stage {X} --gaps`
 
@@ -571,22 +571,22 @@ Present gaps and offer next command:
 ---
 
 **Also available:**
-- `cat {stage_dir}/{stage}-PROOF.md` — see full report
+- `cat {stage_dir}/{stage}-proof.md` — see full report
 - `/ace.audit {X}` — manual testing before planning
 ```
 
 User runs `/ace.plan-stage {X} --gaps` which:
-1. Reads PROOF.md gaps
-2. Creates additional plans (04, 05, etc.) with `gap_closure: true` to close gaps
+1. Reads proof.md gaps
+2. Creates additional runs (04, 05, etc.) with `gap_closure: true` to close gaps
 3. User then runs `/ace.run-stage {X} --gaps-only`
-4. Run-stage runs only gap closure plans (04-05)
+4. Run-stage runs only gap closure runs (04-05)
 5. Auditor runs again after new runs complete
 
 User stays in control at each decision point.
 </step>
 
 <step name="update_roadmap">
-Update TRACK.md to reflect stage completion:
+Update track.md to reflect stage completion:
 
 ```bash
 # Mark stage complete
@@ -605,10 +605,10 @@ If `COMMIT_PLANNING_DOCS=false` (set in load_project_state):
 If `COMMIT_PLANNING_DOCS=true` (default):
 - Continue with git operations below
 
-Commit stage completion (roadmap, state, verification):
+Commit stage completion (track, state, verification):
 ```bash
-git add .ace/TRACK.md .ace/PULSE.md .ace/stages/{stage_dir}/*-PROOF.md
-git add .ace/REQUIREMENTS.md  # if updated
+git add .ace/track.md .ace/pulse.md .ace/stages/{stage_dir}/*-proof.md
+git add .ace/specs.md  # if updated
 git commit -m "docs(stage-{X}): complete stage execution"
 ```
 </step>
@@ -646,26 +646,26 @@ No polling (Task blocks). No context bleed.
 </context_efficiency>
 
 <failure_handling>
-**Subagent fails mid-plan:**
-- RECAP.md won't exist
+**Subagent fails mid-run:**
+- recap.md won't exist
 - Orchestrator detects missing RECAP
 - Reports failure, asks user how to proceed
 
 **Dependency chain breaks:**
-- Batch 1 plan fails
-- Batch 2 plans depending on it will likely fail
+- Batch 1 run fails
+- Batch 2 runs depending on it will likely fail
 - Orchestrator can still attempt them (user choice)
-- Or skip dependent plans entirely
+- Or skip dependent runs entirely
 
 **All agents in batch fail:**
 - Something systemic (git issues, permissions, etc.)
 - Stop execution
 - Report for manual investigation
 
-**Checkpoint fails to resolve:**
+**Gate fails to resolve:**
 - User can't approve or provides repeated issues
-- Ask: "Skip this plan?" or "Abort stage execution?"
-- Record partial progress in PULSE.md
+- Ask: "Skip this run?" or "Abort stage execution?"
+- Record partial progress in pulse.md
 </failure_handling>
 
 <resumption>
@@ -674,13 +674,13 @@ No polling (Task blocks). No context bleed.
 If stage execution was interrupted (context limit, user exit, error):
 
 1. Run `/ace.run-stage {stage}` again
-2. discover_plans finds completed RECAPs
-3. Skips completed plans
-4. Resumes from first incomplete plan
+2. discover_runs finds completed RECAPs
+3. Skips completed runs
+4. Resumes from first incomplete run
 5. Continues batch-based execution
 
-**PULSE.md tracks:**
-- Last completed plan
+**pulse.md tracks:**
+- Last completed run
 - Current batch
-- Any pending checkpoints
+- Any pending gates
 </resumption>

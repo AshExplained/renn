@@ -1,0 +1,40 @@
+{
+  "name": "ace-agentic-code-execution",
+  "version": "0.1.0",
+  "description": "A stage-driven, context-engineered agentic code execution system for Claude Code, OpenCode, and Gemini.",
+  "bin": {
+    "ace-agentic-code-execution": "bin/install.js"
+  },
+  "files": [
+    "bin",
+    "commands",
+    "ace",
+    "agents",
+    "hooks/dist"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "ai",
+    "agentic",
+    "context-engineering",
+    "code-execution",
+    "gemini",
+    "gemini-cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "engines": {
+    "node": ">=16.7.0"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "build:hooks": "node scripts/build-hooks.js",
+    "prepublishOnly": "npm run build:hooks"
+  }
+}

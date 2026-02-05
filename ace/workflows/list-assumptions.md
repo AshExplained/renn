@@ -24,7 +24,7 @@ Exit workflow.
 Validate stage exists in track:
 
 ```bash
-cat .ace/TRACK.md | grep -i "Stage ${STAGE}"
+cat .ace/track.md | grep -i "Stage ${STAGE}"
 ```
 
 **If stage not found:**
@@ -161,7 +161,7 @@ What's next?
 
 Wait for user selection.
 
-If "Discuss context": Note that INTEL.md will incorporate any corrections discussed here
+If "Discuss context": Note that intel.md will incorporate any corrections discussed here
 If "Plan this stage": Proceed knowing assumptions are understood
 If "Re-examine": Return to analyze_stage with updated understanding
 </step>

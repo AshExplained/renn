@@ -21,7 +21,7 @@ Output ONLY the reference content below. Do NOT add:
 
 ## Quick Start
 
-1. `/ace.start` - Initialize project (includes research, requirements, roadmap)
+1. `/ace.start` - Initialize project (includes research, requirements, track)
 2. `/ace.plan-stage 1` - Create detailed run for first stage
 3. `/ace.run-stage 1` - Execute the stage
 
@@ -40,15 +40,15 @@ One command takes you from idea to ready-for-planning:
 - Deep questioning to understand what you're building
 - Optional domain research (spawns 4 parallel scout agents)
 - Requirements definition with v1/v2/out-of-scope scoping
-- Roadmap creation with stage breakdown and success criteria
+- Track creation with stage breakdown and success criteria
 
 Creates all `.ace/` artifacts:
-- `BRIEF.md` — vision and requirements
+- `brief.md` — vision and requirements
 - `config.json` — workflow style (guided/turbo)
 - `recon/` — domain research (if selected)
-- `SPECS.md` — scoped requirements with REQ-IDs
-- `TRACK.md` — stages mapped to requirements
-- `PULSE.md` — project memory
+- `specs.md` — scoped requirements with REQ-IDs
+- `track.md` — stages mapped to requirements
+- `pulse.md` — project memory
 
 Usage: `/ace.start`
 
@@ -68,7 +68,7 @@ Usage: `/ace.map-codebase`
 Help articulate your vision for a stage before planning.
 
 - Captures how you imagine this stage working
-- Creates INTEL.md with your vision, essentials, and boundaries
+- Creates intel.md with your vision, essentials, and boundaries
 - Use when you have ideas about how something should look/feel
 
 Usage: `/ace.discuss-stage 2`
@@ -77,7 +77,7 @@ Usage: `/ace.discuss-stage 2`
 Comprehensive ecosystem research for niche/complex domains.
 
 - Discovers standard stack, architecture patterns, pitfalls
-- Creates RECON.md with "how experts build this" knowledge
+- Creates recon.md with "how experts build this" knowledge
 - Use for 3D, games, audio, shaders, ML, and other specialized domains
 - Goes beyond "which library" to ecosystem knowledge
 
@@ -95,13 +95,13 @@ Usage: `/ace.list-stage-assumptions 3`
 **`/ace.plan-stage <number>`**
 Create detailed execution run for a specific stage.
 
-- Generates `.ace/stages/XX-stage-name/XX-YY-RUN.md`
+- Generates `.ace/stages/XX-stage-name/XX-YY-run.md`
 - Breaks stage into concrete, actionable tasks
 - Includes verification criteria and success measures
 - Multiple runs per stage supported (XX-01, XX-02, etc.)
 
 Usage: `/ace.plan-stage 1`
-Result: Creates `.ace/stages/01-foundation/01-01-RUN.md`
+Result: Creates `.ace/stages/01-foundation/01-01-run.md`
 
 ### Execution
 
@@ -111,7 +111,7 @@ Execute all runs in a stage.
 - Groups runs by batch (from frontmatter), executes batches sequentially
 - Runs within each batch run in parallel via Task tool
 - Verifies stage goal after all runs complete
-- Updates SPECS.md, TRACK.md, PULSE.md
+- Updates specs.md, track.md, pulse.md
 
 Usage: `/ace.run-stage 5`
 
@@ -123,19 +123,19 @@ Execute small, ad-hoc tasks with ACE guarantees but skip optional agents.
 Quick mode uses the same system with a shorter path:
 - Spawns architect + runner (skips scout, reviewer, auditor)
 - Quick tasks live in `.ace/quick/` separate from planned stages
-- Updates PULSE.md tracking (not TRACK.md)
+- Updates pulse.md tracking (not track.md)
 
 Use when you know exactly what to do and the task is small enough to not need recon or auditing.
 
 Usage: `/ace.dash`
-Result: Creates `.ace/quick/NNN-slug/RUN.md`, `.ace/quick/NNN-slug/RECAP.md`
+Result: Creates `.ace/quick/NNN-slug/run.md`, `.ace/quick/NNN-slug/recap.md`
 
-### Roadmap Management
+### Track Management
 
 **`/ace.add-stage <description>`**
 Add new stage to end of current milestone.
 
-- Appends to TRACK.md
+- Appends to track.md
 - Uses next sequential number
 - Updates stage directory structure
 
@@ -170,16 +170,16 @@ Start a new milestone through unified flow.
 - Deep questioning to understand what you're building next
 - Optional domain research (spawns 4 parallel scout agents)
 - Requirements definition with scoping
-- Roadmap creation with stage breakdown
+- Track creation with stage breakdown
 
-Mirrors `/ace.start` flow for brownfield projects (existing BRIEF.md).
+Mirrors `/ace.start` flow for brownfield projects (existing brief.md).
 
 Usage: `/ace.new-milestone "v2.0 Features"`
 
 **`/ace.complete-milestone <version>`**
 Archive completed milestone and prepare for next version.
 
-- Creates MILESTONES.md entry with stats
+- Creates milestones.md entry with stats
 - Archives full details to milestones/ directory
 - Creates git tag for the release
 - Prepares workspace for next version
@@ -205,7 +205,7 @@ Usage: `/ace.status`
 **`/ace.continue`**
 Resume work from previous session with full context restoration.
 
-- Reads PULSE.md for project context
+- Reads pulse.md for project context
 - Shows current position and recent progress
 - Offers next actions based on project state
 
@@ -215,7 +215,7 @@ Usage: `/ace.continue`
 Create context handoff when pausing work mid-stage.
 
 - Creates .continue-here file with current state
-- Updates PULSE.md session continuity section
+- Updates pulse.md session continuity section
 - Captures in-progress work context
 
 Usage: `/ace.pause`
@@ -243,7 +243,7 @@ Capture idea or task as todo from current conversation.
 - Creates structured todo file in `.ace/todos/pending/`
 - Infers area from file paths for grouping
 - Checks for duplicates before creating
-- Updates PULSE.md todo count
+- Updates pulse.md todo count
 
 Usage: `/ace.add-todo` (infers from conversation)
 Usage: `/ace.add-todo Add auth token refresh`
@@ -277,7 +277,7 @@ Usage: `/ace.audit 3`
 **`/ace.audit-milestone [version]`**
 Audit milestone completion against original intent.
 
-- Reads all stage PROOF.md files
+- Reads all stage proof.md files
 - Checks requirements coverage
 - Spawns integration checker for cross-stage wiring
 - Creates MILESTONE-AUDIT.md with gaps and tech debt
@@ -289,7 +289,7 @@ Create stages to close gaps identified by audit.
 
 - Reads MILESTONE-AUDIT.md and groups gaps into stages
 - Prioritizes by requirement priority (must/should/nice)
-- Adds gap closure stages to TRACK.md
+- Adds gap closure stages to track.md
 - Ready for `/ace.plan-stage` on new stages
 
 Usage: `/ace.plan-milestone-gaps`
@@ -323,9 +323,9 @@ Show this command reference.
 
 ```
 .ace/
-├── BRIEF.md              # Project vision
-├── TRACK.md              # Current stage breakdown
-├── PULSE.md              # Project memory & context
+├── brief.md              # Project vision
+├── track.md              # Current stage breakdown
+├── pulse.md              # Project memory & context
 ├── config.json           # Workflow style & gates
 ├── todos/                # Captured ideas and tasks
 │   ├── pending/          # Todos waiting to be worked on
@@ -342,11 +342,11 @@ Show this command reference.
 │   └── CONCERNS.md       # Tech debt, known issues
 └── stages/
     ├── 01-foundation/
-    │   ├── 01-01-RUN.md
-    │   └── 01-01-RECAP.md
+    │   ├── 01-01-run.md
+    │   └── 01-01-recap.md
     └── 02-core-features/
-        ├── 02-01-RUN.md
-        └── 02-01-RECAP.md
+        ├── 02-01-run.md
+        └── 02-01-recap.md
 ```
 
 ## Workflow Styles
@@ -399,7 +399,7 @@ Example config:
 **Starting a new project:**
 
 ```
-/ace.start              # Unified flow: questioning → recon → requirements → roadmap
+/ace.start              # Unified flow: questioning → recon → requirements → track
 /clear
 /ace.plan-stage 1       # Create runs for first stage
 /clear
@@ -425,7 +425,7 @@ Example config:
 ```
 /ace.complete-milestone 1.0.0
 /clear
-/ace.new-milestone  # Start next milestone (questioning → recon → requirements → roadmap)
+/ace.new-milestone  # Start next milestone (questioning → recon → requirements → track)
 ```
 
 **Capturing ideas during work:**
@@ -448,8 +448,8 @@ Example config:
 
 ## Getting Help
 
-- Read `.ace/BRIEF.md` for project vision
-- Read `.ace/PULSE.md` for current context
-- Check `.ace/TRACK.md` for stage status
+- Read `.ace/brief.md` for project vision
+- Read `.ace/pulse.md` for current context
+- Check `.ace/track.md` for stage status
 - Run `/ace.status` to check where you're up to
   </reference>

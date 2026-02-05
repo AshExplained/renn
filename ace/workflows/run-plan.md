@@ -1,9 +1,9 @@
 <purpose>
-Execute a stage prompt (RUN.md) and create the outcome summary (RECAP.md).
+Execute a stage prompt (run.md) and create the outcome summary (recap.md).
 </purpose>
 
 <required_reading>
-Read PULSE.md before any operation to load project context.
+Read pulse.md before any operation to load project context.
 Read config.json for planning behavior settings.
 
 @~/.claude/ace/references/git-integration.md
@@ -33,7 +33,7 @@ Store resolved model for use in Task calls below.
 Before any operation, read project state:
 
 ```bash
-cat .ace/PULSE.md 2>/dev/null
+cat .ace/pulse.md 2>/dev/null
 ```
 
 **If file exists:** Parse and internalize:
@@ -46,7 +46,7 @@ cat .ace/PULSE.md 2>/dev/null
 **If file missing but .ace/ exists:**
 
 ```
-PULSE.md missing but planning artifacts exist.
+pulse.md missing but planning artifacts exist.
 Options:
 1. Reconstruct from existing artifacts
 2. Continue without project state (may lose accumulated context)
@@ -75,25 +75,25 @@ Find the next run to execute:
 - Identify first run without corresponding RECAP
 
 ```bash
-cat .ace/TRACK.md
+cat .ace/track.md
 # Look for stage with "In progress" status
 # Then find runs in that stage
-ls .ace/stages/XX-name/*-RUN.md 2>/dev/null | sort
-ls .ace/stages/XX-name/*-RECAP.md 2>/dev/null | sort
+ls .ace/stages/XX-name/*-run.md 2>/dev/null | sort
+ls .ace/stages/XX-name/*-recap.md 2>/dev/null | sort
 ```
 
 **Logic:**
 
-- If `01.01-RUN.md` exists but `01.01-RECAP.md` doesn't → execute 01.01
-- If `01.01-RECAP.md` exists but `01.02-RECAP.md` doesn't → execute 01.02
+- If `01.01-run.md` exists but `01.01-recap.md` doesn't → execute 01.01
+- If `01.01-recap.md` exists but `01.02-recap.md` doesn't → execute 01.02
 - Pattern: Find first RUN file without matching RECAP file
 
 **Decimal stage handling:**
 
 Stage directories can be integer or decimal format:
 
-- Integer: `.ace/stages/01-foundation/01.01-RUN.md`
-- Decimal: `.ace/stages/01.1-hotfix/01.1.01-RUN.md`
+- Integer: `.ace/stages/01-foundation/01.01-run.md`
+- Decimal: `.ace/stages/01.1-hotfix/01.1.01-run.md`
 
 Parse stage number from path (handles both formats):
 
@@ -104,8 +104,8 @@ STAGE=$(echo "$RUN_PATH" | grep -oE '[0-9]+(\.[0-9]+)?-[0-9]+')
 
 RECAP naming follows same pattern:
 
-- Integer: `01.01-RECAP.md`
-- Decimal: `01.1.01-RECAP.md`
+- Integer: `01.01-recap.md`
+- Decimal: `01.1.01-recap.md`
 
 Confirm with user if ambiguous.
 
@@ -117,7 +117,7 @@ cat .ace/config.json 2>/dev/null
 
 <if style="turbo">
 ```
-⚡ Auto-approved: Execute {stage}.{run}-RUN.md
+⚡ Auto-approved: Execute {stage}.{run}-run.md
 [Run X of Y for Stage Z]
 
 Starting execution...
@@ -130,7 +130,7 @@ Proceed directly to parse_segments step.
 Present:
 
 ```
-Found run to execute: {stage}.{run}-RUN.md
+Found run to execute: {stage}.{run}-run.md
 [Run X of Y for Stage Z]
 
 Proceed with execution?
@@ -160,7 +160,7 @@ Runs are divided into segments by gates. Each segment is routed to optimal execu
 
 ```bash
 # Find all gates and their types
-grep -n "type=\"gate" .ace/stages/XX-name/{stage}.{run}-RUN.md
+grep -n "type=\"checkpoint" .ace/stages/XX-name/{stage}.{run}-run.md
 ```
 
 **2. Analyze execution strategy:**
@@ -183,10 +183,10 @@ Segment routing rules:
 IF segment has no prior gate:
   → SUBAGENT (first segment, nothing to depend on)
 
-IF segment follows gate:human-verify:
+IF segment follows checkpoint:human-verify:
   → SUBAGENT (verification is just confirmation, doesn't affect next work)
 
-IF segment follows gate:decision OR gate:human-action:
+IF segment follows checkpoint:decision OR checkpoint:human-action:
   → MAIN CONTEXT (next tasks need the decision/result)
 ```
 
@@ -227,9 +227,9 @@ No segmentation benefit - execute entirely in main
 
 2. Use Task tool with subagent_type="ace-runner" and model="{runner_model}":
 
-   Prompt: "Execute run at .ace/stages/{stage}.{run}-RUN.md
+   Prompt: "Execute run at .ace/stages/{stage}.{run}-run.md
 
-   This is an autonomous run (no gates). Execute all tasks, create RECAP.md in stage directory, commit with message following run's commit guidance.
+   This is an autonomous run (no gates). Execute all tasks, create recap.md in stage directory, commit with message following run's commit guidance.
 
    Follow all drift rules and authentication gate protocols from the run.
 
@@ -273,7 +273,7 @@ No segmentation benefit - execute entirely in main
 Execute segment-by-segment:
 
 For each autonomous segment:
-  Spawn subagent with prompt: "Execute tasks [X-Y] from run at .ace/stages/{stage}.{run}-RUN.md. Read the run for full context and drift rules. Do NOT create RECAP or commit - just execute these tasks and report results."
+  Spawn subagent with prompt: "Execute tasks [X-Y] from run at .ace/stages/{stage}.{run}-run.md. Read the run for full context and drift rules. Do NOT create RECAP or commit - just execute these tasks and report results."
 
   Wait for subagent completion
 
@@ -284,7 +284,7 @@ For each gate:
 
 After all segments complete:
   Aggregate all results
-  Create RECAP.md
+  Create recap.md
   Commit with all changes
 ```
 
@@ -359,8 +359,8 @@ For Pattern A (fully autonomous) and Pattern C (decision-dependent), skip this s
 ````
 1. Parse run to identify segments:
    - Read run file
-   - Find gate locations: grep -n "type=\"gate" RUN.md
-   - Identify gate types: grep "type=\"gate" RUN.md | grep -o 'gate:[^"]*'
+   - Find gate locations: grep -n "type=\"checkpoint" run.md
+   - Identify gate types: grep "type=\"checkpoint" run.md | grep -o 'gate:[^"]*'
    - Build segment map:
      * Segment 1: Start → first gate (tasks 1-X)
      * Gate 1: Type and location
@@ -390,7 +390,7 @@ For Pattern A (fully autonomous) and Pattern C (decision-dependent), skip this s
       - Execute only the tasks assigned to you
       - Follow all drift rules and authentication gate protocols
       - Track drifts for later Recap
-      - DO NOT create RECAP.md (will be created after all segments complete)
+      - DO NOT create recap.md (will be created after all segments complete)
       - DO NOT commit (will be done after all segments complete)
 
       **Report back:**
@@ -446,7 +446,7 @@ For Pattern A (fully autonomous) and Pattern C (decision-dependent), skip this s
       - Collect decisions from all gates
       - Merge into complete picture
 
-   B. Create RECAP.md:
+   B. Create recap.md:
       - Use aggregated results
       - Document all work from all segments
       - Include drifts from all segments
@@ -454,7 +454,7 @@ For Pattern A (fully autonomous) and Pattern C (decision-dependent), skip this s
 
    C. Commit:
       - Stage all files from all segments
-      - Stage RECAP.md
+      - Stage recap.md
       - Commit with message following run guidance
       - Include note about segmented execution if relevant
 
@@ -464,7 +464,7 @@ For Pattern A (fully autonomous) and Pattern C (decision-dependent), skip this s
 
 ````
 
-Run: 01.02-RUN.md (8 tasks, 2 verify gates)
+Run: 01.02-run.md (8 tasks, 2 verify gates)
 
 Parsing segments...
 
@@ -515,7 +515,7 @@ Aggregating results...
 - Total drifts: 1
 - Segmented execution: 3 subagents, 2 gates
 
-Creating RECAP.md...
+Creating recap.md...
 Committing...
 ✓ Complete
 
@@ -527,13 +527,13 @@ Committing...
 <step name="load_prompt">
 Read the run prompt:
 ```bash
-cat .ace/stages/XX-name/{stage}.{run}-RUN.md
+cat .ace/stages/XX-name/{stage}.{run}-run.md
 ````
 
 This IS the execution instructions. Follow it exactly.
 
-**If run references INTEL.md:**
-The INTEL.md file provides the user's vision for this stage — how they imagine it working, what's essential, and what's out of scope. Honor this context throughout execution.
+**If run references intel.md:**
+The intel.md file provides the user's vision for this stage — how they imagine it working, what's essential, and what's out of scope. Honor this context throughout execution.
 </step>
 
 <step name="previous_stage_check">
@@ -541,10 +541,10 @@ Before executing, check if previous stage had issues:
 
 ```bash
 # Find previous stage recap
-ls .ace/stages/*/RECAP.md 2>/dev/null | sort -r | head -2 | tail -1
+ls .ace/stages/*/recap.md 2>/dev/null | sort -r | head -2 | tail -1
 ```
 
-If previous stage RECAP.md has "Issues Encountered" != "None" or "Next Stage Readiness" mentions blockers:
+If previous stage recap.md has "Issues Encountered" != "None" or "Next Stage Readiness" mentions blockers:
 
 Use AskUserQuestion:
 
@@ -579,7 +579,7 @@ Execute each task in the prompt. **Drifts are normal** - handle them automatical
    - Track task completion and commit hash for Recap documentation
    - Continue to next task
 
-   **If `type="gate:*"`:**
+   **If `type="checkpoint:*"`:**
 
    - STOP immediately (do not continue to next task)
    - Execute gate_protocol (see below)
@@ -610,7 +610,7 @@ This is NOT a failure. Authentication gates are expected and normal. Handle them
 
 1. **Recognize it's an auth gate** - Not a bug, just needs credentials
 2. **STOP current task execution** - Don't retry repeatedly
-3. **Create dynamic gate:human-action** - Present it to user immediately
+3. **Create dynamic checkpoint:human-action** - Present it to user immediately
 4. **Provide exact authentication steps** - CLI commands, where to get keys
 5. **Wait for user to authenticate** - Let them complete auth flow
 6. **Verify authentication works** - Test that credentials are valid
@@ -1033,7 +1033,7 @@ git commit -m "fix(08.02): correct email validation regex
 
 **5. Record commit hash:**
 
-After committing, capture hash for RECAP.md:
+After committing, capture hash for recap.md:
 
 ```bash
 TASK_COMMIT=$(git rev-parse --short HEAD)
@@ -1048,7 +1048,7 @@ TASK_COMMITS+=("Task ${TASK_NUM}: ${TASK_COMMIT}")
 </task_commit>
 
 <step name="gate_protocol">
-When encountering `type="gate:*"`:
+When encountering `type="checkpoint:*"`:
 
 **Critical: Claude automates everything with CLI/API before gates.** Gates are for verification and decisions, not manual work.
 
@@ -1069,7 +1069,7 @@ Task: [task name]
 ────────────────────────────────────────────────────────
 ```
 
-**For gate:human-verify (90% of gates):**
+**For checkpoint:human-verify (90% of gates):**
 
 ```
 Built: [what was automated - deployed, built, configured]
@@ -1084,7 +1084,7 @@ How to verify:
 ────────────────────────────────────────────────────────
 ```
 
-**For gate:decision (9% of gates):**
+**For checkpoint:decision (9% of gates):**
 
 ```
 Decision needed: [decision]
@@ -1103,7 +1103,7 @@ Options:
 [Resume signal - e.g., "Select: option-id"]
 ```
 
-**For gate:human-action (1% - rare, only for truly unavoidable manual steps):**
+**For checkpoint:human-action (1% - rare, only for truly unavoidable manual steps):**
 
 ```
 I automated: [what Claude already did via CLI/API]
@@ -1224,7 +1224,7 @@ How to proceed?
 
 Wait for user decision.
 
-If user chose "Skip", note it in RECAP.md under "Issues Encountered".
+If user chose "Skip", note it in recap.md under "Issues Encountered".
 </step>
 
 <step name="record_completion_time">
@@ -1246,16 +1246,16 @@ else
 fi
 ```
 
-Pass timing data to RECAP.md creation.
+Pass timing data to recap.md creation.
 </step>
 
 <step name="generate_user_setup">
 **Generate USER-SETUP.md if run has user_setup in frontmatter.**
 
-Check RUN.md frontmatter for `user_setup` field:
+Check run.md frontmatter for `user_setup` field:
 
 ```bash
-grep -A 50 "^user_setup:" .ace/stages/XX-name/{stage}.{run}-RUN.md | head -50
+grep -A 50 "^user_setup:" .ace/stages/XX-name/{stage}.{run}-run.md | head -50
 ```
 
 **If user_setup exists and is not empty:**
@@ -1320,23 +1320,23 @@ Set `USER_SETUP_CREATED=true` if file was generated, for use in completion messa
 </step>
 
 <step name="create_recap">
-Create `{stage}.{run}-RECAP.md` as specified in the prompt's `<output>` section.
-Use ~/.claude/ace/templates/RECAP.md for structure.
+Create `{stage}.{run}-recap.md` as specified in the prompt's `<output>` section.
+Use ~/.claude/ace/templates/recap.md for structure.
 
-**File location:** `.ace/stages/XX-name/{stage}.{run}-RECAP.md`
+**File location:** `.ace/stages/XX-name/{stage}.{run}-recap.md`
 
 **Frontmatter population:**
 
 Before writing recap content, populate frontmatter fields from execution context:
 
 1. **Basic identification:**
-   - stage: From RUN.md frontmatter
-   - run: From RUN.md frontmatter
+   - stage: From run.md frontmatter
+   - run: From run.md frontmatter
    - subsystem: Categorize based on stage focus (auth, payments, ui, api, database, infra, testing, etc.)
    - tags: Extract tech keywords (libraries, frameworks, tools used)
 
 2. **Dependency graph:**
-   - requires: List prior stages this built upon (check RUN.md context section for referenced prior recaps)
+   - requires: List prior stages this built upon (check run.md context section for referenced prior recaps)
    - provides: Extract from accomplishments - what was delivered
    - affects: Infer from stage description/goal what future stages might need this
 
@@ -1374,12 +1374,12 @@ The one-liner must be SUBSTANTIVE:
 
 **Next Step section:**
 
-- If more runs exist in this stage: "Ready for {stage}.{next-run}-RUN.md"
+- If more runs exist in this stage: "Ready for {stage}.{next-run}-run.md"
 - If this is the last run: "Stage complete, ready for transition"
   </step>
 
 <step name="update_current_position">
-Update Current Position section in PULSE.md to reflect run completion.
+Update Current Position section in pulse.md to reflect run completion.
 
 **Format:**
 
@@ -1387,19 +1387,19 @@ Update Current Position section in PULSE.md to reflect run completion.
 Stage: [current] of [total] ([stage name])
 Run: [just completed] of [total in stage]
 Status: [In progress / Stage complete]
-Last activity: [today] - Completed {stage}.{run}-RUN.md
+Last activity: [today] - Completed {stage}.{run}-run.md
 
 Progress: [progress bar]
 ```
 
 **Calculate progress bar:**
 
-- Count total runs across all stages (from TRACK.md)
-- Count completed runs (count RECAP.md files that exist)
+- Count total runs across all stages (from track.md)
+- Count completed runs (count recap.md files that exist)
 - Progress = (completed / total) × 100%
 - Render: ░ for incomplete, █ for complete
 
-**Example - completing 02.01-RUN.md (run 5 of 10 total):**
+**Example - completing 02.01-run.md (run 5 of 10 total):**
 
 Before:
 
@@ -1422,7 +1422,7 @@ After:
 Stage: 2 of 4 (Authentication)
 Run: 1 of 2 in current stage
 Status: In progress
-Last activity: 2025-01-19 - Completed 02.01-RUN.md
+Last activity: 2025-01-19 - Completed 02.01-run.md
 
 Progress: ███████░░░ 50%
 ```
@@ -1437,38 +1437,38 @@ Progress: ███████░░░ 50%
       </step>
 
 <step name="extract_decisions_and_issues">
-Extract decisions, issues, and concerns from RECAP.md into PULSE.md accumulated context.
+Extract decisions, issues, and concerns from recap.md into pulse.md accumulated context.
 
 **Decisions Made:**
 
-- Read RECAP.md "## Decisions Made" section
+- Read recap.md "## Decisions Made" section
 - If content exists (not "None"):
-  - Add each decision to PULSE.md Decisions table
+  - Add each decision to pulse.md Decisions table
   - Format: `| [stage number] | [decision summary] | [rationale] |`
 
 **Blockers/Concerns:**
 
-- Read RECAP.md "## Next Stage Readiness" section
+- Read recap.md "## Next Stage Readiness" section
 - If contains blockers or concerns:
-  - Add to PULSE.md "Blockers/Concerns Carried Forward"
+  - Add to pulse.md "Blockers/Concerns Carried Forward"
     </step>
 
 <step name="update_session_continuity">
-Update Session Continuity section in PULSE.md to enable resumption in future sessions.
+Update Session Continuity section in pulse.md to enable resumption in future sessions.
 
 **Format:**
 
 ```markdown
 Last session: [current date and time]
-Stopped at: Completed {stage}.{run}-RUN.md
+Stopped at: Completed {stage}.{run}-run.md
 Resume file: [path to .continue-here if exists, else "None"]
 ```
 
-**Size constraint note:** Keep PULSE.md under 150 lines total.
+**Size constraint note:** Keep pulse.md under 150 lines total.
 </step>
 
 <step name="issues_review_gate">
-Before proceeding, check RECAP.md content.
+Before proceeding, check recap.md content.
 
 If "Issues Encountered" is NOT "None":
 
@@ -1493,7 +1493,7 @@ Present issues and wait for acknowledgment before proceeding.
 Update the track file:
 
 ```bash
-TRACK_FILE=".ace/TRACK.md"
+TRACK_FILE=".ace/track.md"
 ```
 
 **If more runs remain in this stage:**
@@ -1511,7 +1511,7 @@ TRACK_FILE=".ace/TRACK.md"
 Commit execution metadata (RECAP + PULSE + TRACK):
 
 **Note:** All task code has already been committed during execution (one commit per task).
-RUN.md was already committed during plan-stage. This final commit captures execution results only.
+run.md was already committed during plan-stage. This final commit captures execution results only.
 
 **Check planning config:**
 
@@ -1527,14 +1527,14 @@ If `COMMIT_PLANNING_DOCS=true` (default):
 **1. Stage execution artifacts:**
 
 ```bash
-git add .ace/stages/XX-name/{stage}.{run}-RECAP.md
-git add .ace/PULSE.md
+git add .ace/stages/XX-name/{stage}.{run}-recap.md
+git add .ace/pulse.md
 ```
 
 **2. Stage track:**
 
 ```bash
-git add .ace/TRACK.md
+git add .ace/track.md
 ```
 
 **3. Verify staging:**
@@ -1555,7 +1555,7 @@ Tasks completed: [N]/[N]
 - [Task 2 name]
 - [Task 3 name]
 
-RECAP: .ace/stages/XX-name/{stage}.{run}-RECAP.md
+RECAP: .ace/stages/XX-name/{stage}.{run}-recap.md
 EOF
 )"
 ```
@@ -1571,7 +1571,7 @@ Tasks completed: 3/3
 - Password hashing with bcrypt
 - Email confirmation flow
 
-RECAP: .ace/stages/08-user-auth/08.02-registration-RECAP.md
+RECAP: .ace/stages/08-user-auth/08.02-registration-recap.md
 EOF
 )"
 ```
@@ -1665,8 +1665,8 @@ This warning appears BEFORE "Run complete" messaging. User sees setup requiremen
 List files in the stage directory:
 
 ```bash
-ls -1 .ace/stages/[current-stage-dir]/*-RUN.md 2>/dev/null | wc -l
-ls -1 .ace/stages/[current-stage-dir]/*-RECAP.md 2>/dev/null | wc -l
+ls -1 .ace/stages/[current-stage-dir]/*-run.md 2>/dev/null | wc -l
+ls -1 .ace/stages/[current-stage-dir]/*-recap.md 2>/dev/null | wc -l
 ```
 
 State the counts: "This stage has [X] runs and [Y] recaps."
@@ -1685,13 +1685,13 @@ Compare the counts from Step 1:
 **Route A: More runs remain in this stage**
 
 Identify the next unexecuted run:
-- Find the first RUN.md file that has no matching RECAP.md
+- Find the first run.md file that has no matching recap.md
 - Read its `<objective>` section
 
 <if style="turbo">
 ```
 Run {stage}.{run} complete.
-Recap: .ace/stages/{stage-dir}/{stage}.{run}-RECAP.md
+Recap: .ace/stages/{stage-dir}/{stage}.{run}-recap.md
 
 {Y} of {X} runs complete for Stage {Z}.
 
@@ -1704,7 +1704,7 @@ Loop back to identify_run step automatically.
 <if style="guided" OR="custom with gates.execute_next_run true">
 ```
 Run {stage}.{run} complete.
-Recap: .ace/stages/{stage-dir}/{stage}.{run}-RECAP.md
+Recap: .ace/stages/{stage-dir}/{stage}.{run}-recap.md
 
 {Y} of {X} runs complete for Stage {Z}.
 
@@ -1712,7 +1712,7 @@ Recap: .ace/stages/{stage-dir}/{stage}.{run}-RECAP.md
 
 ## ▶ Next Up
 
-**{stage}.{next-run}: [Run Name]** — [objective from next RUN.md]
+**{stage}.{next-run}: [Run Name]** — [objective from next run.md]
 
 `/ace.run-stage {stage}`
 
@@ -1736,7 +1736,7 @@ Wait for user to clear and run next command.
 
 **Step 3: Check milestone status (only when all runs in stage are complete)**
 
-Read TRACK.md and extract:
+Read track.md and extract:
 1. Current stage number (from the run just completed)
 2. All stage numbers listed in the current milestone section
 
@@ -1759,11 +1759,11 @@ State: "Current stage is {X}. Milestone has {N} stages (highest: {Y})."
 
 **Route B: Stage complete, more stages remain in milestone**
 
-Read TRACK.md to get the next stage's name and goal.
+Read track.md to get the next stage's name and goal.
 
 ```
 Run {stage}.{run} complete.
-Recap: .ace/stages/{stage-dir}/{stage}.{run}-RECAP.md
+Recap: .ace/stages/{stage-dir}/{stage}.{run}-recap.md
 
 ## ✓ Stage {Z}: {Stage Name} Complete
 
@@ -1773,7 +1773,7 @@ All {Y} runs finished.
 
 ## ▶ Next Up
 
-**Stage {Z+1}: {Next Stage Name}** — {Goal from TRACK.md}
+**Stage {Z+1}: {Next Stage Name}** — {Goal from track.md}
 
 `/ace.plan-stage {Z+1}`
 
@@ -1797,7 +1797,7 @@ All {Y} runs finished.
 🎉 MILESTONE COMPLETE!
 
 Run {stage}.{run} complete.
-Recap: .ace/stages/{stage-dir}/{stage}.{run}-RECAP.md
+Recap: .ace/stages/{stage-dir}/{stage}.{run}-recap.md
 
 ## ✓ Stage {Z}: {Stage Name} Complete
 
@@ -1833,12 +1833,12 @@ All {Y} runs finished.
 
 <success_criteria>
 
-- All tasks from RUN.md completed
+- All tasks from run.md completed
 - All verifications pass
 - USER-SETUP.md generated if user_setup in frontmatter
-- RECAP.md created with substantive content
-- PULSE.md updated (position, decisions, issues, session)
-- TRACK.md updated
+- recap.md created with substantive content
+- pulse.md updated (position, decisions, issues, session)
+- track.md updated
 - If codebase map exists: map updated with execution changes (or skipped if no significant changes)
 - If USER-SETUP.md created: prominently surfaced in completion output
   </success_criteria>

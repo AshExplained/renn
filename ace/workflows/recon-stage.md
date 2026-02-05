@@ -1,6 +1,6 @@
 <purpose>
 Execute recon at the appropriate depth level.
-Produces RECON.md (for Level 2-3) that informs RUN.md creation.
+Produces recon.md (for Level 2-3) that informs run.md creation.
 
 Called from plan-stage.md's mandatory_recon step with a depth parameter.
 
@@ -13,8 +13,8 @@ NOTE: For comprehensive ecosystem research ("how do experts build this"), use /a
 | Level | Name         | Time      | Output                                       | When                                      |
 | ----- | ------------ | --------- | -------------------------------------------- | ----------------------------------------- |
 | 1     | Quick Verify | 2-5 min   | No file, proceed with verified knowledge     | Single library, confirming current syntax |
-| 2     | Standard     | 15-30 min | RECON.md                                     | Choosing between options, new integration |
-| 3     | Deep Dive    | 1+ hour   | Detailed RECON.md with validation gates      | Architectural decisions, novel problems   |
+| 2     | Standard     | 15-30 min | recon.md                                     | Choosing between options, new integration |
+| 3     | Deep Dive    | 1+ hour   | Detailed recon.md with validation gates      | Architectural decisions, novel problems   |
 
 **Depth is determined by plan-stage.md before routing here.**
 </depth_levels>
@@ -28,7 +28,7 @@ Claude's training data is 6-18 months stale. Always verify.
 2. **Official docs** - When Context7 lacks coverage
 3. **WebSearch LAST** - For comparisons and trends only
 
-See ~/.claude/ace/templates/RECON.md `<recon_protocol>` for full protocol.
+See ~/.claude/ace/templates/recon.md `<recon_protocol>` for full protocol.
 </source_hierarchy>
 
 <process>
@@ -69,7 +69,7 @@ For: Single known library, confirming syntax/version still correct.
    - API syntax unchanged
    - No breaking changes in recent versions
 
-4. **If verified:** Return to plan-stage.md with confirmation. No RECON.md needed.
+4. **If verified:** Return to plan-stage.md with confirmation. No recon.md needed.
 
 5. **If concerns found:** Escalate to Level 2.
 
@@ -107,7 +107,7 @@ For: Choosing between options, new external integration.
 
 5. **Cross-verify:** Any WebSearch finding → confirm with Context7/official docs.
 
-6. **Create RECON.md** using ~/.claude/ace/templates/RECON.md structure:
+6. **Create recon.md** using ~/.claude/ace/templates/recon.md structure:
 
    - Summary with recommendation
    - Key findings per option
@@ -116,7 +116,7 @@ For: Choosing between options, new external integration.
 
 7. Return to plan-stage.md.
 
-**Output:** `.ace/stages/XX-name/RECON.md`
+**Output:** `.ace/stages/XX-name/recon.md`
 </step>
 
 <step name="level_3_deep_dive">
@@ -126,7 +126,7 @@ For: Architectural decisions, novel problems, high-risk choices.
 
 **Process:**
 
-1. **Scope the recon** using ~/.claude/ace/templates/RECON.md:
+1. **Scope the recon** using ~/.claude/ace/templates/recon.md:
 
    - Define clear scope
    - Define include/exclude boundaries
@@ -158,9 +158,9 @@ For: Architectural decisions, novel problems, high-risk choices.
    - Mark what's verified vs assumed
    - Flag contradictions
 
-6. **Create comprehensive RECON.md:**
+6. **Create comprehensive recon.md:**
 
-   - Full structure from ~/.claude/ace/templates/RECON.md
+   - Full structure from ~/.claude/ace/templates/recon.md
    - Quality report with source attribution
    - Confidence by finding
    - If LOW confidence on any critical finding → add validation checkpoints
@@ -169,7 +169,7 @@ For: Architectural decisions, novel problems, high-risk choices.
 
 8. Return to plan-stage.md.
 
-**Output:** `.ace/stages/XX-name/RECON.md` (comprehensive)
+**Output:** `.ace/stages/XX-name/recon.md` (comprehensive)
 </step>
 
 <step name="identify_unknowns">
@@ -184,14 +184,14 @@ Ask: What do we need to learn before we can plan this stage?
   </step>
 
 <step name="create_recon_scope">
-Use ~/.claude/ace/templates/RECON.md.
+Use ~/.claude/ace/templates/recon.md.
 
 Include:
 
 - Clear recon objective
 - Scoped include/exclude lists
 - Source preferences (official docs, Context7, current year)
-- Output structure for RECON.md
+- Output structure for recon.md
   </step>
 
 <step name="execute_recon">
@@ -203,7 +203,7 @@ Run the recon:
 </step>
 
 <step name="create_recon_output">
-Write `.ace/stages/XX-name/RECON.md`:
+Write `.ace/stages/XX-name/recon.md`:
 - Summary with recommendation
 - Key findings with sources
 - Code examples if applicable
@@ -211,7 +211,7 @@ Write `.ace/stages/XX-name/RECON.md`:
 </step>
 
 <step name="confidence_gate">
-After creating RECON.md, check confidence level.
+After creating recon.md, check confidence level.
 
 If confidence is LOW:
 Use AskUserQuestion:
@@ -231,7 +231,7 @@ Proceed directly, just note: "Recon complete (high confidence)."
 </step>
 
 <step name="open_questions_gate">
-If RECON.md has open_questions:
+If recon.md has open_questions:
 
 Present them inline:
 "Open questions from recon:
@@ -246,7 +246,7 @@ If "address first": Gather user input on questions, update recon.
 
 <step name="offer_next">
 ```
-Recon complete: .ace/stages/XX-name/RECON.md
+Recon complete: .ace/stages/XX-name/recon.md
 Recommendation: [one-liner]
 Confidence: [level]
 
@@ -259,7 +259,7 @@ What's next?
 
 ```
 
-NOTE: RECON.md is NOT committed separately. It will be committed with stage completion.
+NOTE: recon.md is NOT committed separately. It will be committed with stage completion.
 </step>
 
 </process>
@@ -273,17 +273,17 @@ NOTE: RECON.md is NOT committed separately. It will be committed with stage comp
 **Level 2 (Standard):**
 - Context7 consulted for all options
 - WebSearch findings cross-verified
-- RECON.md created with recommendation
+- recon.md created with recommendation
 - Confidence level MEDIUM or higher
-- Ready to inform RUN.md creation
+- Ready to inform run.md creation
 
 **Level 3 (Deep Dive):**
 - Recon scope defined
 - Context7 exhaustively consulted
 - All WebSearch findings verified against authoritative sources
-- RECON.md created with comprehensive analysis
+- recon.md created with comprehensive analysis
 - Quality report with source attribution
 - If LOW confidence findings → validation checkpoints defined
 - Confidence gate passed
-- Ready to inform RUN.md creation
+- Ready to inform run.md creation
 </success_criteria>

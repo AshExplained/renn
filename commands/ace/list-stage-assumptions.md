@@ -24,10 +24,10 @@ Output: Conversational output only (no file creation) - ends with "What do you t
 Stage number: $ARGUMENTS (required)
 
 **Load project pulse first:**
-@.ace/PULSE.md
+@.ace/pulse.md
 
 **Load track:**
-@.ace/TRACK.md
+@.ace/track.md
 </context>
 
 <process>

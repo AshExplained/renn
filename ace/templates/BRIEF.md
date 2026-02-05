@@ -1,6 +1,6 @@
-# BRIEF.md Template
+# brief.md Template
 
-Template for `.ace/BRIEF.md` — the living project context document.
+Template for `.ace/brief.md` — the living project context document.
 
 <template>
 
@@ -126,7 +126,7 @@ Common types: Tech stack, Timeline, Budget, Dependencies, Compatibility, Perform
 
 <evolution>
 
-BRIEF.md evolves throughout the project lifecycle.
+brief.md evolves throughout the project lifecycle.
 
 **After each stage transition:**
 1. Requirements invalidated? → Move to Out of Scope with reason
@@ -168,17 +168,17 @@ For existing codebases:
 
 <pulse_reference>
 
-PULSE.md references BRIEF.md:
+pulse.md references brief.md:
 
 ```markdown
 ## Project Reference
 
-See: .ace/BRIEF.md (updated [date])
+See: .ace/brief.md (updated [date])
 
 **Core value:** [One-liner from Core Value section]
 **Current focus:** [Current stage name]
 ```
 
-This ensures Claude reads current BRIEF.md context.
+This ensures Claude reads current brief.md context.
 
 </pulse_reference>

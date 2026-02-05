@@ -13,7 +13,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
 <gate_types>
 
 <type name="human-verify">
-## gate:human-verify (Most Common - 90%)
+## checkpoint:human-verify (Most Common - 90%)
 
 **When:** Claude completed automated work, human confirms it works correctly.
 
@@ -27,7 +27,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
 
 **Structure:**
 ```xml
-<task type="gate:human-verify" gate="blocking">
+<task type="checkpoint:human-verify" gate="blocking">
   <what-built>[What Claude automated and deployed/built]</what-built>
   <how-to-verify>
     [Exact steps to test - URLs, commands, expected behavior]
@@ -51,7 +51,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
   <done>App deployed, URL captured</done>
 </task>
 
-<task type="gate:human-verify" gate="blocking">
+<task type="checkpoint:human-verify" gate="blocking">
   <what-built>Deployed to Vercel at https://myapp-abc123.vercel.app</what-built>
   <how-to-verify>
     Visit https://myapp-abc123.vercel.app and confirm:
@@ -80,7 +80,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
   <done>Dev server running at http://localhost:3000</done>
 </task>
 
-<task type="gate:human-verify" gate="blocking">
+<task type="checkpoint:human-verify" gate="blocking">
   <what-built>Responsive dashboard layout - dev server running at http://localhost:3000</what-built>
   <how-to-verify>
     Visit http://localhost:3000/dashboard and verify:
@@ -105,7 +105,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
   <done>App builds successfully</done>
 </task>
 
-<task type="gate:human-verify" gate="blocking">
+<task type="checkpoint:human-verify" gate="blocking">
   <what-built>Built macOS app at DerivedData/Build/Products/Debug/App.app</what-built>
   <how-to-verify>
     Open App.app and test:
@@ -120,7 +120,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
 </type>
 
 <type name="decision">
-## gate:decision (9%)
+## checkpoint:decision (9%)
 
 **When:** Human must make choice that affects implementation direction.
 
@@ -133,7 +133,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
 
 **Structure:**
 ```xml
-<task type="gate:decision" gate="blocking">
+<task type="checkpoint:decision" gate="blocking">
   <decision>[What's being decided]</decision>
   <context>[Why this decision matters]</context>
   <options>
@@ -160,7 +160,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
 
 **Example: Auth Provider Selection**
 ```xml
-<task type="gate:decision" gate="blocking">
+<task type="checkpoint:decision" gate="blocking">
   <decision>Select authentication provider</decision>
   <context>
     Need user authentication for the app. Three solid options with different tradeoffs.
@@ -188,7 +188,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
 
 **Example: Database Selection**
 ```xml
-<task type="gate:decision" gate="blocking">
+<task type="checkpoint:decision" gate="blocking">
   <decision>Select database for user data</decision>
   <context>
     App needs persistent storage for users, sessions, and user-generated content.
@@ -217,7 +217,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
 </type>
 
 <type name="human-action">
-## gate:human-action (1% - Rare)
+## checkpoint:human-action (1% - Rare)
 
 **When:** Action has NO CLI/API and requires human-only interaction, OR Claude hit an authentication gate during automation.
 
@@ -238,7 +238,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
 
 **Structure:**
 ```xml
-<task type="gate:human-action" gate="blocking">
+<task type="checkpoint:human-action" gate="blocking">
   <action>[What human must do - Claude already did everything automatable]</action>
   <instructions>
     [What Claude already automated]
@@ -260,7 +260,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
   <done>Account created, verification email sent</done>
 </task>
 
-<task type="gate:human-action" gate="blocking">
+<task type="checkpoint:human-action" gate="blocking">
   <action>Complete email verification for SendGrid account</action>
   <instructions>
     I created the account and requested verification email.
@@ -280,7 +280,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
   <done>Payment intent created</done>
 </task>
 
-<task type="gate:human-action" gate="blocking">
+<task type="checkpoint:human-action" gate="blocking">
   <action>Complete 3D Secure authentication</action>
   <instructions>
     I created the payment intent: https://checkout.stripe.com/pay/cs_test_abc123
@@ -302,7 +302,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
 
 <!-- If vercel returns "Error: Not authenticated", Claude creates gate on the fly -->
 
-<task type="gate:human-action" gate="blocking">
+<task type="checkpoint:human-action" gate="blocking">
   <action>Authenticate Vercel CLI so I can continue deployment</action>
   <instructions>
     I tried to deploy but got authentication error.
@@ -328,7 +328,7 @@ Runs execute autonomously. Gates formalize the interaction points where human ve
 
 <execution_protocol>
 
-When Claude encounters `type="gate:*"`:
+When Claude encounters `type="checkpoint:*"`:
 
 1. **Stop immediately** - do not proceed to next task
 2. **Display gate clearly** using the format below
@@ -336,7 +336,7 @@ When Claude encounters `type="gate:*"`:
 4. **Verify if possible** - check files, run tests, whatever is specified
 5. **Resume execution** - continue to next task only after confirmation
 
-**For gate:human-verify:**
+**For checkpoint:human-verify:**
 ```
 ╔═══════════════════════════════════════════════════════╗
 ║  GATE: Verification Required                          ║
@@ -359,7 +359,7 @@ How to verify:
 ------------------------------------------------------------
 ```
 
-**For gate:decision:**
+**For checkpoint:decision:**
 ```
 ╔═══════════════════════════════════════════════════════╗
 ║  GATE: Decision Required                              ║
@@ -390,7 +390,7 @@ Options:
 ------------------------------------------------------------
 ```
 
-**For gate:human-action:**
+**For checkpoint:human-action:**
 ```
 ╔═══════════════════════════════════════════════════════╗
 ║  GATE: Action Required                                ║
@@ -424,7 +424,7 @@ I'll verify: vercel whoami returns your account
 **Gate protocol:**
 1. Recognize it's not a failure - missing auth is expected
 2. Stop current task - don't retry repeatedly
-3. Create gate:human-action dynamically
+3. Create checkpoint:human-action dynamically
 4. Provide exact authentication steps
 5. Verify authentication works
 6. Retry the original task
@@ -513,13 +513,13 @@ Task 3 complete. Continuing to task 4...
 **Pattern for secret collection:**
 ```xml
 <!-- WRONG: Asking user to add env vars in dashboard -->
-<task type="gate:human-action">
+<task type="checkpoint:human-action">
   <action>Add OPENAI_API_KEY to Convex dashboard</action>
   <instructions>Go to dashboard.convex.dev -> Settings -> Environment Variables -> Add</instructions>
 </task>
 
 <!-- RIGHT: Claude asks for value, then adds via CLI -->
-<task type="gate:human-action">
+<task type="checkpoint:human-action">
   <action>Provide your OpenAI API key</action>
   <instructions>
     I need your OpenAI API key to configure the Convex backend.
@@ -582,7 +582,7 @@ If default port is in use, check what's running and either:
 </task>
 
 <!-- User only visits URL -->
-<task type="gate:human-verify">
+<task type="checkpoint:human-verify">
   <what-built>Feature X - dev server running at http://localhost:3000</what-built>
   <how-to-verify>
     Visit http://localhost:3000/feature and verify:
@@ -640,7 +640,7 @@ If default port is in use, check what's running and either:
 
 ```xml
 <!-- WRONG: Gate with broken environment -->
-<task type="gate:human-verify">
+<task type="checkpoint:human-verify">
   <what-built>Dashboard (server failed to start)</what-built>
   <how-to-verify>Visit http://localhost:3000...</how-to-verify>
 </task>
@@ -653,7 +653,7 @@ If default port is in use, check what's running and either:
   <done>Server running correctly</done>
 </task>
 
-<task type="gate:human-verify">
+<task type="checkpoint:human-verify">
   <what-built>Dashboard - server running at http://localhost:3000</what-built>
   <how-to-verify>Visit http://localhost:3000/dashboard...</how-to-verify>
 </task>
@@ -733,7 +733,7 @@ If default port is in use, check what's running and either:
 </task>
 
 <!-- Human verifies visual/functional correctness -->
-<task type="gate:human-verify" gate="blocking">
+<task type="checkpoint:human-verify" gate="blocking">
   <what-built>Deployed to https://myapp.vercel.app</what-built>
   <how-to-verify>
     Visit https://myapp.vercel.app and confirm:
@@ -792,7 +792,7 @@ If default port is in use, check what's running and either:
 </task>
 
 <!-- Human verifies in Stripe dashboard -->
-<task type="gate:human-verify" gate="blocking">
+<task type="checkpoint:human-verify" gate="blocking">
   <what-built>Stripe webhook configured via API</what-built>
   <how-to-verify>
     Visit Stripe Dashboard > Developers > Webhooks
@@ -834,7 +834,7 @@ If default port is in use, check what's running and either:
 </task>
 
 <!-- ONE gate at end verifies the complete flow - Claude already started server -->
-<task type="gate:human-verify" gate="blocking">
+<task type="checkpoint:human-verify" gate="blocking">
   <what-built>Complete authentication flow - dev server running at http://localhost:3000</what-built>
   <how-to-verify>
     1. Visit: http://localhost:3000/login
@@ -854,7 +854,7 @@ If default port is in use, check what's running and either:
 ### BAD: Asking user to start dev server
 
 ```xml
-<task type="gate:human-verify" gate="blocking">
+<task type="checkpoint:human-verify" gate="blocking">
   <what-built>Dashboard component</what-built>
   <how-to-verify>
     1. Run: npm run dev
@@ -875,7 +875,7 @@ If default port is in use, check what's running and either:
   <verify>curl localhost:3000 returns 200</verify>
 </task>
 
-<task type="gate:human-verify" gate="blocking">
+<task type="checkpoint:human-verify" gate="blocking">
   <what-built>Dashboard at http://localhost:3000/dashboard (server running)</what-built>
   <how-to-verify>
     Visit http://localhost:3000/dashboard and verify:
@@ -888,7 +888,7 @@ If default port is in use, check what's running and either:
 ### BAD: Asking user to add env vars in dashboard
 
 ```xml
-<task type="gate:human-action" gate="blocking">
+<task type="checkpoint:human-action" gate="blocking">
   <action>Add environment variables to Convex</action>
   <instructions>
     1. Go to dashboard.convex.dev
@@ -904,7 +904,7 @@ If default port is in use, check what's running and either:
 ### GOOD: Claude collects secret, adds via CLI
 
 ```xml
-<task type="gate:human-action" gate="blocking">
+<task type="checkpoint:human-action" gate="blocking">
   <action>Provide your OpenAI API key</action>
   <instructions>
     I need your OpenAI API key. Get it from: https://platform.openai.com/api-keys
@@ -924,7 +924,7 @@ If default port is in use, check what's running and either:
 ### BAD: Asking human to deploy
 
 ```xml
-<task type="gate:human-action" gate="blocking">
+<task type="checkpoint:human-action" gate="blocking">
   <action>Deploy to Vercel</action>
   <instructions>
     1. Visit vercel.com/new
@@ -948,7 +948,7 @@ If default port is in use, check what's running and either:
   <verify>vercel ls shows deployment, curl returns 200</verify>
 </task>
 
-<task type="gate:human-verify">
+<task type="checkpoint:human-verify">
   <what-built>Deployed to {url}</what-built>
   <how-to-verify>Visit {url}, check homepage loads</how-to-verify>
   <resume-signal>Type "approved"</resume-signal>
@@ -959,11 +959,11 @@ If default port is in use, check what's running and either:
 
 ```xml
 <task type="auto">Create schema</task>
-<task type="gate:human-verify">Check schema</task>
+<task type="checkpoint:human-verify">Check schema</task>
 <task type="auto">Create API route</task>
-<task type="gate:human-verify">Check API</task>
+<task type="checkpoint:human-verify">Check API</task>
 <task type="auto">Create UI form</task>
-<task type="gate:human-verify">Check form</task>
+<task type="checkpoint:human-verify">Check form</task>
 ```
 
 **Why bad:** Verification fatigue. Combine into one gate at end.
@@ -975,7 +975,7 @@ If default port is in use, check what's running and either:
 <task type="auto">Create API route</task>
 <task type="auto">Create UI form</task>
 
-<task type="gate:human-verify">
+<task type="checkpoint:human-verify">
   <what-built>Complete auth flow (schema + API + UI)</what-built>
   <how-to-verify>Test full flow: register, login, access protected page</how-to-verify>
   <resume-signal>Type "approved"</resume-signal>
@@ -985,7 +985,7 @@ If default port is in use, check what's running and either:
 ### BAD: Asking for automatable file operations
 
 ```xml
-<task type="gate:human-action">
+<task type="checkpoint:human-action">
   <action>Create .env file</action>
   <instructions>
     1. Create .env in project root
@@ -1000,7 +1000,7 @@ If default port is in use, check what's running and either:
 ### BAD: Vague verification steps
 
 ```xml
-<task type="gate:human-verify">
+<task type="checkpoint:human-verify">
   <what-built>Dashboard</what-built>
   <how-to-verify>Check it works</how-to-verify>
   <resume-signal>Continue</resume-signal>
@@ -1012,7 +1012,7 @@ If default port is in use, check what's running and either:
 ### GOOD: Specific verification steps (server already running)
 
 ```xml
-<task type="gate:human-verify">
+<task type="checkpoint:human-verify">
   <what-built>Responsive dashboard - server running at http://localhost:3000</what-built>
   <how-to-verify>
     Visit http://localhost:3000/dashboard and verify:
@@ -1028,7 +1028,7 @@ If default port is in use, check what's running and either:
 ### BAD: Asking user to run any CLI command
 
 ```xml
-<task type="gate:human-action">
+<task type="checkpoint:human-action">
   <action>Run database migrations</action>
   <instructions>
     1. Run: npx prisma migrate deploy
@@ -1043,7 +1043,7 @@ If default port is in use, check what's running and either:
 ### BAD: Asking user to copy values between services
 
 ```xml
-<task type="gate:human-action">
+<task type="checkpoint:human-action">
   <action>Configure webhook URL in Stripe</action>
   <instructions>
     1. Copy the deployment URL from terminal
@@ -1066,9 +1066,9 @@ Gates formalize human-in-the-loop points. Use them when Claude cannot complete a
 **The golden rule:** If Claude CAN automate it, Claude MUST automate it.
 
 **Gate priority:**
-1. **gate:human-verify** (90% of gates) - Claude automated everything, human confirms visual/functional correctness
-2. **gate:decision** (9% of gates) - Human makes architectural/technology choices
-3. **gate:human-action** (1% of gates) - Truly unavoidable manual steps with no API/CLI
+1. **checkpoint:human-verify** (90% of gates) - Claude automated everything, human confirms visual/functional correctness
+2. **checkpoint:decision** (9% of gates) - Human makes architectural/technology choices
+3. **checkpoint:human-action** (1% of gates) - Truly unavoidable manual steps with no API/CLI
 
 **When NOT to use gates:**
 - Things Claude can verify programmatically (tests pass, build succeeds)

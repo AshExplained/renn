@@ -1,6 +1,6 @@
 # Pulse Template
 
-Template for `.ace/PULSE.md` — the project's living memory.
+Template for `.ace/pulse.md` — the project's living memory.
 
 ---
 
@@ -11,9 +11,9 @@ Template for `.ace/PULSE.md` — the project's living memory.
 
 ## Project Reference
 
-See: .ace/BRIEF.md (updated [date])
+See: .ace/brief.md (updated [date])
 
-**Core value:** [One-liner from BRIEF.md Core Value section]
+**Core value:** [One-liner from brief.md Core Value section]
 **Current focus:** [Current stage name]
 
 ## Current Position
@@ -48,7 +48,7 @@ Progress: [░░░░░░░░░░] 0%
 
 ### Decisions
 
-Decisions are logged in BRIEF.md Key Decisions table.
+Decisions are logged in brief.md Key Decisions table.
 Recent decisions affecting current work:
 
 - [Stage X]: [Decision summary]
@@ -75,7 +75,7 @@ Resume file: [Path to .continue-here*.md if exists, otherwise "None"]
 
 <purpose>
 
-PULSE.md is the project's short-term memory spanning all stages and sessions.
+pulse.md is the project's short-term memory spanning all stages and sessions.
 
 **Problem it solves:** Information is captured in recaps, issues, and decisions but not systematically consumed. Sessions start without context.
 
@@ -89,8 +89,8 @@ PULSE.md is the project's short-term memory spanning all stages and sessions.
 
 <lifecycle>
 
-**Creation:** After TRACK.md is created (during init)
-- Reference BRIEF.md (read it for current context)
+**Creation:** After track.md is created (during init)
+- Reference brief.md (read it for current context)
 - Initialize empty accumulated context sections
 - Set position to "Stage 1 ready to plan"
 
@@ -101,9 +101,9 @@ PULSE.md is the project's short-term memory spanning all stages and sessions.
 - transition: Know what's complete
 
 **Writing:** After every significant action
-- run: After RECAP.md created
+- run: After recap.md created
   - Update position (stage, run, status)
-  - Note new decisions (detail in BRIEF.md)
+  - Note new decisions (detail in brief.md)
   - Add blockers/concerns
 - transition: After stage marked complete
   - Update progress bar
@@ -115,12 +115,12 @@ PULSE.md is the project's short-term memory spanning all stages and sessions.
 <sections>
 
 ### Project Reference
-Points to BRIEF.md for full context. Includes:
+Points to brief.md for full context. Includes:
 - Core value (the ONE thing that matters)
 - Current focus (which stage)
 - Last update date (triggers re-read if stale)
 
-Claude reads BRIEF.md directly for requirements, constraints, and decisions.
+Claude reads brief.md directly for requirements, constraints, and decisions.
 
 ### Current Position
 Where we are right now:
@@ -143,7 +143,7 @@ Updated after each run completion.
 
 ### Accumulated Context
 
-**Decisions:** Reference to BRIEF.md Key Decisions table, plus recent decisions summary for quick access. Full decision log lives in BRIEF.md.
+**Decisions:** Reference to brief.md Key Decisions table, plus recent decisions summary for quick access. Full decision log lives in brief.md.
 
 **Pending Todos:** Ideas captured via /ace.add-todo
 - Count of pending todos
@@ -165,10 +165,10 @@ Enables instant resumption:
 
 <size_constraint>
 
-Keep PULSE.md under 100 lines.
+Keep pulse.md under 100 lines.
 
 It's a DIGEST, not an archive. If accumulated context grows too large:
-- Keep only 3-5 recent decisions in summary (full log in BRIEF.md)
+- Keep only 3-5 recent decisions in summary (full log in brief.md)
 - Keep only active blockers, remove resolved ones
 
 The goal is "read once, know where we are" — if it's too long, that fails.

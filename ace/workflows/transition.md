@@ -2,17 +2,17 @@
 
 **Read these files NOW:**
 
-1. `.ace/PULSE.md`
-2. `.ace/BRIEF.md`
-3. `.ace/TRACK.md`
-4. Current stage's run files (`*-RUN.md`)
-5. Current stage's recap files (`*-RECAP.md`)
+1. `.ace/pulse.md`
+2. `.ace/brief.md`
+3. `.ace/track.md`
+4. Current stage's run files (`*-run.md`)
+5. Current stage's recap files (`*-recap.md`)
 
 </required_reading>
 
 <purpose>
 
-Mark current stage complete and advance to next. This is the natural point where progress tracking and BRIEF.md evolution happen.
+Mark current stage complete and advance to next. This is the natural point where progress tracking and brief.md evolution happen.
 
 "Planning next stage" = "current stage is done"
 
@@ -25,8 +25,8 @@ Mark current stage complete and advance to next. This is the natural point where
 Before transition, read project state:
 
 ```bash
-cat .ace/PULSE.md 2>/dev/null
-cat .ace/BRIEF.md 2>/dev/null
+cat .ace/pulse.md 2>/dev/null
+cat .ace/brief.md 2>/dev/null
 ```
 
 Parse current position to verify we're transitioning the right stage.
@@ -39,8 +39,8 @@ Note accumulated context that may need updating after transition.
 Check current stage has all run recaps:
 
 ```bash
-ls .ace/stages/XX-current/*-RUN.md 2>/dev/null | sort
-ls .ace/stages/XX-current/*-RECAP.md 2>/dev/null | sort
+ls .ace/stages/XX-current/*-run.md 2>/dev/null | sort
+ls .ace/stages/XX-current/*-recap.md 2>/dev/null | sort
 ```
 
 **Verification logic:**
@@ -90,9 +90,9 @@ Present:
 
 ```
 Stage [X] has incomplete runs:
-- {stage}.01-RECAP.md ✓ Complete
-- {stage}.02-RECAP.md ✗ Missing
-- {stage}.03-RECAP.md ✗ Missing
+- {stage}.01-recap.md ✓ Complete
+- {stage}.02-recap.md ✗ Missing
+- {stage}.03-recap.md ✗ Missing
 
 ⚠️ Safety rail: Skipping runs requires confirmation (destructive action)
 
@@ -123,7 +123,7 @@ If found, delete them — stage is complete, handoffs are stale.
 Update the track file:
 
 ```bash
-TRACK_FILE=".ace/TRACK.md"
+TRACK_FILE=".ace/track.md"
 ```
 
 Update the file:
@@ -163,12 +163,12 @@ The `completed/` subfolder pattern from create-meta-prompts handles archival.
 
 <step name="evolve_brief">
 
-Evolve BRIEF.md to reflect learnings from completed stage.
+Evolve brief.md to reflect learnings from completed stage.
 
 **Read stage recaps:**
 
 ```bash
-cat .ace/stages/XX-current/*-RECAP.md
+cat .ace/stages/XX-current/*-recap.md
 ```
 
 **Assess requirement changes:**
@@ -186,14 +186,14 @@ cat .ace/stages/XX-current/*-RECAP.md
    - Add to Active: `- [ ] [New requirement]`
 
 4. **Decisions to log?**
-   - Extract decisions from RECAP.md files
+   - Extract decisions from recap.md files
    - Add to Key Decisions table with outcome if known
 
 5. **"What This Is" still accurate?**
    - If the product has meaningfully changed, update the description
    - Keep it current and accurate
 
-**Update BRIEF.md:**
+**Update brief.md:**
 
 Make the edits inline. Update "Last updated" footer:
 
@@ -250,7 +250,7 @@ After (Stage 2 shipped JWT auth, discovered rate limiting needed):
 
 <step name="update_current_position_after_transition">
 
-Update Current Position section in PULSE.md to reflect stage completion and transition.
+Update Current Position section in pulse.md to reflect stage completion and transition.
 
 **Format:**
 
@@ -281,7 +281,7 @@ Before:
 Stage: 2 of 4 (Authentication)
 Run: 2 of 2 in current stage
 Status: Stage complete
-Last activity: 2025-01-20 — Completed 02.02-RUN.md
+Last activity: 2025-01-20 — Completed 02.02-run.md
 
 Progress: ███████░░░ 60%
 ```
@@ -311,14 +311,14 @@ Progress: ███████░░░ 60%
 
 <step name="update_project_reference">
 
-Update Project Reference section in PULSE.md.
+Update Project Reference section in pulse.md.
 
 ```markdown
 ## Project Reference
 
-See: .ace/BRIEF.md (updated [today])
+See: .ace/brief.md (updated [today])
 
-**Core value:** [Current core value from BRIEF.md]
+**Core value:** [Current core value from brief.md]
 **Current focus:** [Next stage name]
 ```
 
@@ -328,12 +328,12 @@ Update the date and current focus to reflect the transition.
 
 <step name="review_accumulated_context">
 
-Review and update Accumulated Context section in PULSE.md.
+Review and update Accumulated Context section in pulse.md.
 
 **Decisions:**
 
 - Note recent decisions from this stage (3-5 max)
-- Full log lives in BRIEF.md Key Decisions table
+- Full log lives in brief.md Key Decisions table
 
 **Blockers/Concerns:**
 
@@ -363,7 +363,7 @@ After (if database indexing was addressed in Stage 2):
 
 **Step complete when:**
 
-- [ ] Recent decisions noted (full log in BRIEF.md)
+- [ ] Recent decisions noted (full log in brief.md)
 - [ ] Resolved blockers removed from list
 - [ ] Unresolved blockers kept with stage prefix
 - [ ] New concerns from completed stage added
@@ -372,7 +372,7 @@ After (if database indexing was addressed in Stage 2):
 
 <step name="update_session_continuity_after_transition">
 
-Update Session Continuity section in PULSE.md to reflect transition completion.
+Update Session Continuity section in pulse.md to reflect transition completion.
 
 **Format:**
 
@@ -394,9 +394,9 @@ Resume file: None
 
 **MANDATORY: Verify milestone status before presenting next steps.**
 
-**Step 1: Read TRACK.md and identify stages in current milestone**
+**Step 1: Read track.md and identify stages in current milestone**
 
-Read the TRACK.md file and extract:
+Read the track.md file and extract:
 1. Current stage number (the stage just transitioned from)
 2. All stage numbers in the current milestone section
 
@@ -419,7 +419,7 @@ State: "Current stage is {X}. Milestone has {N} stages (highest: {Y})."
 
 **Route A: More stages remain in milestone**
 
-Read TRACK.md to get the next stage's name and goal.
+Read track.md to get the next stage's name and goal.
 
 **If next stage exists:**
 
@@ -446,7 +446,7 @@ Exit skill and invoke SlashCommand("/ace.plan-stage [X+1]")
 
 ## ▶ Next Up
 
-**Stage [X+1]: [Name]** — [Goal from TRACK.md]
+**Stage [X+1]: [Name]** — [Goal from track.md]
 
 `/ace.plan-stage [X+1]`
 
@@ -523,8 +523,8 @@ If user wants to move on but stage isn't fully complete:
 
 ```
 Stage [X] has incomplete runs:
-- {stage}.02-RUN.md (not executed)
-- {stage}.03-RUN.md (not executed)
+- {stage}.02-run.md (not executed)
+- {stage}.03-run.md (not executed)
 
 Options:
 1. Mark complete anyway (runs weren't needed)
@@ -547,9 +547,9 @@ Transition is complete when:
 
 - [ ] Current stage run recaps verified (all exist or user chose to skip)
 - [ ] Any stale handoffs deleted
-- [ ] TRACK.md updated with completion status and run count
-- [ ] BRIEF.md evolved (requirements, decisions, description if needed)
-- [ ] PULSE.md updated (position, project reference, context, session)
+- [ ] track.md updated with completion status and run count
+- [ ] brief.md evolved (requirements, decisions, description if needed)
+- [ ] pulse.md updated (position, project reference, context, session)
 - [ ] Progress table updated
 - [ ] User knows next steps
 

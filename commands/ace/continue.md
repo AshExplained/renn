@@ -14,9 +14,9 @@ Restore complete project context and resume work seamlessly from previous sessio
 
 Routes to the continue-project workflow which handles:
 
-- PULSE.md loading (or reconstruction if missing)
+- pulse.md loading (or reconstruction if missing)
 - Gate detection (.continue-here files)
-- Incomplete work detection (RUN without RECAP)
+- Incomplete work detection (run.md without recap.md)
 - Status presentation
 - Context-aware next action routing
 </objective>
@@ -31,10 +31,10 @@ Routes to the continue-project workflow which handles:
 The workflow handles all resumption logic including:
 
 1. Project existence verification
-2. PULSE.md loading or reconstruction
+2. pulse.md loading or reconstruction
 3. Gate and incomplete work detection
 4. Visual status presentation
-5. Context-aware option offering (checks INTEL.md before suggesting plan vs discuss)
+5. Context-aware option offering (checks intel.md before suggesting plan vs discuss)
 6. Routing to appropriate next command
 7. Session continuity updates
 </process>

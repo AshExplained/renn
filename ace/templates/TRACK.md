@@ -1,6 +1,6 @@
 # Track Template
 
-Template for `.ace/TRACK.md`.
+Template for `.ace/track.md`.
 
 ## Initial Track (v1.0 Greenfield)
 
@@ -108,7 +108,7 @@ Stages execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 - Stage count depends on depth setting (quick: 3-5, standard: 5-8, comprehensive: 8-12)
 - Each stage delivers something coherent
 - Stages can have 1+ runs (split if >3 tasks or multiple subsystems)
-- Runs use naming: {stage}-{run}-RUN.md (e.g., 01-02-RUN.md)
+- Runs use naming: {stage}-{run}-run.md (e.g., 01-02-run.md)
 - No time estimates (this isn't enterprise PM)
 - Progress table updated by run workflow
 - Run count can be "TBD" initially, refined during planning

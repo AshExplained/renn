@@ -1,6 +1,6 @@
 # Proof Report Template
 
-Template for `.ace/stages/XX-name/{stage}-PROOF.md` — stage goal verification results.
+Template for `.ace/stages/XX-name/{stage}-proof.md` — stage goal verification results.
 
 ---
 
@@ -16,7 +16,7 @@ score: N/M must-haves verified
 
 # Stage {X}: {Name} Proof Report
 
-**Stage Goal:** {goal from TRACK.md}
+**Stage Goal:** {goal from track.md}
 **Verified:** {timestamp}
 **Status:** {passed | gaps_found | human_needed}
 
@@ -119,7 +119,7 @@ None — all verifiable items checked programmatically.
 
 {If gaps found, generate fix run recommendations:}
 
-### {stage}-{next}-RUN.md: {Fix Name}
+### {stage}-{next}-run.md: {Fix Name}
 
 **Objective:** {What this fixes}
 
@@ -132,7 +132,7 @@ None — all verifiable items checked programmatically.
 
 ---
 
-### {stage}-{next+1}-RUN.md: {Fix Name}
+### {stage}-{next+1}-run.md: {Fix Name}
 
 **Objective:** {What this fixes}
 
@@ -147,7 +147,7 @@ None — all verifiable items checked programmatically.
 ## Verification Metadata
 
 **Verification approach:** Goal-backward (derived from stage goal)
-**Must-haves source:** {RUN.md frontmatter | derived from TRACK.md goal}
+**Must-haves source:** {run.md frontmatter | derived from track.md goal}
 **Automated checks:** {N} passed, {M} failed
 **Human checks required:** {N}
 **Total verification time:** {duration}
@@ -282,7 +282,7 @@ None needed until automated gaps are fixed.
 
 ## Recommended Fix Runs
 
-### 03-04-RUN.md: Implement Chat API
+### 03-04-run.md: Implement Chat API
 
 **Objective:** Wire API routes to database
 
@@ -295,7 +295,7 @@ None needed until automated gaps are fixed.
 
 ---
 
-### 03-05-RUN.md: Implement Chat UI
+### 03-05-run.md: Implement Chat UI
 
 **Objective:** Wire Chat component to API
 
@@ -311,7 +311,7 @@ None needed until automated gaps are fixed.
 ## Verification Metadata
 
 **Verification approach:** Goal-backward (derived from stage goal)
-**Must-haves source:** 03-01-RUN.md frontmatter
+**Must-haves source:** 03-01-run.md frontmatter
 **Automated checks:** 2 passed, 8 failed
 **Human checks required:** 0 (blocked by automated failures)
 **Total verification time:** 2 min

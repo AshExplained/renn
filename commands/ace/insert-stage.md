@@ -17,8 +17,8 @@ Purpose: Handle urgent work discovered during execution without renumbering enti
 </objective>
 
 <execution_context>
-@.ace/TRACK.md
-@.ace/PULSE.md
+@.ace/track.md
+@.ace/pulse.md
 </execution_context>
 
 <process>
@@ -63,10 +63,10 @@ fi
 Load the track file:
 
 ```bash
-if [ -f .ace/TRACK.md ]; then
-  TRACK=".ace/TRACK.md"
+if [ -f .ace/track.md ]; then
+  TRACK=".ace/track.md"
 else
-  echo "ERROR: No track found (.ace/TRACK.md)"
+  echo "ERROR: No track found (.ace/track.md)"
   exit 1
 fi
 ```
@@ -157,9 +157,9 @@ Preserve all other content exactly (formatting, spacing, other stages).
 </step>
 
 <step name="update_pulse">
-Update PULSE.md to reflect the inserted stage:
+Update pulse.md to reflect the inserted stage:
 
-1. Read `.ace/PULSE.md`
+1. Read `.ace/pulse.md`
 2. Under "## Accumulated Context" → "### Track Evolution" add entry:
    ```
    - Stage {decimal_stage} inserted after Stage {after_stage}: {description} (URGENT)
@@ -181,7 +181,7 @@ Stage {decimal_stage} inserted after Stage {after_stage}:
 - Marker: (INSERTED) - indicates urgent work
 
 Track updated: {track-path}
-Pulse updated: .ace/PULSE.md
+Pulse updated: .ace/pulse.md
 
 ---
 
@@ -221,7 +221,7 @@ Stage insertion is complete when:
 - [ ] Stage directory created: `.ace/stages/{N.M}-{slug}/`
 - [ ] Track updated with new stage entry (includes "(INSERTED)" marker)
 - [ ] Stage inserted in correct position (after target stage, before next integer stage)
-- [ ] PULSE.md updated with track evolution note
+- [ ] pulse.md updated with track evolution note
 - [ ] Decimal number calculated correctly (based on existing decimals)
 - [ ] User informed of next steps and dependency implications
       </success_criteria>

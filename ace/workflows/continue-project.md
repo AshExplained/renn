@@ -20,26 +20,26 @@ Instantly restore full project context so "Where were we?" has an immediate, com
 Check if this is an existing project:
 
 ```bash
-ls .ace/PULSE.md 2>/dev/null && echo "Project exists"
-ls .ace/TRACK.md 2>/dev/null && echo "Track exists"
-ls .ace/BRIEF.md 2>/dev/null && echo "Brief exists"
+ls .ace/pulse.md 2>/dev/null && echo "Project exists"
+ls .ace/track.md 2>/dev/null && echo "Track exists"
+ls .ace/brief.md 2>/dev/null && echo "Brief exists"
 ```
 
-**If PULSE.md exists:** Proceed to load_state
-**If only TRACK.md/BRIEF.md exist:** Offer to reconstruct PULSE.md
+**If pulse.md exists:** Proceed to load_state
+**If only track.md/brief.md exist:** Offer to reconstruct pulse.md
 **If .ace/ doesn't exist:** This is a new project - route to /ace.start
 </step>
 
 <step name="load_state">
 
-Read and parse PULSE.md, then BRIEF.md:
+Read and parse pulse.md, then brief.md:
 
 ```bash
-cat .ace/PULSE.md
-cat .ace/BRIEF.md
+cat .ace/pulse.md
+cat .ace/brief.md
 ```
 
-**From PULSE.md extract:**
+**From pulse.md extract:**
 
 - **Project Reference**: Core value and current focus
 - **Current Position**: Stage X of Y, Run A of B, Status
@@ -49,7 +49,7 @@ cat .ace/BRIEF.md
 - **Blockers/Concerns**: Issues carried forward
 - **Session Continuity**: Where we left off, any resume files
 
-**From BRIEF.md extract:**
+**From brief.md extract:**
 
 - **What This Is**: Current accurate description
 - **Requirements**: Validated, Active, Out of Scope
@@ -66,7 +66,7 @@ Look for incomplete work that needs attention:
 ls .ace/stages/*/.continue-here*.md 2>/dev/null
 
 # Check for runs without recaps (incomplete execution)
-for run in .ace/stages/*/*-RUN.md; do
+for run in .ace/stages/*/*-run.md; do
   recap="${run/RUN/RECAP}"
   [ ! -f "$recap" ] && echo "Incomplete: $run"
 done 2>/dev/null
@@ -102,7 +102,7 @@ Present complete project status to user:
 ```
 PROJECT STATUS
 
-Building: [one-liner from BRIEF.md "What This Is"]
+Building: [one-liner from brief.md "What This Is"]
 
 Stage: [X] of [Y] - [Stage name]
 Run:   [A] of [B] - [Status]
@@ -156,12 +156,12 @@ Based on project state, determine the most logical next action:
 → Option: Review completed work
 
 **If stage ready to plan:**
-→ Check if INTEL.md exists for this stage:
+→ Check if intel.md exists for this stage:
 
-- If INTEL.md missing:
+- If intel.md missing:
   → Primary: Discuss stage vision (how user imagines it working)
   → Secondary: Plan directly (skip context gathering)
-- If INTEL.md exists:
+- If intel.md exists:
   → Primary: Plan the stage
   → Option: Review track
 
@@ -181,9 +181,9 @@ What would you like to do?
    OR
 1. Run stage (/ace.run-stage {stage})
    OR
-1. Discuss Stage 3 context (/ace.discuss-stage 3) [if INTEL.md missing]
+1. Discuss Stage 3 context (/ace.discuss-stage 3) [if intel.md missing]
    OR
-1. Plan Stage 3 (/ace.plan-stage 3) [if INTEL.md exists or discuss option declined]
+1. Plan Stage 3 (/ace.plan-stage 3) [if intel.md exists or discuss option declined]
 
 [Secondary options:]
 2. Review current stage status
@@ -192,10 +192,10 @@ What would you like to do?
 5. Something else
 ```
 
-**Note:** When offering stage planning, check for INTEL.md existence first:
+**Note:** When offering stage planning, check for intel.md existence first:
 
 ```bash
-ls .ace/stages/XX-name/*-INTEL.md 2>/dev/null
+ls .ace/stages/XX-name/*-intel.md 2>/dev/null
 ```
 
 If missing, suggest discuss-stage before plan. If exists, offer plan directly.
@@ -212,7 +212,7 @@ Based on user selection, route to appropriate workflow:
 
   ## Next Up
 
-  **{stage}.{run}: [Run Name]** — [objective from RUN.md]
+  **{stage}.{run}: [Run Name]** — [objective from run.md]
 
   /ace.run-stage {stage}
 
@@ -226,7 +226,7 @@ Based on user selection, route to appropriate workflow:
 
   ## Next Up
 
-  **Stage [N]: [Name]** — [Goal from TRACK.md]
+  **Stage [N]: [Name]** — [Goal from track.md]
 
   /ace.plan-stage [stage-number]
 
@@ -242,14 +242,14 @@ Based on user selection, route to appropriate workflow:
   ```
 - **Transition** → ./transition.md
 - **Check todos** → Read .ace/todos/pending/, present summary
-- **Review alignment** → Read BRIEF.md, compare to current state
+- **Review alignment** → Read brief.md, compare to current state
 - **Something else** → Ask what they need
 </step>
 
 <step name="update_session">
 Before proceeding to routed workflow, update session continuity:
 
-Update PULSE.md:
+Update pulse.md:
 
 ```markdown
 ## Session Continuity
@@ -265,21 +265,21 @@ This ensures if session ends unexpectedly, next resume knows the state.
 </process>
 
 <reconstruction>
-If PULSE.md is missing but other artifacts exist:
+If pulse.md is missing but other artifacts exist:
 
-"PULSE.md missing. Reconstructing from artifacts..."
+"pulse.md missing. Reconstructing from artifacts..."
 
-1. Read BRIEF.md → Extract "What This Is" and Core Value
-2. Read TRACK.md → Determine stages, find current position
-3. Scan \*-RECAP.md files → Extract decisions, concerns
+1. Read brief.md → Extract "What This Is" and Core Value
+2. Read track.md → Determine stages, find current position
+3. Scan \*-recap.md files → Extract decisions, concerns
 4. Count pending todos in .ace/todos/pending/
 5. Check for .continue-here files → Session continuity
 
-Reconstruct and write PULSE.md, then proceed normally.
+Reconstruct and write pulse.md, then proceed normally.
 
 This handles cases where:
 
-- Project predates PULSE.md introduction
+- Project predates pulse.md introduction
 - File was accidentally deleted
 - Cloning repo without full .ace/ state
 </reconstruction>
@@ -296,7 +296,7 @@ If user says "continue" or "go":
 <success_criteria>
 Resume is complete when:
 
-- [ ] PULSE.md loaded (or reconstructed)
+- [ ] pulse.md loaded (or reconstructed)
 - [ ] Incomplete work detected and flagged
 - [ ] Clear status presented to user
 - [ ] Contextual next actions offered

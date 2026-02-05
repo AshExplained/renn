@@ -1,6 +1,6 @@
 # UAT Template
 
-Template for `.ace/stages/XX-name/{stage}-UAT.md` — persistent UAT session tracking.
+Template for `.ace/stages/XX-name/{stage}-uat.md` — persistent UAT session tracking.
 
 ---
 
@@ -10,7 +10,7 @@ Template for `.ace/stages/XX-name/{stage}-UAT.md` — persistent UAT session tra
 ---
 status: testing | complete | diagnosed
 stage: XX-name
-source: [list of RECAP.md files tested]
+source: [list of recap.md files tested]
 started: [ISO timestamp]
 updated: [ISO timestamp]
 ---
@@ -109,7 +109,7 @@ skipped: [N]
 1. User runs diagnosis (from audit offer or manually)
 2. diagnose-issues workflow spawns parallel debug agents
 3. Each agent investigates one gap, returns root cause
-4. UAT.md Gaps section updated with diagnosis:
+4. uat.md Gaps section updated with diagnosis:
    - Each gap gets `root_cause`, `artifacts`, `missing`, `debug_session` filled
 5. status -> "diagnosed"
 6. Ready for /ace.plan-stage --gaps with root causes
@@ -137,7 +137,7 @@ skipped: [N]
 <lifecycle>
 
 **Creation:** When /ace.audit starts new session
-- Extract tests from RECAP.md files
+- Extract tests from recap.md files
 - Set status to "testing"
 - Current Test points to test 1
 - All tests have result: [pending]
@@ -184,7 +184,7 @@ Default: **major** (safe default, user can clarify if wrong)
 ---
 status: diagnosed
 stage: 04-comments
-source: 04-01-RECAP.md, 04-02-RECAP.md
+source: 04-01-recap.md, 04-02-recap.md
 started: 2025-01-15T10:30:00Z
 updated: 2025-01-15T10:45:00Z
 ---

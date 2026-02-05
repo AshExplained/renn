@@ -37,28 +37,28 @@ Run /ace.start to start a new project.
 
 Exit.
 
-If missing PULSE.md: suggest `/ace.start`.
+If missing pulse.md: suggest `/ace.start`.
 
-**If TRACK.md missing but BRIEF.md exists:**
+**If track.md missing but brief.md exists:**
 
 This means a milestone was completed and archived. Go to **Route F** (between milestones).
 
-If missing both TRACK.md and BRIEF.md: suggest `/ace.start`.
+If missing both track.md and brief.md: suggest `/ace.start`.
 </step>
 
 <step name="load">
 **Load full project context:**
 
-- Read `.ace/PULSE.md` for living memory (position, decisions, issues)
-- Read `.ace/TRACK.md` for stage structure and objectives
-- Read `.ace/BRIEF.md` for current state (What This Is, Core Value, Requirements)
+- Read `.ace/pulse.md` for living memory (position, decisions, issues)
+- Read `.ace/track.md` for stage structure and objectives
+- Read `.ace/brief.md` for current state (What This Is, Core Value, Requirements)
 - Read `.ace/config.json` for settings (horsepower, workflow toggles)
   </step>
 
 <step name="recent">
 **Gather recent work context:**
 
-- Find the 2-3 most recent RECAP.md files
+- Find the 2-3 most recent recap.md files
 - Extract from each: what was accomplished, key decisions, any issues logged
 - This shows "what we've been working on"
   </step>
@@ -66,10 +66,10 @@ If missing both TRACK.md and BRIEF.md: suggest `/ace.start`.
 <step name="position">
 **Parse current position:**
 
-- From PULSE.md: current stage, run number, status
+- From pulse.md: current stage, run number, status
 - Calculate: total runs, completed runs, remaining runs
 - Note any blockers or concerns
-- Check for INTEL.md: For stages without RUN.md files, check if `{stage}-INTEL.md` exists in stage directory
+- Check for intel.md: For stages without run.md files, check if `{stage}-intel.md` exists in stage directory
 - Count pending todos: `ls .ace/todos/pending/*.md 2>/dev/null | wc -l`
 - Check for active debug sessions: `ls .ace/debug/*.md 2>/dev/null | grep -v resolved | wc -l`
   </step>
@@ -90,14 +90,14 @@ If missing both TRACK.md and BRIEF.md: suggest `/ace.start`.
 ## Current Position
 Stage [N] of [total]: [stage-name]
 Run [M] of [stage-total]: [status]
-INTEL: [✓ if INTEL.md exists | - if not]
+INTEL: [✓ if intel.md exists | - if not]
 
 ## Key Decisions Made
-- [decision 1 from PULSE.md]
+- [decision 1 from pulse.md]
 - [decision 2]
 
 ## Blockers/Concerns
-- [any blockers or concerns from PULSE.md]
+- [any blockers or concerns from pulse.md]
 
 ## Pending Todos
 - [count] pending — /ace.check-todos to review
@@ -120,24 +120,24 @@ INTEL: [✓ if INTEL.md exists | - if not]
 List files in the current stage directory:
 
 ```bash
-ls -1 .ace/stages/[current-stage-dir]/*-RUN.md 2>/dev/null | wc -l
-ls -1 .ace/stages/[current-stage-dir]/*-RECAP.md 2>/dev/null | wc -l
-ls -1 .ace/stages/[current-stage-dir]/*-UAT.md 2>/dev/null | wc -l
+ls -1 .ace/stages/[current-stage-dir]/*-run.md 2>/dev/null | wc -l
+ls -1 .ace/stages/[current-stage-dir]/*-recap.md 2>/dev/null | wc -l
+ls -1 .ace/stages/[current-stage-dir]/*-uat.md 2>/dev/null | wc -l
 ```
 
 State: "This stage has {X} runs, {Y} recaps."
 
 **Step 1.5: Check for unaddressed UAT gaps**
 
-Check for UAT.md files with status "diagnosed" (has gaps needing fixes).
+Check for uat.md files with status "diagnosed" (has gaps needing fixes).
 
 ```bash
 # Check for diagnosed UAT with gaps
-grep -l "status: diagnosed" .ace/stages/[current-stage-dir]/*-UAT.md 2>/dev/null
+grep -l "status: diagnosed" .ace/stages/[current-stage-dir]/*-uat.md 2>/dev/null
 ```
 
 Track:
-- `uat_with_gaps`: UAT.md files with status "diagnosed" (gaps need fixing)
+- `uat_with_gaps`: uat.md files with status "diagnosed" (gaps need fixing)
 
 **Step 2: Route based on counts**
 
@@ -152,7 +152,7 @@ Track:
 
 **Route A: Unexecuted run exists**
 
-Find the first RUN.md without matching RECAP.md.
+Find the first run.md without matching recap.md.
 Read its `<objective>` section.
 
 ```
@@ -160,7 +160,7 @@ Read its `<objective>` section.
 
 ## ▶ Next Up
 
-**{stage}-{run}: [Run Name]** — [objective summary from RUN.md]
+**{stage}-{run}: [Run Name]** — [objective summary from run.md]
 
 `/ace.run-stage {stage}`
 
@@ -173,16 +173,16 @@ Read its `<objective>` section.
 
 **Route B: Stage needs planning**
 
-Check if `{stage}-INTEL.md` exists in stage directory.
+Check if `{stage}-intel.md` exists in stage directory.
 
-**If INTEL.md exists:**
+**If intel.md exists:**
 
 ```
 ---
 
 ## ▶ Next Up
 
-**Stage {N}: {Name}** — {Goal from TRACK.md}
+**Stage {N}: {Name}** — {Goal from track.md}
 <sub>✓ Context gathered, ready to plan</sub>
 
 `/ace.plan-stage {stage-number}`
@@ -192,14 +192,14 @@ Check if `{stage}-INTEL.md` exists in stage directory.
 ---
 ```
 
-**If INTEL.md does NOT exist:**
+**If intel.md does NOT exist:**
 
 ```
 ---
 
 ## ▶ Next Up
 
-**Stage {N}: {Name}** — {Goal from TRACK.md}
+**Stage {N}: {Name}** — {Goal from track.md}
 
 `/ace.discuss-stage {stage}` — gather context and clarify approach
 
@@ -218,14 +218,14 @@ Check if `{stage}-INTEL.md` exists in stage directory.
 
 **Route E: UAT gaps need fix runs**
 
-UAT.md exists with gaps (diagnosed issues). User needs to plan fixes.
+uat.md exists with gaps (diagnosed issues). User needs to plan fixes.
 
 ```
 ---
 
 ## ⚠ UAT Gaps Found
 
-**{stage}-UAT.md** has {N} gaps requiring fixes.
+**{stage}-uat.md** has {N} gaps requiring fixes.
 
 `/ace.plan-stage {stage} --gaps`
 
@@ -244,7 +244,7 @@ UAT.md exists with gaps (diagnosed issues). User needs to plan fixes.
 
 **Step 3: Check milestone status (only when stage complete)**
 
-Read TRACK.md and identify:
+Read track.md and identify:
 1. Current stage number
 2. All stage numbers in the current milestone section
 
@@ -263,7 +263,7 @@ State: "Current stage is {X}. Milestone has {N} stages (highest: {Y})."
 
 **Route C: Stage complete, more stages remain**
 
-Read TRACK.md to get the next stage's name and goal.
+Read track.md to get the next stage's name and goal.
 
 ```
 ---
@@ -272,7 +272,7 @@ Read TRACK.md to get the next stage's name and goal.
 
 ## ▶ Next Up
 
-**Stage {Z+1}: {Name}** — {Goal from TRACK.md}
+**Stage {Z+1}: {Name}** — {Goal from track.md}
 
 `/ace.discuss-stage {Z+1}` — gather context and clarify approach
 
@@ -316,11 +316,11 @@ All {N} stages finished!
 
 ---
 
-**Route F: Between milestones (TRACK.md missing, BRIEF.md exists)**
+**Route F: Between milestones (track.md missing, brief.md exists)**
 
 A milestone was completed and archived. Ready to start the next milestone cycle.
 
-Read MILESTONES.md to find the last completed milestone version.
+Read milestones.md to find the last completed milestone version.
 
 ```
 ---

@@ -19,7 +19,7 @@ Then verify each level against the actual codebase.
 
 <required_reading>
 @~/.claude/ace/references/verification-patterns.md
-@~/.claude/ace/templates/PROOF.md
+@~/.claude/ace/templates/proof.md
 </required_reading>
 
 <process>
@@ -33,21 +33,21 @@ PADDED_STAGE=$(printf "%02d" ${STAGE_ARG} 2>/dev/null || echo "${STAGE_ARG}")
 STAGE_DIR=$(ls -d .ace/stages/${PADDED_STAGE}-* .ace/stages/${STAGE_ARG}-* 2>/dev/null | head -1)
 
 # Stage goal from TRACK
-grep -A 5 "Stage ${STAGE_NUM}" .ace/TRACK.md
+grep -A 5 "Stage ${STAGE_NUM}" .ace/track.md
 
 # Requirements mapped to this stage
-grep -E "^| ${STAGE_NUM}" .ace/SPECS.md 2>/dev/null
+grep -E "^| ${STAGE_NUM}" .ace/specs.md 2>/dev/null
 
 # All RECAP files (claims to verify)
-ls "$STAGE_DIR"/*-RECAP.md 2>/dev/null
+ls "$STAGE_DIR"/*-recap.md 2>/dev/null
 
 # All RUN files (for must_haves in frontmatter)
-ls "$STAGE_DIR"/*-RUN.md 2>/dev/null
+ls "$STAGE_DIR"/*-run.md 2>/dev/null
 ```
 
-**Extract stage goal:** Parse TRACK.md for this stage's goal/description. This is the outcome to verify, not the tasks.
+**Extract stage goal:** Parse track.md for this stage's goal/description. This is the outcome to verify, not the tasks.
 
-**Extract requirements:** If SPECS.md exists, find requirements mapped to this stage. These become additional verification targets.
+**Extract requirements:** If specs.md exists, find requirements mapped to this stage. These become additional verification targets.
 </step>
 
 <step name="establish_must_haves">
@@ -55,10 +55,10 @@ ls "$STAGE_DIR"/*-RUN.md 2>/dev/null
 
 **Option A: Must-haves in RUN frontmatter**
 
-Check if any RUN.md has `must_haves` in frontmatter:
+Check if any run.md has `must_haves` in frontmatter:
 
 ```bash
-grep -l "must_haves:" "$STAGE_DIR"/*-RUN.md 2>/dev/null
+grep -l "must_haves:" "$STAGE_DIR"/*-run.md 2>/dev/null
 ```
 
 If found, extract and use:
@@ -80,7 +80,7 @@ must_haves:
 
 If no must_haves in frontmatter, derive using goal-backward process:
 
-1. **State the goal:** Take stage goal from TRACK.md
+1. **State the goal:** Take stage goal from track.md
 
 2. **Derive truths:** Ask "What must be TRUE for this goal to be achieved?"
    - List 3-7 observable behaviors from user perspective
@@ -376,11 +376,11 @@ For each key link in must_haves:
 </step>
 
 <step name="verify_requirements">
-**Check requirements coverage if SPECS.md exists.**
+**Check requirements coverage if specs.md exists.**
 
 ```bash
 # Find requirements mapped to this stage
-grep -E "Stage ${STAGE_NUM}" .ace/SPECS.md 2>/dev/null
+grep -E "Stage ${STAGE_NUM}" .ace/specs.md 2>/dev/null
 ```
 
 For each requirement:
@@ -399,8 +399,8 @@ For each requirement:
 
 Identify files modified in this stage:
 ```bash
-# Extract files from RECAP.md
-grep -E "^\- \`" "$STAGE_DIR"/*-RECAP.md | sed 's/.*`\([^`]*\)`.*/\1/' | sort -u
+# Extract files from recap.md
+grep -E "^\- \`" "$STAGE_DIR"/*-recap.md | sed 's/.*`\([^`]*\)`.*/\1/' | sort -u
 ```
 
 Run anti-pattern detection:
@@ -512,7 +512,7 @@ Group related gaps into fix runs:
 2. **Generate run recommendations:**
 
 ```markdown
-### {stage}-{next}-RUN.md: {Fix Name}
+### {stage}-{next}-run.md: {Fix Name}
 
 **Objective:** {What this fixes}
 
@@ -546,10 +546,10 @@ Group related gaps into fix runs:
 </step>
 
 <step name="create_report">
-**Generate PROOF.md using template.**
+**Generate proof.md using template.**
 
 ```bash
-REPORT_PATH="$STAGE_DIR/${STAGE_NUM}-PROOF.md"
+REPORT_PATH="$STAGE_DIR/${STAGE_NUM}-proof.md"
 ```
 
 Fill template sections:
@@ -557,14 +557,14 @@ Fill template sections:
 2. **Goal Achievement:** Truth verification table
 3. **Required Artifacts:** Artifact verification table
 4. **Key Link Verification:** Wiring verification table
-5. **Requirements Coverage:** If SPECS.md exists
+5. **Requirements Coverage:** If specs.md exists
 6. **Anti-Patterns Found:** Scan results table
 7. **Human Verification Required:** Items needing human
 8. **Gaps Summary:** Critical and non-critical gaps
 9. **Recommended Fix Runs:** If gaps_found
 10. **Verification Metadata:** Approach, timing, counts
 
-See ~/.claude/ace/templates/PROOF.md for complete template.
+See ~/.claude/ace/templates/proof.md for complete template.
 </step>
 
 <step name="return_to_orchestrator">
@@ -577,7 +577,7 @@ See ~/.claude/ace/templates/PROOF.md for complete template.
 
 **Status:** {passed | gaps_found | human_needed}
 **Score:** {N}/{M} must-haves verified
-**Report:** .ace/stages/{stage_dir}/{stage}-PROOF.md
+**Report:** .ace/stages/{stage_dir}/{stage}-proof.md
 
 {If passed:}
 All must-haves verified. Stage goal achieved. Ready to proceed.
@@ -592,8 +592,8 @@ All must-haves verified. Stage goal achieved. Ready to proceed.
 ### Recommended Fixes
 
 {N} fix runs recommended:
-1. {stage}-{next}-RUN.md: {name}
-2. {stage}-{next+1}-RUN.md: {name}
+1. {stage}-{next}-run.md: {name}
+2. {stage}-{next+1}-run.md: {name}
 
 {If human_needed:}
 ### Human Verification Required
@@ -623,6 +623,6 @@ The orchestrator will:
 - [ ] Human verification items identified
 - [ ] Overall status determined
 - [ ] Fix runs generated (if gaps_found)
-- [ ] PROOF.md created with complete report
+- [ ] proof.md created with complete report
 - [ ] Results returned to orchestrator
 </success_criteria>

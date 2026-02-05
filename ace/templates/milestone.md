@@ -1,6 +1,6 @@
 # Milestone Entry Template
 
-Add this entry to `.ace/MILESTONES.md` when completing a milestone:
+Add this entry to `.ace/milestones.md` when completing a milestone:
 
 ```markdown
 ## v[X.Y] [Name] (Shipped: YYYY-MM-DD)
@@ -29,7 +29,7 @@ Add this entry to `.ace/MILESTONES.md` when completing a milestone:
 ```
 
 <structure>
-If MILESTONES.md doesn't exist, create it with header:
+If milestones.md doesn't exist, create it with header:
 
 ```markdown
 # Project Milestones: [Project Name]

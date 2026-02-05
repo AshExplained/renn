@@ -1,6 +1,6 @@
 ---
 name: ace.new-milestone
-description: Start a new milestone cycle — update BRIEF.md and route to requirements
+description: Start a new milestone cycle — update brief.md and route to requirements
 argument-hint: "[milestone name, e.g., 'v1.1 Notifications']"
 allowed-tools:
   - Read
@@ -13,14 +13,14 @@ allowed-tools:
 <objective>
 Start a new milestone through unified flow: questioning → recon (optional) → requirements → track.
 
-This is the brownfield equivalent of ace.start. The project exists, BRIEF.md has history. This command gathers "what's next", updates BRIEF.md, then continues through the full requirements → track cycle.
+This is the brownfield equivalent of ace.start. The project exists, brief.md has history. This command gathers "what's next", updates brief.md, then continues through the full requirements → track cycle.
 
 **Creates/Updates:**
-- `.ace/BRIEF.md` — updated with new milestone goals
+- `.ace/brief.md` — updated with new milestone goals
 - `.ace/recon/` — domain recon (optional, focuses on NEW features)
-- `.ace/SPECS.md` — scoped requirements for this milestone
-- `.ace/TRACK.md` — stage structure (continues numbering)
-- `.ace/PULSE.md` — reset for new milestone
+- `.ace/specs.md` — scoped requirements for this milestone
+- `.ace/track.md` — stage structure (continues numbering)
+- `.ace/pulse.md` — reset for new milestone
 
 **After this command:** Run `/ace.plan-stage [N]` to start execution.
 </objective>
@@ -28,39 +28,31 @@ This is the brownfield equivalent of ace.start. The project exists, BRIEF.md has
 <execution_context>
 @~/.claude/ace/references/questioning.md
 @~/.claude/ace/references/ui-brand.md
-@~/.claude/ace/templates/BRIEF.md
-@~/.claude/ace/templates/SPECS.md
+@~/.claude/ace/templates/brief.md
+@~/.claude/ace/templates/specs.md
 </execution_context>
 
 <context>
 Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 
 **Load project context:**
-@.ace/BRIEF.md
-@.ace/PULSE.md
-@.ace/MILESTONES.md
+@.ace/brief.md
+@.ace/pulse.md
+@.ace/milestones.md
 @.ace/config.json
 
-**Load milestone context (if exists, from /ace.discuss-milestone):**
-@.ace/MILESTONE-CONTEXT.md
 </context>
 
 <process>
 
 ## Stage 1: Load Context
 
-- Read BRIEF.md (existing project, Validated requirements, decisions)
-- Read MILESTONES.md (what shipped previously)
-- Read PULSE.md (pending todos, blockers)
-- Check for MILESTONE-CONTEXT.md (from /ace.discuss-milestone)
+- Read brief.md (existing project, Validated requirements, decisions)
+- Read milestones.md (what shipped previously)
+- Read pulse.md (pending todos, blockers)
 
 ## Stage 2: Gather Milestone Goals
 
-**If MILESTONE-CONTEXT.md exists:**
-- Use features and scope from discuss-milestone
-- Present summary for confirmation
-
-**If no context file:**
 - Present what shipped in last milestone
 - Ask: "What do you want to build next?"
 - Use AskUserQuestion to explore features
@@ -68,11 +60,11 @@ Milestone name: $ARGUMENTS (optional - will prompt if not provided)
 
 ## Stage 3: Determine Milestone Version
 
-- Parse last version from MILESTONES.md
+- Parse last version from milestones.md
 - Suggest next version (v1.0 → v1.1, or v2.0 for major)
 - Confirm with user
 
-## Stage 4: Update BRIEF.md
+## Stage 4: Update brief.md
 
 Add/update these sections:
 
@@ -91,7 +83,7 @@ Update Active requirements section with new goals.
 
 Update "Last updated" footer.
 
-## Stage 5: Update PULSE.md
+## Stage 5: Update pulse.md
 
 ```markdown
 ## Current Position
@@ -106,8 +98,6 @@ Keep Accumulated Context section (decisions, blockers) from previous milestone.
 
 ## Stage 6: Cleanup and Commit
 
-Delete MILESTONE-CONTEXT.md if exists (consumed).
-
 Check ace config:
 ```bash
 COMMIT_PLANNING_DOCS=$(cat .ace/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
@@ -118,7 +108,7 @@ If `COMMIT_PLANNING_DOCS=false`: Skip git operations
 
 If `COMMIT_PLANNING_DOCS=true` (default):
 ```bash
-git add .ace/BRIEF.md .ace/PULSE.md
+git add .ace/brief.md .ace/pulse.md
 git commit -m "docs: start milestone v[X.Y] [Name]"
 ```
 
@@ -188,7 +178,7 @@ Project Recon — Stack dimension for [new features].
 SUBSEQUENT MILESTONE — Adding [target features] to existing app.
 
 Existing validated capabilities (DO NOT re-research):
-[List from BRIEF.md Validated requirements]
+[List from brief.md Validated requirements]
 
 Focus ONLY on what's needed for the NEW features.
 </milestone_context>
@@ -198,7 +188,7 @@ What stack additions/changes are needed for [new features]?
 </question>
 
 <project_context>
-[BRIEF.md summary - current state, new milestone goals]
+[brief.md summary - current state, new milestone goals]
 </project_context>
 
 <downstream_consumer>
@@ -215,8 +205,8 @@ Your STACK.md feeds into track creation. Be prescriptive:
 </quality_gate>
 
 <output>
-Write to: .ace/recon/STACK.md
-Use template: ~/.claude/ace/templates/recon-project/STACK.md
+Write to: .ace/recon/stack.md
+Use template: ~/.claude/ace/templates/recon/stack.md
 </output>
 ", subagent_type="ace-project-scout", model="{scout_model}", description="Stack recon")
 
@@ -229,7 +219,7 @@ Project Recon — Features dimension for [new features].
 SUBSEQUENT MILESTONE — Adding [target features] to existing app.
 
 Existing features (already built):
-[List from BRIEF.md Validated requirements]
+[List from brief.md Validated requirements]
 
 Focus on how [new features] typically work, expected behavior.
 </milestone_context>
@@ -239,7 +229,7 @@ How do [target features] typically work? What's expected behavior?
 </question>
 
 <project_context>
-[BRIEF.md summary - new milestone goals]
+[brief.md summary - new milestone goals]
 </project_context>
 
 <downstream_consumer>
@@ -256,8 +246,8 @@ Your FEATURES.md feeds into requirements definition. Categorize clearly:
 </quality_gate>
 
 <output>
-Write to: .ace/recon/FEATURES.md
-Use template: ~/.claude/ace/templates/recon-project/FEATURES.md
+Write to: .ace/recon/features.md
+Use template: ~/.claude/ace/templates/recon/features.md
 </output>
 ", subagent_type="ace-project-scout", model="{scout_model}", description="Features recon")
 
@@ -270,7 +260,7 @@ Project Recon — Architecture dimension for [new features].
 SUBSEQUENT MILESTONE — Adding [target features] to existing app.
 
 Existing architecture:
-[Summary from BRIEF.md or codebase map]
+[Summary from brief.md or codebase map]
 
 Focus on how [new features] integrate with existing architecture.
 </milestone_context>
@@ -280,7 +270,7 @@ How do [target features] integrate with existing [domain] architecture?
 </question>
 
 <project_context>
-[BRIEF.md summary - current architecture, new features]
+[brief.md summary - current architecture, new features]
 </project_context>
 
 <downstream_consumer>
@@ -298,8 +288,8 @@ Your ARCHITECTURE.md informs stage structure in track. Include:
 </quality_gate>
 
 <output>
-Write to: .ace/recon/ARCHITECTURE.md
-Use template: ~/.claude/ace/templates/recon-project/ARCHITECTURE.md
+Write to: .ace/recon/architecture.md
+Use template: ~/.claude/ace/templates/recon/architecture.md
 </output>
 ", subagent_type="ace-project-scout", model="{scout_model}", description="Architecture recon")
 
@@ -319,7 +309,7 @@ What are common mistakes when adding [target features] to [domain]?
 </question>
 
 <project_context>
-[BRIEF.md summary - current state, new features]
+[brief.md summary - current state, new features]
 </project_context>
 
 <downstream_consumer>
@@ -336,31 +326,31 @@ Your PITFALLS.md prevents mistakes in track/planning. For each pitfall:
 </quality_gate>
 
 <output>
-Write to: .ace/recon/PITFALLS.md
-Use template: ~/.claude/ace/templates/recon-project/PITFALLS.md
+Write to: .ace/recon/pitfalls.md
+Use template: ~/.claude/ace/templates/recon/pitfalls.md
 </output>
 ", subagent_type="ace-project-scout", model="{scout_model}", description="Pitfalls recon")
 ```
 
-After all 4 agents complete, spawn synthesizer to create RECAP.md:
+After all 4 agents complete, spawn synthesizer to create recap.md:
 
 ```
 Task(prompt="
 <task>
-Synthesize recon outputs into RECAP.md.
+Synthesize recon outputs into recap.md.
 </task>
 
 <recon_files>
 Read these files:
-- .ace/recon/STACK.md
-- .ace/recon/FEATURES.md
-- .ace/recon/ARCHITECTURE.md
-- .ace/recon/PITFALLS.md
+- .ace/recon/stack.md
+- .ace/recon/features.md
+- .ace/recon/architecture.md
+- .ace/recon/pitfalls.md
 </recon_files>
 
 <output>
-Write to: .ace/recon/RECAP.md
-Use template: ~/.claude/ace/templates/recon-project/RECAP.md
+Write to: .ace/recon/recap.md
+Use template: ~/.claude/ace/templates/recon/recap.md
 Commit after writing.
 </output>
 ", subagent_type="ace-synthesizer", model="{synthesizer_model}", description="Synthesize recon")
@@ -374,9 +364,9 @@ Display recon complete banner and key findings:
 
 ## Key Findings
 
-**Stack additions:** [from RECAP.md]
-**New feature table stakes:** [from RECAP.md]
-**Watch Out For:** [from RECAP.md]
+**Stack additions:** [from recap.md]
+**New feature table stakes:** [from recap.md]
+**Watch Out For:** [from recap.md]
 
 Files: `.ace/recon/`
 ```
@@ -394,12 +384,12 @@ Display stage banner:
 
 **Load context:**
 
-Read BRIEF.md and extract:
+Read brief.md and extract:
 - Core value (the ONE thing that must work)
 - Current milestone goals
 - Validated requirements (what already exists)
 
-**If recon exists:** Read recon/FEATURES.md and extract feature categories.
+**If recon exists:** Read recon/features.md and extract feature categories.
 
 **Present features by category:**
 
@@ -459,9 +449,9 @@ Use AskUserQuestion:
   - "No, recon covered it" — Proceed
   - "Yes, let me add some" — Capture additions
 
-**Generate SPECS.md:**
+**Generate specs.md:**
 
-Create `.ace/SPECS.md` with:
+Create `.ace/specs.md` with:
 - v1 Requirements for THIS milestone grouped by category (checkboxes, REQ-IDs)
 - Future Requirements (deferred to later milestones)
 - Out of Scope (explicit exclusions with reasoning)
@@ -508,7 +498,7 @@ Check ace config (same pattern as Stage 6).
 
 If committing:
 ```bash
-git add .ace/SPECS.md
+git add .ace/specs.md
 git commit -m "$(cat <<'EOF'
 docs: define milestone v[X.Y] requirements
 
@@ -530,7 +520,7 @@ Display stage banner:
 
 **Determine starting stage number:**
 
-Read MILESTONES.md to find the last stage number from previous milestone.
+Read milestones.md to find the last stage number from previous milestone.
 New stages continue from there (e.g., if v1.0 ended at stage 5, v1.1 starts at stage 6).
 
 Spawn ace-navigator agent with context:
@@ -540,19 +530,19 @@ Task(prompt="
 <planning_context>
 
 **Project:**
-@.ace/BRIEF.md
+@.ace/brief.md
 
 **Requirements:**
-@.ace/SPECS.md
+@.ace/specs.md
 
 **Recon (if exists):**
-@.ace/recon/RECAP.md
+@.ace/recon/recap.md
 
 **Config:**
 @.ace/config.json
 
 **Previous milestone (for stage numbering):**
-@.ace/MILESTONES.md
+@.ace/milestones.md
 
 </planning_context>
 
@@ -563,7 +553,7 @@ Create track for milestone v[X.Y]:
 3. Map every requirement to exactly one stage
 4. Derive 2-5 success criteria per stage (observable user behaviors)
 5. Validate 100% coverage of new requirements
-6. Write files immediately (TRACK.md, PULSE.md, update SPECS.md traceability)
+6. Write files immediately (track.md, pulse.md, update specs.md traceability)
 7. Return TRACK CREATED with summary
 
 Write files first, then return. This ensures artifacts persist even if context is lost.
@@ -580,7 +570,7 @@ Write files first, then return. This ensures artifacts persist even if context i
 
 **If `## TRACK CREATED`:**
 
-Read the created TRACK.md and present it nicely inline:
+Read the created track.md and present it nicely inline:
 
 ```
 ---
@@ -617,7 +607,7 @@ Use AskUserQuestion:
 - options:
   - "Approve" — Commit and continue
   - "Adjust stages" — Tell me what to change
-  - "Review full file" — Show raw TRACK.md
+  - "Review full file" — Show raw track.md
 
 **If "Approve":** Continue to commit.
 
@@ -630,7 +620,7 @@ Use AskUserQuestion:
   User feedback on track:
   [user's notes]
 
-  Current TRACK.md: @.ace/TRACK.md
+  Current track.md: @.ace/track.md
 
   Update the track based on feedback. Edit files in place.
   Return TRACK REVISED with changes made.
@@ -640,7 +630,7 @@ Use AskUserQuestion:
 - Present revised track
 - Loop until user approves
 
-**If "Review full file":** Display raw `cat .ace/TRACK.md`, then re-ask.
+**If "Review full file":** Display raw `cat .ace/track.md`, then re-ask.
 
 **Commit track (after approval):**
 
@@ -648,7 +638,7 @@ Check ace config (same pattern as Stage 6).
 
 If committing:
 ```bash
-git add .ace/TRACK.md .ace/PULSE.md .ace/SPECS.md
+git add .ace/track.md .ace/pulse.md .ace/specs.md
 git commit -m "$(cat <<'EOF'
 docs: create milestone v[X.Y] track ([N] stages)
 
@@ -675,10 +665,10 @@ Present completion with next steps:
 
 | Artifact       | Location                    |
 |----------------|-----------------------------|
-| Project        | `.ace/BRIEF.md`             |
+| Project        | `.ace/brief.md`             |
 | Recon          | `.ace/recon/`               |
-| Requirements   | `.ace/SPECS.md`             |
-| Track          | `.ace/TRACK.md`             |
+| Requirements   | `.ace/specs.md`             |
+| Track          | `.ace/track.md`             |
 
 **[N] stages** | **[X] requirements** | Ready to build ✓
 
@@ -686,7 +676,7 @@ Present completion with next steps:
 
 ## ▶ Next Up
 
-**Stage [N]: [Stage Name]** — [Goal from TRACK.md]
+**Stage [N]: [Stage Name]** — [Goal from track.md]
 
 `/ace.discuss-stage [N]` — gather context and clarify approach
 
@@ -703,17 +693,16 @@ Present completion with next steps:
 </process>
 
 <success_criteria>
-- [ ] BRIEF.md updated with Current Milestone section
-- [ ] PULSE.md reset for new milestone
-- [ ] MILESTONE-CONTEXT.md consumed and deleted (if existed)
+- [ ] brief.md updated with Current Milestone section
+- [ ] pulse.md reset for new milestone
 - [ ] Recon completed (if selected) — 4 parallel agents spawned, milestone-aware
 - [ ] Requirements gathered (from recon or conversation)
 - [ ] User scoped each category
-- [ ] SPECS.md created with REQ-IDs
+- [ ] specs.md created with REQ-IDs
 - [ ] ace-navigator spawned with stage numbering context
 - [ ] Track files written immediately (not draft)
 - [ ] User feedback incorporated (if any)
-- [ ] TRACK.md created with stages continuing from previous milestone
+- [ ] track.md created with stages continuing from previous milestone
 - [ ] All commits made (if planning docs committed)
 - [ ] User knows next step is `/ace.discuss-stage [N]`
 

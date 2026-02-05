@@ -1,5 +1,5 @@
 <purpose>
-Validate built features through conversational testing with persistent state. Creates UAT.md that tracks test progress, survives /clear, and feeds gaps into /ace.plan-stage --gaps.
+Validate built features through conversational testing with persistent state. Creates uat.md that tracks test progress, survives /clear, and feeds gaps into /ace.plan-stage --gaps.
 
 User tests, Claude records. One test at a time. Plain text responses.
 </purpose>
@@ -15,7 +15,7 @@ No Pass/Fail buttons. No severity questions. Just: "Here's what should happen. D
 </philosophy>
 
 <template>
-@~/.claude/ace/templates/UAT.md
+@~/.claude/ace/templates/uat.md
 </template>
 
 <process>
@@ -43,7 +43,7 @@ Store resolved models for use in Task calls below.
 **First: Check for active UAT sessions**
 
 ```bash
-find .ace/stages -name "*-UAT.md" -type f 2>/dev/null | head -5
+find .ace/stages -name "*-uat.md" -type f 2>/dev/null | head -5
 ```
 
 **If active sessions exist AND no $ARGUMENTS provided:**
@@ -97,14 +97,14 @@ PADDED_STAGE=$(printf "%02d" ${STAGE_ARG} 2>/dev/null || echo "${STAGE_ARG}")
 STAGE_DIR=$(ls -d .ace/stages/${PADDED_STAGE}-* .ace/stages/${STAGE_ARG}-* 2>/dev/null | head -1)
 
 # Find RECAP files
-ls "$STAGE_DIR"/*-RECAP.md 2>/dev/null
+ls "$STAGE_DIR"/*-recap.md 2>/dev/null
 ```
 
-Read each RECAP.md to extract testable deliverables.
+Read each recap.md to extract testable deliverables.
 </step>
 
 <step name="extract_tests">
-**Extract testable deliverables from RECAP.md:**
+**Extract testable deliverables from recap.md:**
 
 Parse for:
 1. **Accomplishments** - Features/functionality added
@@ -139,7 +139,7 @@ Create file:
 ---
 status: testing
 stage: XX-name
-source: [list of RECAP.md files]
+source: [list of recap.md files]
 started: [ISO timestamp]
 updated: [ISO timestamp]
 ---
@@ -178,7 +178,7 @@ skipped: 0
 [none yet]
 ```
 
-Write to `.ace/stages/XX-name/{stage}-UAT.md`
+Write to `.ace/stages/XX-name/{stage}-uat.md`
 
 Proceed to `present_test`.
 </step>
@@ -317,7 +317,7 @@ git check-ignore -q .ace 2>/dev/null && COMMIT_DOCS=false
 
 Commit the UAT file:
 ```bash
-git add ".ace/stages/XX-name/{stage}-UAT.md"
+git add ".ace/stages/XX-name/{stage}-uat.md"
 git commit -m "test({stage}): complete UAT - {passed} passed, {issues} issues"
 ```
 
@@ -363,7 +363,7 @@ Spawning parallel debug agents to investigate each issue.
 - Follow @~/.claude/ace/workflows/diagnose-issues.md
 - Spawn parallel debug agents for each issue
 - Collect root causes
-- Update UAT.md with root causes
+- Update uat.md with root causes
 - Proceed to `plan_gap_closure`
 
 Diagnosis runs automatically - no user prompt. Parallel agents investigate simultaneously, so overhead is minimal and fixes are more accurate.
@@ -392,13 +392,13 @@ Task(
 **Mode:** gap_closure
 
 **UAT with diagnoses:**
-@.ace/stages/{stage_dir}/{stage}-UAT.md
+@.ace/stages/{stage_dir}/{stage}-uat.md
 
 **Project State:**
-@.ace/PULSE.md
+@.ace/pulse.md
 
-**Roadmap:**
-@.ace/TRACK.md
+**Track:**
+@.ace/track.md
 
 </planning_context>
 
@@ -443,7 +443,7 @@ Task(
 **Stage Goal:** Close diagnosed gaps from UAT
 
 **Runs to verify:**
-@.ace/stages/{stage_dir}/*-RUN.md
+@.ace/stages/{stage_dir}/*-run.md
 
 </verification_context>
 
@@ -482,7 +482,7 @@ Task(
 **Mode:** revision
 
 **Existing runs:**
-@.ace/stages/{stage_dir}/*-RUN.md
+@.ace/stages/{stage_dir}/*-run.md
 
 **Reviewer issues:**
 {structured_issues_from_reviewer}
@@ -490,7 +490,7 @@ Task(
 </revision_context>
 
 <instructions>
-Read existing RUN.md files. Make targeted updates to address reviewer issues.
+Read existing run.md files. Make targeted updates to address reviewer issues.
 Do NOT replan from scratch unless issues are fundamental.
 </instructions>
 """,
@@ -582,7 +582,7 @@ Default to **major** if unclear. User can correct if needed.
 </severity_inference>
 
 <success_criteria>
-- [ ] UAT file created with all tests from RECAP.md
+- [ ] UAT file created with all tests from recap.md
 - [ ] Tests presented one at a time with expected behavior
 - [ ] User responses processed as pass/issue/skip
 - [ ] Severity inferred from description (never asked)

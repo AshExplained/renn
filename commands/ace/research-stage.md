@@ -61,7 +61,7 @@ else
   STAGE="$ARGUMENTS"
 fi
 
-grep -A5 "Stage ${STAGE}:" .ace/TRACK.md 2>/dev/null
+grep -A5 "Stage ${STAGE}:" .ace/track.md 2>/dev/null
 ```
 
 **If not found:** Error and exit. **If found:** Extract stage number, name, description.
@@ -69,7 +69,7 @@ grep -A5 "Stage ${STAGE}:" .ace/TRACK.md 2>/dev/null
 ## 2. Check Existing Recon
 
 ```bash
-ls .ace/stages/${STAGE}-*/RECON.md 2>/dev/null
+ls .ace/stages/${STAGE}-*/recon.md 2>/dev/null
 ```
 
 **If exists:** Offer: 1) Update recon, 2) View existing, 3) Skip. Wait for response.
@@ -79,10 +79,10 @@ ls .ace/stages/${STAGE}-*/RECON.md 2>/dev/null
 ## 3. Gather Stage Context
 
 ```bash
-grep -A20 "Stage ${STAGE}:" .ace/TRACK.md
-cat .ace/SPECS.md 2>/dev/null
-cat .ace/stages/${STAGE}-*/*-INTEL.md 2>/dev/null
-grep -A30 "### Decisions Made" .ace/PULSE.md 2>/dev/null
+grep -A20 "Stage ${STAGE}:" .ace/track.md
+cat .ace/specs.md 2>/dev/null
+cat .ace/stages/${STAGE}-*/*-intel.md 2>/dev/null
+grep -A30 "### Decisions Made" .ace/pulse.md 2>/dev/null
 ```
 
 Present summary with stage description, requirements, prior decisions.
@@ -122,7 +122,7 @@ Mode: ecosystem
 </context>
 
 <downstream_consumer>
-Your RECON.md will be loaded by `/ace.plan-stage` which uses specific sections:
+Your recon.md will be loaded by `/ace.plan-stage` which uses specific sections:
 - `## Standard Stack` → Runs use these libraries
 - `## Architecture Patterns` → Task structure follows these
 - `## Don't Hand-Roll` → Tasks NEVER build custom solutions for listed problems
@@ -142,7 +142,7 @@ Before declaring complete, verify:
 </quality_gate>
 
 <output>
-Write to: .ace/stages/${STAGE}-{slug}/${STAGE}-RECON.md
+Write to: .ace/stages/${STAGE}-{slug}/${STAGE}-recon.md
 </output>
 ```
 
@@ -171,13 +171,13 @@ Continue recon for Stage {stage_number}: {stage_name}
 </objective>
 
 <prior_state>
-Recon file: @.ace/stages/${STAGE}-{slug}/${STAGE}-RECON.md
+Recon file: @.ace/stages/${STAGE}-{slug}/${STAGE}-recon.md
 </prior_state>
 
-<gate_response>
-**Type:** {gate_type}
+<checkpoint_response>
+**Type:** {checkpoint_type}
 **Response:** {user_response}
-</gate_response>
+</checkpoint_response>
 ```
 
 ```

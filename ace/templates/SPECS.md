@@ -1,6 +1,6 @@
 # Specs Template
 
-Template for `.ace/SPECS.md` — checkable requirements that define "done."
+Template for `.ace/specs.md` — checkable requirements that define "done."
 
 <template>
 
@@ -8,7 +8,7 @@ Template for `.ace/SPECS.md` — checkable requirements that define "done."
 # Specs: [Project Name]
 
 **Defined:** [date]
-**Core Value:** [from BRIEF.md]
+**Core Value:** [from brief.md]
 
 ## v1 Requirements
 

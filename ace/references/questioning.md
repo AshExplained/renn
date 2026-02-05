@@ -14,7 +14,7 @@ Don't interrogate. Collaborate. Don't follow a script. Follow the thread.
 
 <the_goal>
 
-By the end of questioning, you need enough clarity to write a BRIEF.md that downstream stages can act on:
+By the end of questioning, you need enough clarity to write a brief.md that downstream stages can act on:
 
 - **Research** needs: what domain to research, what the user already knows, what unknowns exist
 - **Requirements** needs: clear enough vision to scope v1 features
@@ -22,7 +22,7 @@ By the end of questioning, you need enough clarity to write a BRIEF.md that down
 - **ace.plan-stage** needs: specific requirements to break into tasks, context for implementation choices
 - **ace.run-stage** needs: success criteria to verify against, the "why" behind requirements
 
-A vague BRIEF.md forces every downstream stage to guess. The cost compounds.
+A vague brief.md forces every downstream stage to guess. The cost compounds.
 
 </the_goal>
 
@@ -111,17 +111,17 @@ Four things. If they volunteer more, capture it.
 
 <decision_gate>
 
-When you could write a clear BRIEF.md, offer to proceed:
+When you could write a clear brief.md, offer to proceed:
 
 - header: "Ready?"
-- question: "I think I understand what you're after. Ready to create BRIEF.md?"
+- question: "I think I understand what you're after. Ready to create brief.md?"
 - options:
-  - "Create BRIEF.md" — Let's move forward
+  - "Create brief.md" — Let's move forward
   - "Keep exploring" — I want to share more / ask me more
 
 If "Keep exploring" — ask what they want to add or identify gaps and probe naturally.
 
-Loop until "Create BRIEF.md" selected.
+Loop until "Create brief.md" selected.
 
 </decision_gate>
 

@@ -14,9 +14,9 @@ The git log should read like a changelog of what shipped, not a diary of plannin
 | Event                   | Commit? | Why                                              |
 | ----------------------- | ------- | ------------------------------------------------ |
 | BRIEF + TRACK created   | YES     | Project initialization                           |
-| RUN.md created          | NO      | Intermediate - commit with run completion        |
+| run.md created          | NO      | Intermediate - commit with run completion        |
 | RESEARCH.md created     | NO      | Intermediate                                     |
-| RECON.md created        | NO      | Intermediate                                     |
+| recon.md created        | NO      | Intermediate                                     |
 | **Task completed**      | YES     | Atomic unit of work (1 commit per task)         |
 | **Run completed**       | YES     | Metadata commit (RECAP + PULSE + TRACK)         |
 | Handoff created         | YES     | WIP state preserved                              |
@@ -40,7 +40,7 @@ If NO_GIT: Run `git init` silently. ACE projects always get their own repo.
 ```
 docs: initialize [project-name] ([N] stages)
 
-[One-liner from BRIEF.md]
+[One-liner from brief.md]
 
 Stages:
 1. [stage-name]: [goal]
@@ -124,16 +124,16 @@ Tasks completed: [N]/[N]
 - [Task 2 name]
 - [Task 3 name]
 
-RECAP: .ace/stages/XX-name/{stage}.{run}-RECAP.md
+RECAP: .ace/stages/XX-name/{stage}.{run}-recap.md
 ```
 
 What to commit:
 
 ```bash
-git add .ace/stages/XX-name/{stage}.{run}-RUN.md
-git add .ace/stages/XX-name/{stage}.{run}-RECAP.md
-git add .ace/PULSE.md
-git add .ace/TRACK.md
+git add .ace/stages/XX-name/{stage}.{run}-run.md
+git add .ace/stages/XX-name/{stage}.{run}-recap.md
+git add .ace/pulse.md
+git add .ace/track.md
 git commit
 ```
 
@@ -211,9 +211,9 @@ Each run produces 2-4 commits (tasks + metadata). Clear, granular, bisectable.
 <anti_patterns>
 
 **Still don't commit (intermediate artifacts):**
-- RUN.md creation (commit with run completion)
+- run.md creation (commit with run completion)
 - RESEARCH.md (intermediate)
-- RECON.md (intermediate)
+- recon.md (intermediate)
 - Minor planning tweaks
 - "Fixed typo in track"
 
@@ -234,7 +234,7 @@ Each run produces 2-4 commits (tasks + metadata). Clear, granular, bisectable.
 - Git history becomes primary context source for future Claude sessions
 - `git log --grep="{stage}.{run}"` shows all work for a run
 - `git diff <hash>^..<hash>` shows exact changes per task
-- Less reliance on parsing RECAP.md = more context for actual work
+- Less reliance on parsing recap.md = more context for actual work
 
 **Failure recovery:**
 - Task 1 committed ✅, Task 2 failed ❌

@@ -14,10 +14,10 @@ You are spawned by:
 - `/ace.plan-stage --gaps` orchestrator (gap closure planning from verification failures)
 - `/ace.plan-stage` orchestrator in revision mode (updating runs based on reviewer feedback)
 
-Your job: Produce RUN.md files that Claude runners can implement without interpretation. Runs are prompts, not documents that become prompts.
+Your job: Produce run.md files that Claude runners can implement without interpretation. Runs are prompts, not documents that become prompts.
 
 **Core responsibilities:**
-- **FIRST: Parse and honor user decisions from INTEL.md** (locked decisions are NON-NEGOTIABLE)
+- **FIRST: Parse and honor user decisions from intel.md** (locked decisions are NON-NEGOTIABLE)
 - Decompose stages into parallel-optimized runs with 2-3 tasks each
 - Build dependency graphs and assign execution batches
 - Derive must-haves using goal-backward methodology
@@ -69,8 +69,8 @@ You are planning for ONE person (the user) and ONE implementer (Claude).
 
 ## Runs Are Prompts
 
-RUN.md is NOT a document that gets transformed into a prompt.
-RUN.md IS the prompt. It contains:
+run.md is NOT a document that gets transformed into a prompt.
+run.md IS the prompt. It contains:
 - Objective (what and why)
 - Context (@file references)
 - Tasks (with verification criteria)
@@ -126,19 +126,19 @@ Discovery is MANDATORY unless you can prove current context exists.
 **Level 1 - Quick Verification** (2-5 min)
 - Single known library, confirming syntax/version
 - Low-risk decision (easily changed later)
-- Action: Context7 resolve-library-id + query-docs, no RECON.md needed
+- Action: Context7 resolve-library-id + query-docs, no recon.md needed
 
 **Level 2 - Standard Research** (15-30 min)
 - Choosing between 2-3 options
 - New external integration (API, service)
 - Medium-risk decision
-- Action: Route to recon workflow, produces RECON.md
+- Action: Route to recon workflow, produces recon.md
 
 **Level 3 - Deep Dive** (1+ hour)
 - Architectural decision with long-term impact
 - Novel problem without clear patterns
 - High-risk, hard to change later
-- Action: Full research with RECON.md
+- Action: Full research with recon.md
 
 **Depth indicators:**
 - Level 2+: New library not in package.json, external API, "choose/select/evaluate" in description
@@ -221,10 +221,10 @@ Tasks must be specific enough for clean execution. Compare:
 For each potential task, evaluate TDD fit:
 
 **Heuristic:** Can you write `expect(fn(input)).toBe(output)` before writing `fn`?
-- Yes: Create a dedicated TDD plan for this feature
-- No: Standard task in standard plan
+- Yes: Create a dedicated TDD run for this feature
+- No: Standard task in standard run
 
-**TDD candidates (create dedicated TDD plans):**
+**TDD candidates (create dedicated TDD runs):**
 - Business logic with defined inputs/outputs
 - API endpoints with request/response contracts
 - Data transformations, parsing, formatting
@@ -232,7 +232,7 @@ For each potential task, evaluate TDD fit:
 - Algorithms with testable behavior
 - State machines and workflows
 
-**Standard tasks (remain in standard plans):**
+**Standard tasks (remain in standard runs):**
 - UI layout, styling, visual components
 - Configuration changes
 - Glue code connecting existing components
@@ -412,7 +412,7 @@ Don't pad small work to hit a number. Don't compress complex work to look effici
 
 <plan_format>
 
-## RUN.md Structure
+## run.md Structure
 
 ```markdown
 ---
@@ -440,13 +440,13 @@ Output: [What artifacts will be created]
 
 <execution_context>
 @~/.claude/ace/workflows/run-plan.md
-@~/.claude/ace/templates/RECAP.md
+@~/.claude/ace/templates/recap.md
 </execution_context>
 
 <context>
-@.ace/BRIEF.md
-@.ace/TRACK.md
-@.ace/PULSE.md
+@.ace/brief.md
+@.ace/track.md
+@.ace/pulse.md
 
 # Only reference prior run RECAPs if genuinely needed
 @path/to/relevant/source.ts
@@ -473,7 +473,7 @@ Output: [What artifacts will be created]
 </success_criteria>
 
 <output>
-After completion, create `.ace/stages/XX-name/{stage}-{run}-RECAP.md`
+After completion, create `.ace/stages/XX-name/{stage}-{run}-recap.md`
 </output>
 ```
 
@@ -533,12 +533,12 @@ Forward planning produces tasks. Goal-backward planning produces requirements th
 ## The Process
 
 **Step 1: State the Goal**
-Take the stage goal from TRACK.md. This is the outcome, not the work.
+Take the stage goal from track.md. This is the outcome, not the work.
 
 - Good: "Working chat interface" (outcome)
 - Bad: "Build chat components" (task)
 
-If the roadmap goal is task-shaped, reframe it as outcome-shaped.
+If the track goal is task-shaped, reframe it as outcome-shaped.
 
 **Step 2: Derive Observable Truths**
 Ask: "What must be TRUE for this goal to be achieved?"
@@ -633,7 +633,7 @@ must_haves:
 
 ## Gate Types
 
-**gate:human-verify (90% of gates)**
+**checkpoint:human-verify (90% of gates)**
 Human confirms Claude's automated work works correctly.
 
 Use for:
@@ -644,7 +644,7 @@ Use for:
 
 Structure:
 ```xml
-<task type="gate:human-verify" blocking="true">
+<task type="checkpoint:human-verify" blocking="true">
   <what-built>[What Claude automated]</what-built>
   <how-to-verify>
     [Exact steps to test - URLs, commands, expected behavior]
@@ -653,7 +653,7 @@ Structure:
 </task>
 ```
 
-**gate:decision (9% of gates)**
+**checkpoint:decision (9% of gates)**
 Human makes implementation choice that affects direction.
 
 Use for:
@@ -663,7 +663,7 @@ Use for:
 
 Structure:
 ```xml
-<task type="gate:decision" blocking="true">
+<task type="checkpoint:decision" blocking="true">
   <decision>[What's being decided]</decision>
   <context>[Why this matters]</context>
   <options>
@@ -677,7 +677,7 @@ Structure:
 </task>
 ```
 
-**gate:human-action (1% - rare)**
+**checkpoint:human-action (1% - rare)**
 Action has NO CLI/API and requires human-only interaction.
 
 Use ONLY for:
@@ -718,7 +718,7 @@ Authentication gates are created dynamically when Claude encounters auth errors 
 
 **Bad - Asking human to automate:**
 ```xml
-<task type="gate:human-action">
+<task type="checkpoint:human-action">
   <action>Deploy to Vercel</action>
   <instructions>Visit vercel.com, import repo, click deploy...</instructions>
 </task>
@@ -728,9 +728,9 @@ Why bad: Vercel has a CLI. Claude should run `vercel --yes`.
 **Bad - Too many gates:**
 ```xml
 <task type="auto">Create schema</task>
-<task type="gate:human-verify">Check schema</task>
+<task type="checkpoint:human-verify">Check schema</task>
 <task type="auto">Create API</task>
-<task type="gate:human-verify">Check API</task>
+<task type="checkpoint:human-verify">Check API</task>
 ```
 Why bad: Verification fatigue. Combine into one gate at end.
 
@@ -739,7 +739,7 @@ Why bad: Verification fatigue. Combine into one gate at end.
 <task type="auto">Create schema</task>
 <task type="auto">Create API</task>
 <task type="auto">Create UI</task>
-<task type="gate:human-verify">
+<task type="checkpoint:human-verify">
   <what-built>Complete auth flow (schema + API + UI)</what-built>
   <how-to-verify>Test full flow: register, login, access protected page</how-to-verify>
 </task>
@@ -844,11 +844,11 @@ Triggered by `--gaps` flag. Creates runs to address verification or UAT failures
 PADDED_STAGE=$(printf "%02d" $STAGE_ARG 2>/dev/null || echo "$STAGE_ARG")
 STAGE_DIR=$(ls -d .ace/stages/$PADDED_STAGE-* .ace/stages/$STAGE_ARG-* 2>/dev/null | head -1)
 
-# Check for PROOF.md (code verification gaps)
-ls "$STAGE_DIR"/*-PROOF.md 2>/dev/null
+# Check for proof.md (code verification gaps)
+ls "$STAGE_DIR"/*-proof.md 2>/dev/null
 
-# Check for UAT.md with diagnosed status (user testing gaps)
-grep -l "status: diagnosed" "$STAGE_DIR"/*-UAT.md 2>/dev/null
+# Check for uat.md with diagnosed status (user testing gaps)
+grep -l "status: diagnosed" "$STAGE_DIR"/*-uat.md 2>/dev/null
 ```
 
 **2. Parse gaps:**
@@ -891,7 +891,7 @@ Cluster related gaps by:
 </task>
 ```
 
-**7. Write RUN.md files:**
+**7. Write run.md files:**
 
 ```yaml
 ---
@@ -918,10 +918,10 @@ Triggered when orchestrator provides `<revision_context>` with reviewer issues. 
 
 ### Step 1: Load Existing Runs
 
-Read all RUN.md files in the stage directory:
+Read all run.md files in the stage directory:
 
 ```bash
-cat .ace/stages/$STAGE-*/*-RUN.md
+cat .ace/stages/$STAGE-*/*-run.md
 ```
 
 Build mental model of:
@@ -943,7 +943,7 @@ issues:
 ```
 
 Group issues by:
-- Run (which RUN.md needs updating)
+- Run (which run.md needs updating)
 - Dimension (what type of issue)
 - Severity (blocker vs warning)
 
@@ -990,7 +990,7 @@ After making edits, self-check:
 **If `COMMIT_PLANNING_DOCS=true` (default):**
 
 ```bash
-git add .ace/stages/$STAGE-*/$STAGE-*-RUN.md
+git add .ace/stages/$STAGE-*/$STAGE-*-run.md
 git commit -m "fix($STAGE): revise runs based on reviewer feedback"
 ```
 
@@ -1010,8 +1010,8 @@ git commit -m "fix($STAGE): revise runs based on reviewer feedback"
 
 ### Files Updated
 
-- .ace/stages/16-xxx/16-01-RUN.md
-- .ace/stages/16-xxx/16-02-RUN.md
+- .ace/stages/16-xxx/16-01-run.md
+- .ace/stages/16-xxx/16-02-run.md
 
 {If any issues NOT addressed:}
 
@@ -1027,13 +1027,13 @@ git commit -m "fix($STAGE): revise runs based on reviewer feedback"
 <execution_flow>
 
 <step name="load_project_state" priority="first">
-Read `.ace/PULSE.md` and parse:
+Read `.ace/pulse.md` and parse:
 - Current position (which stage we're planning)
 - Accumulated decisions (constraints on this stage)
 - Pending todos (candidates for inclusion)
 - Blockers/concerns (things this stage may address)
 
-If PULSE.md missing but .ace/ exists, offer to reconstruct or continue without.
+If pulse.md missing but .ace/ exists, offer to reconstruct or continue without.
 
 **Load planning config:**
 
@@ -1072,13 +1072,13 @@ If exists, load relevant documents based on stage type:
 Check track and existing stages:
 
 ```bash
-cat .ace/TRACK.md
+cat .ace/track.md
 ls .ace/stages/
 ```
 
 If multiple stages available, ask which one to plan. If obvious (first incomplete stage), proceed.
 
-Read any existing RUN.md or RECON.md in the stage directory.
+Read any existing run.md or recon.md in the stage directory.
 
 **Check for --gaps flag:** If present, switch to gap_closure_mode.
 </step>
@@ -1092,7 +1092,7 @@ Apply recon level protocol (see discovery_levels section).
 
 1. Scan all recap frontmatter (first ~25 lines):
 ```bash
-for f in .ace/stages/*/*-RECAP.md; do
+for f in .ace/stages/*/*-recap.md; do
   sed -n '1,/^---$/p; /^---$/q' "$f" | head -30
 done
 ```
@@ -1113,7 +1113,7 @@ done
 
 5. Read FULL recaps only for selected relevant stages.
 
-**From PULSE.md:** Decisions -> constrain approach. Pending todos -> candidates.
+**From pulse.md:** Decisions -> constrain approach. Pending todos -> candidates.
 </step>
 
 <step name="gather_stage_context">
@@ -1129,16 +1129,16 @@ Understand:
 PADDED_STAGE=$(printf "%02d" $STAGE 2>/dev/null || echo "$STAGE")
 STAGE_DIR=$(ls -d .ace/stages/$PADDED_STAGE-* .ace/stages/$STAGE-* 2>/dev/null | head -1)
 
-# Read INTEL.md if exists (from /ace.discuss-stage)
-cat "$STAGE_DIR"/*-INTEL.md 2>/dev/null
+# Read intel.md if exists (from /ace.discuss-stage)
+cat "$STAGE_DIR"/*-intel.md 2>/dev/null
 
-# Read RECON.md if exists (from /ace.research-stage)
-cat "$STAGE_DIR"/*-RECON.md 2>/dev/null
+# Read recon.md if exists (from /ace.research-stage)
+cat "$STAGE_DIR"/*-recon.md 2>/dev/null
 ```
 
-**If INTEL.md exists:** Honor user's vision, prioritize their essential features, respect stated boundaries. These are locked decisions - do not revisit.
+**If intel.md exists:** Honor user's vision, prioritize their essential features, respect stated boundaries. These are locked decisions - do not revisit.
 
-**If RECON.md exists:** Use standard_stack, architecture_patterns, dont_hand_roll, common_pitfalls. Research has already identified the right tools.
+**If recon.md exists:** Use standard_stack, architecture_patterns, dont_hand_roll, common_pitfalls. Research has already identified the right tools.
 </step>
 
 <step name="break_into_tasks">
@@ -1192,7 +1192,7 @@ Rules:
 </step>
 
 <step name="derive_must_haves">
-Apply goal-backward methodology to derive must_haves for RUN.md frontmatter.
+Apply goal-backward methodology to derive must_haves for run.md frontmatter.
 
 1. State the goal (outcome, not task)
 2. Derive observable truths (3-7, user perspective)
@@ -1216,22 +1216,22 @@ Wait for confirmation in guided mode. Auto-approve in turbo mode.
 </step>
 
 <step name="write_stage_prompt">
-Use template structure for each RUN.md.
+Use template structure for each run.md.
 
-Write to `.ace/stages/XX-name/{stage}-{NN}-RUN.md` (e.g., `01-02-RUN.md` for Stage 1, Run 2)
+Write to `.ace/stages/XX-name/{stage}-{NN}-run.md` (e.g., `01-02-run.md` for Stage 1, Run 2)
 
 Include frontmatter (stage, run, type, batch, depends_on, files_modified, autonomous, must_haves).
 </step>
 
 <step name="update_track">
-Update TRACK.md to finalize stage placeholders created by add-stage or insert-stage.
+Update track.md to finalize stage placeholders created by add-stage or insert-stage.
 
-1. Read `.ace/TRACK.md`
+1. Read `.ace/track.md`
 2. Find the stage entry (`### Stage {N}:`)
 3. Update placeholders:
 
 **Goal** (only if placeholder):
-- `[To be planned]` → derive from INTEL.md > RECON.md > stage description
+- `[To be planned]` → derive from intel.md > recon.md > stage description
 - `[Urgent work - to be planned]` → derive from same sources
 - If Goal already has real content → leave it alone
 
@@ -1243,11 +1243,11 @@ Update TRACK.md to finalize stage placeholders created by add-stage or insert-st
 - Replace `Runs:\n- [ ] TBD ...` with actual run checkboxes:
   ```
   Runs:
-  - [ ] {stage}-01-RUN.md — {brief objective}
-  - [ ] {stage}-02-RUN.md — {brief objective}
+  - [ ] {stage}-01-run.md — {brief objective}
+  - [ ] {stage}-02-run.md — {brief objective}
   ```
 
-4. Write updated TRACK.md
+4. Write updated track.md
 </step>
 
 <step name="git_commit">
@@ -1258,7 +1258,7 @@ Commit stage run(s) and updated track:
 **If `COMMIT_PLANNING_DOCS=true` (default):**
 
 ```bash
-git add .ace/stages/$STAGE-*/$STAGE-*-RUN.md .ace/TRACK.md
+git add .ace/stages/$STAGE-*/$STAGE-*-run.md .ace/track.md
 git commit -m "docs($STAGE): create stage runs
 
 Stage $STAGE: $STAGE_NAME
@@ -1362,7 +1362,7 @@ Execute: `/ace.run-stage {stage} --gaps-only`
 
 ### Files Updated
 
-- .ace/stages/{stage_dir}/{stage}-{run}-RUN.md
+- .ace/stages/{stage_dir}/{stage}-{run}-run.md
 
 {If any issues NOT addressed:}
 
@@ -1384,7 +1384,7 @@ Reviewer can now re-verify updated runs.
 ## Standard Mode
 
 Stage planning complete when:
-- [ ] PULSE.md read, project history absorbed
+- [ ] pulse.md read, project history absorbed
 - [ ] Mandatory recon completed (Level 0-3)
 - [ ] Prior decisions, issues, concerns synthesized
 - [ ] Dependency graph built (needs/creates for each task)
@@ -1403,7 +1403,7 @@ Stage planning complete when:
 ## Gap Closure Mode
 
 Planning complete when:
-- [ ] PROOF.md or UAT.md loaded and gaps parsed
+- [ ] proof.md or uat.md loaded and gaps parsed
 - [ ] Existing RECAPs read for context
 - [ ] Gaps clustered into focused runs
 - [ ] Run numbers sequential after existing (04, 05...)

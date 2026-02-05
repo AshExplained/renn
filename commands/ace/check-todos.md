@@ -17,8 +17,8 @@ Enables reviewing captured ideas and deciding what to work on next.
 </objective>
 
 <context>
-@.ace/PULSE.md
-@.ace/TRACK.md
+@.ace/pulse.md
+@.ace/track.md
 </context>
 
 <process>
@@ -110,7 +110,7 @@ If `files` field has entries, read and briefly summarize each.
 
 <step name="check_track">
 ```bash
-ls .ace/TRACK.md 2>/dev/null && echo "Track exists"
+ls .ace/track.md 2>/dev/null && echo "Track exists"
 ```
 
 If track exists:
@@ -148,7 +148,7 @@ Use AskUserQuestion:
 ```bash
 mv ".ace/todos/pending/[filename]" ".ace/todos/done/"
 ```
-Update PULSE.md todo count. Present problem/solution context. Begin work or ask how to proceed.
+Update pulse.md todo count. Present problem/solution context. Begin work or ask how to proceed.
 
 **Add to stage run:**
 Note todo reference in stage planning notes. Keep in pending. Return to list or exit.
@@ -171,7 +171,7 @@ After any action that changes todo count:
 ls .ace/todos/pending/*.md 2>/dev/null | wc -l
 ```
 
-Update PULSE.md "### Pending Todos" section if exists.
+Update pulse.md "### Pending Todos" section if exists.
 </step>
 
 <step name="git_commit">
@@ -191,7 +191,7 @@ git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
 ```bash
 git add .ace/todos/done/[filename]
 git rm --cached .ace/todos/pending/[filename] 2>/dev/null || true
-[ -f .ace/PULSE.md ] && git add .ace/PULSE.md
+[ -f .ace/pulse.md ] && git add .ace/pulse.md
 git commit -m "$(cat <<'EOF'
 docs: start work on todo - [title]
 
@@ -207,7 +207,7 @@ Confirm: "Committed: docs: start work on todo - [title]"
 
 <output>
 - Moved todo to `.ace/todos/done/` (if "Work on it now")
-- Updated `.ace/PULSE.md` (if todo count changed)
+- Updated `.ace/pulse.md` (if todo count changed)
 </output>
 
 <anti_patterns>
@@ -223,6 +223,6 @@ Confirm: "Committed: docs: start work on todo - [title]"
 - [ ] Track context checked for stage match
 - [ ] Appropriate actions offered
 - [ ] Selected action executed
-- [ ] PULSE.md updated if todo count changed
+- [ ] pulse.md updated if todo count changed
 - [ ] Changes committed to git (if todo moved to done/)
 </success_criteria>

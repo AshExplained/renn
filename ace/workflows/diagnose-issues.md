@@ -1,7 +1,7 @@
 <purpose>
 Orchestrate parallel debug agents to investigate UAT gaps and find root causes.
 
-After UAT finds gaps, spawn one debug agent per gap. Each agent investigates autonomously with symptoms pre-filled from UAT. Collect root causes, update UAT.md gaps with diagnosis, then hand off to plan-stage --gaps with actual diagnoses.
+After UAT finds gaps, spawn one debug agent per gap. Each agent investigates autonomously with symptoms pre-filled from UAT. Collect root causes, update uat.md gaps with diagnosis, then hand off to plan-stage --gaps with actual diagnoses.
 
 Orchestrator stays lean: parse gaps, spawn agents, collect results, update UAT.
 </purpose>
@@ -24,7 +24,7 @@ With diagnosis: "Comment doesn't refresh" → "useEffect missing dependency" →
 <process>
 
 <step name="parse_gaps">
-**Extract gaps from UAT.md:**
+**Extract gaps from uat.md:**
 
 Read the "Gaps" section (YAML format):
 ```yaml
@@ -134,7 +134,7 @@ If agent returns `## INVESTIGATION INCONCLUSIVE`:
 </step>
 
 <step name="update_uat">
-**Update UAT.md gaps with diagnosis:**
+**Update uat.md gaps with diagnosis:**
 
 For each gap in the Gaps section, add artifacts and missing fields:
 
@@ -167,9 +167,9 @@ git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
 
 **If `COMMIT_PLANNING_DOCS=true` (default):**
 
-Commit the updated UAT.md:
+Commit the updated uat.md:
 ```bash
-git add ".ace/stages/XX-name/{stage}-UAT.md"
+git add ".ace/stages/XX-name/{stage}-uat.md"
 git commit -m "docs({stage}): add root causes from diagnosis"
 ```
 </step>
@@ -222,10 +222,10 @@ Agents only diagnose—plan-stage --gaps handles fixes (no fix application).
 </failure_handling>
 
 <success_criteria>
-- [ ] Gaps parsed from UAT.md
+- [ ] Gaps parsed from uat.md
 - [ ] Debug agents spawned in parallel
 - [ ] Root causes collected from all agents
-- [ ] UAT.md gaps updated with artifacts and missing
+- [ ] uat.md gaps updated with artifacts and missing
 - [ ] Debug sessions saved to ${DEBUG_DIR}/
 - [ ] Hand off to audit for automatic planning
 </success_criteria>

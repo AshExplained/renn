@@ -10,10 +10,10 @@ allowed-tools:
 ---
 
 <objective>
-Mark milestone {{version}} complete, archive to milestones/, and update TRACK.md and SPECS.md.
+Mark milestone {{version}} complete, archive to milestones/, and update track.md and specs.md.
 
 Purpose: Create historical record of shipped version, archive milestone artifacts (track + specs), and prepare for next milestone.
-Output: Milestone archived (track + specs), BRIEF.md evolved, git tagged.
+Output: Milestone archived (track + specs), brief.md evolved, git tagged.
 </objective>
 
 <execution_context>
@@ -25,10 +25,10 @@ Output: Milestone archived (track + specs), BRIEF.md evolved, git tagged.
 
 <context>
 **Project files:**
-- `.ace/TRACK.md`
-- `.ace/SPECS.md`
-- `.ace/PULSE.md`
-- `.ace/BRIEF.md`
+- `.ace/track.md`
+- `.ace/specs.md`
+- `.ace/pulse.md`
+- `.ace/brief.md`
 
 **User input:**
 
@@ -63,7 +63,7 @@ Output: Milestone archived (track + specs), BRIEF.md evolved, git tagged.
 
 1. **Verify readiness:**
 
-   - Check all stages in milestone have completed runs (RECAP.md exists)
+   - Check all stages in milestone have completed runs (recap.md exists)
    - Present milestone scope and stats
    - Wait for confirmation
 
@@ -76,25 +76,25 @@ Output: Milestone archived (track + specs), BRIEF.md evolved, git tagged.
 
 3. **Extract accomplishments:**
 
-   - Read all stage RECAP.md files in milestone range
+   - Read all stage recap.md files in milestone range
    - Extract 4-6 key accomplishments
    - Present for approval
 
 4. **Archive milestone:**
 
-   - Create `.ace/milestones/v{{version}}-TRACK.md`
-   - Extract full stage details from TRACK.md
+   - Create `.ace/milestones/v{{version}}-track.md`
+   - Extract full stage details from track.md
    - Fill milestone-archive.md template
-   - Update TRACK.md to one-line summary with link
+   - Update track.md to one-line summary with link
 
 5. **Archive specs:**
 
-   - Create `.ace/milestones/v{{version}}-SPECS.md`
+   - Create `.ace/milestones/v{{version}}-specs.md`
    - Mark all v1 specs as complete (checkboxes checked)
    - Note spec outcomes (validated, adjusted, dropped)
-   - Delete `.ace/SPECS.md` (fresh one created for next milestone)
+   - Delete `.ace/specs.md` (fresh one created for next milestone)
 
-6. **Update BRIEF.md:**
+6. **Update brief.md:**
 
    - Add "Current State" section with shipped version
    - Add "Next Milestone Goals" section
@@ -102,7 +102,7 @@ Output: Milestone archived (track + specs), BRIEF.md evolved, git tagged.
 
 7. **Commit and tag:**
 
-   - Stage: MILESTONES.md, BRIEF.md, TRACK.md, PULSE.md, archive files
+   - Stage: milestones.md, brief.md, track.md, pulse.md, archive files
    - Commit: `chore: archive v{{version}} milestone`
    - Tag: `git tag -a v{{version}} -m "[milestone summary]"`
    - Ask about pushing tag
@@ -114,11 +114,11 @@ Output: Milestone archived (track + specs), BRIEF.md evolved, git tagged.
 
 <success_criteria>
 
-- Milestone archived to `.ace/milestones/v{{version}}-TRACK.md`
-- Specs archived to `.ace/milestones/v{{version}}-SPECS.md`
-- `.ace/SPECS.md` deleted (fresh for next milestone)
-- TRACK.md collapsed to one-line entry
-- BRIEF.md updated with current state
+- Milestone archived to `.ace/milestones/v{{version}}-track.md`
+- Specs archived to `.ace/milestones/v{{version}}-specs.md`
+- `.ace/specs.md` deleted (fresh for next milestone)
+- track.md collapsed to one-line entry
+- brief.md updated with current state
 - Git tag v{{version}} created
 - Commit successful
 - User knows next steps (including need for fresh specs)
@@ -127,10 +127,10 @@ Output: Milestone archived (track + specs), BRIEF.md evolved, git tagged.
 <critical_rules>
 
 - **Load workflow first:** Read ship-milestone.md before executing
-- **Verify completion:** All stages must have RECAP.md files
+- **Verify completion:** All stages must have recap.md files
 - **User confirmation:** Wait for approval at verification gates
 - **Archive before deleting:** Always create archive files before updating/deleting originals
-- **One-line summary:** Collapsed milestone in TRACK.md should be single line with link
-- **Context efficiency:** Archive keeps TRACK.md and SPECS.md constant size per milestone
+- **One-line summary:** Collapsed milestone in track.md should be single line with link
+- **Context efficiency:** Archive keeps track.md and specs.md constant size per milestone
 - **Fresh specs:** Next milestone starts with `/ace.new-milestone` which includes specs definition
   </critical_rules>

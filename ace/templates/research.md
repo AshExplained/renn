@@ -1,6 +1,6 @@
 # Research Template
 
-Template for `.ace/stages/XX-name/{stage}-RESEARCH.md` - comprehensive ecosystem research before planning.
+Template for `.ace/stages/XX-name/{stage}-research.md` - comprehensive ecosystem research before planning.
 
 **Purpose:** Document what Claude needs to know to implement a stage well - not just "which library" but "how do experts build this."
 
@@ -16,26 +16,26 @@ Template for `.ace/stages/XX-name/{stage}-RESEARCH.md` - comprehensive ecosystem
 **Confidence:** [HIGH/MEDIUM/LOW]
 
 <user_constraints>
-## User Constraints (from INTEL.md)
+## User Constraints (from intel.md)
 
-**CRITICAL:** If INTEL.md exists from /ace.discuss-stage, copy locked decisions here verbatim. These MUST be honored by the architect.
+**CRITICAL:** If intel.md exists from /ace.discuss-stage, copy locked decisions here verbatim. These MUST be honored by the architect.
 
 ### Locked Decisions
-[Copy from INTEL.md `## Decisions` section - these are NON-NEGOTIABLE]
+[Copy from intel.md `## Decisions` section - these are NON-NEGOTIABLE]
 - [Decision 1]
 - [Decision 2]
 
 ### Claude's Discretion
-[Copy from INTEL.md - areas where scout/architect can choose]
+[Copy from intel.md - areas where scout/architect can choose]
 - [Area 1]
 - [Area 2]
 
 ### Deferred Ideas (OUT OF SCOPE)
-[Copy from INTEL.md - do NOT research or plan these]
+[Copy from intel.md - do NOT research or plan these]
 - [Deferred 1]
 - [Deferred 2]
 
-**If no INTEL.md exists:** Write "No user constraints - all decisions at Claude's discretion"
+**If no intel.md exists:** Write "No user constraints - all decisions at Claude's discretion"
 </user_constraints>
 
 <research_summary>
@@ -540,13 +540,13 @@ function useVehicleControls(rigidBodyRef) {
 - Sources: Mark confidence levels honestly
 
 **Integration with planning:**
-- RESEARCH.md loaded as @context reference in RUN.md
+- research.md loaded as @context reference in run.md
 - Standard stack informs library choices
 - Don't hand-roll prevents custom solutions
 - Pitfalls inform verification criteria
 - Code examples can be referenced in task actions
 
 **After creation:**
-- File lives in stage directory: `.ace/stages/XX-name/{stage}-RESEARCH.md`
+- File lives in stage directory: `.ace/stages/XX-name/{stage}-research.md`
 - Referenced during planning workflow
 - plan-stage loads it automatically when present

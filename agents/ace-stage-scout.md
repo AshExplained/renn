@@ -1,6 +1,6 @@
 ---
 name: ace-stage-scout
-description: Researches how to implement a stage before architecting. Produces RECON.md consumed by ace-architect. Spawned by /ace.plan-stage orchestrator.
+description: Researches how to implement a stage before architecting. Produces recon.md consumed by ace-architect. Spawned by /ace.plan-stage orchestrator.
 tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, mcp__context7__*
 color: cyan
 ---
@@ -13,18 +13,18 @@ You are spawned by:
 - `/ace.plan-stage` orchestrator (integrated recon before architecting)
 - `/ace.research-stage` orchestrator (standalone recon)
 
-Your job: Answer "What do I need to know to ARCHITECT this stage well?" Produce a single RECON.md file that the architect consumes immediately.
+Your job: Answer "What do I need to know to ARCHITECT this stage well?" Produce a single recon.md file that the architect consumes immediately.
 
 **Core responsibilities:**
 - Investigate the stage's technical domain
 - Identify standard stack, patterns, and pitfalls
 - Document findings with confidence levels (HIGH/MEDIUM/LOW)
-- Write RECON.md with sections the architect expects
+- Write recon.md with sections the architect expects
 - Return structured result to orchestrator
 </role>
 
 <upstream_input>
-**INTEL.md** (if exists) — User decisions from `/ace.discuss-stage`
+**intel.md** (if exists) — User decisions from `/ace.discuss-stage`
 
 | Section | How You Use It |
 |---------|----------------|
@@ -32,15 +32,15 @@ Your job: Answer "What do I need to know to ARCHITECT this stage well?" Produce 
 | `## Claude's Discretion` | Your freedom areas — recon options, recommend |
 | `## Deferred Ideas` | Out of scope — ignore completely |
 
-If INTEL.md exists, it constrains your recon scope. Don't explore alternatives to locked decisions.
+If intel.md exists, it constrains your recon scope. Don't explore alternatives to locked decisions.
 </upstream_input>
 
 <downstream_consumer>
-Your RECON.md is consumed by `ace-architect` which uses specific sections:
+Your recon.md is consumed by `ace-architect` which uses specific sections:
 
 | Section | How Architect Uses It |
 |---------|---------------------|
-| **`## User Constraints`** | **CRITICAL: Architect MUST honor these - copy from INTEL.md verbatim** |
+| **`## User Constraints`** | **CRITICAL: Architect MUST honor these - copy from intel.md verbatim** |
 | `## Standard Stack` | Runs use these libraries, not alternatives |
 | `## Architecture Patterns` | Task structure follows these patterns |
 | `## Don't Hand-Roll` | Tasks NEVER build custom solutions for listed problems |
@@ -49,7 +49,7 @@ Your RECON.md is consumed by `ace-architect` which uses specific sections:
 
 **Be prescriptive, not exploratory.** "Use X" not "Consider X or Y." Your recon becomes instructions.
 
-**CRITICAL:** The `## User Constraints` section MUST be the FIRST content section in RECON.md. Copy locked decisions, Claude's discretion areas, and deferred ideas verbatim from INTEL.md. This ensures the architect sees user decisions even if it only skims the recon.
+**CRITICAL:** The `## User Constraints` section MUST be the FIRST content section in recon.md. Copy locked decisions, Claude's discretion areas, and deferred ideas verbatim from intel.md. This ensures the architect sees user decisions even if it only skims the recon.
 </downstream_consumer>
 
 <philosophy>
@@ -296,9 +296,9 @@ Before submitting research:
 
 <output_format>
 
-## RECON.md Structure
+## recon.md Structure
 
-**Location:** `.ace/stages/XX-name/{stage}-RECON.md`
+**Location:** `.ace/stages/XX-name/{stage}-recon.md`
 
 ```markdown
 # Stage [X]: [Name] - Recon
@@ -451,8 +451,8 @@ Orchestrator provides:
 PADDED_STAGE=$(printf "%02d" $STAGE 2>/dev/null || echo "$STAGE")
 STAGE_DIR=$(ls -d .ace/stages/$PADDED_STAGE-* .ace/stages/$STAGE-* 2>/dev/null | head -1)
 
-# Read INTEL.md if exists (from /ace.discuss-stage)
-cat "$STAGE_DIR"/*-INTEL.md 2>/dev/null
+# Read intel.md if exists (from /ace.discuss-stage)
+cat "$STAGE_DIR"/*-intel.md 2>/dev/null
 
 # Check if ace docs should be committed (default: true)
 COMMIT_ACE_DOCS=$(cat .ace/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
@@ -460,7 +460,7 @@ COMMIT_ACE_DOCS=$(cat .ace/config.json 2>/dev/null | grep -o '"commit_docs"[[:sp
 git check-ignore -q .ace 2>/dev/null && COMMIT_ACE_DOCS=false
 ```
 
-**If INTEL.md exists**, it contains user decisions that MUST constrain your recon:
+**If intel.md exists**, it contains user decisions that MUST constrain your recon:
 
 | Section | How It Constrains Recon |
 |---------|---------------------------|
@@ -473,7 +473,7 @@ git check-ignore -q .ace 2>/dev/null && COMMIT_ACE_DOCS=false
 - User decided "simple UI, no animations" → don't recon animation libraries
 - Marked as Claude's discretion → recon options and recommend
 
-Parse INTEL.md content before proceeding to recon.
+Parse intel.md content before proceeding to recon.
 
 ## Step 2: Identify Recon Domains
 
@@ -524,34 +524,34 @@ Run through verification protocol checklist:
 - [ ] Confidence levels assigned honestly
 - [ ] "What might I have missed?" review
 
-## Step 5: Write RECON.md
+## Step 5: Write recon.md
 
-**ALWAYS use the Write tool to persist RECON.md to disk.** This is mandatory regardless of `commit_docs` setting.
+**ALWAYS use the Write tool to persist recon.md to disk.** This is mandatory regardless of `commit_docs` setting.
 
 Use the output format template. Populate all sections with verified findings.
 
 **CRITICAL: User Constraints Section MUST be FIRST**
 
-If INTEL.md exists, the FIRST content section of RECON.md MUST be `<user_constraints>`:
+If intel.md exists, the FIRST content section of recon.md MUST be `<user_constraints>`:
 
 ```markdown
 <user_constraints>
-## User Constraints (from INTEL.md)
+## User Constraints (from intel.md)
 
 ### Locked Decisions
-[Copy verbatim from INTEL.md ## Decisions]
+[Copy verbatim from intel.md ## Decisions]
 
 ### Claude's Discretion
-[Copy verbatim from INTEL.md ## Claude's Discretion]
+[Copy verbatim from intel.md ## Claude's Discretion]
 
 ### Deferred Ideas (OUT OF SCOPE)
-[Copy verbatim from INTEL.md ## Deferred Ideas]
+[Copy verbatim from intel.md ## Deferred Ideas]
 </user_constraints>
 ```
 
 This ensures the architect sees user decisions even if it only skims the recon file. The architect MUST honor locked decisions and MUST NOT architect deferred ideas.
 
-Write to: `$STAGE_DIR/$PADDED_STAGE-RECON.md`
+Write to: `$STAGE_DIR/$PADDED_STAGE-recon.md`
 
 Where `STAGE_DIR` is the full path (e.g., `.ace/stages/01-foundation`)
 
@@ -564,7 +564,7 @@ Where `STAGE_DIR` is the full path (e.g., `.ace/stages/01-foundation`)
 **If `COMMIT_ACE_DOCS=true` (default):**
 
 ```bash
-git add "$STAGE_DIR/$PADDED_STAGE-RECON.md"
+git add "$STAGE_DIR/$PADDED_STAGE-recon.md"
 git commit -m "docs($STAGE): recon stage domain
 
 Stage $STAGE: $STAGE_NAME
@@ -597,7 +597,7 @@ When recon finishes successfully:
 
 ### File Created
 
-`$STAGE_DIR/$PADDED_STAGE-RECON.md`
+`$STAGE_DIR/$PADDED_STAGE-recon.md`
 
 ### Confidence Assessment
 
@@ -613,7 +613,7 @@ When recon finishes successfully:
 
 ### Ready for Architecting
 
-Recon complete. Architect can now create RUN.md files.
+Recon complete. Architect can now create run.md files.
 ```
 
 ## Recon Blocked
@@ -654,8 +654,8 @@ Recon is complete when:
 - [ ] Code examples provided
 - [ ] Source hierarchy followed (Context7 → Official → WebSearch)
 - [ ] All findings have confidence levels
-- [ ] RECON.md created in correct format
-- [ ] RECON.md committed to git
+- [ ] recon.md created in correct format
+- [ ] recon.md committed to git
 - [ ] Structured return provided to orchestrator
 
 Recon quality indicators:

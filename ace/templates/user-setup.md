@@ -63,17 +63,17 @@ Expected results:
 
 Generate `{stage}-USER-SETUP.md` when run frontmatter contains `user_setup` field.
 
-**Trigger:** `user_setup` exists in RUN.md frontmatter and has items.
+**Trigger:** `user_setup` exists in run.md frontmatter and has items.
 
-**Location:** Same directory as RUN.md and RECAP.md.
+**Location:** Same directory as run.md and recap.md.
 
-**Timing:** Generated during run-stage.md after tasks complete, before RECAP.md creation.
+**Timing:** Generated during run-stage.md after tasks complete, before recap.md creation.
 
 ---
 
 ## Frontmatter Schema
 
-In RUN.md, `user_setup` declares human-required configuration:
+In run.md, `user_setup` declares human-required configuration:
 
 ```yaml
 user_setup:

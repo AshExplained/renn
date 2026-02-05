@@ -1,6 +1,6 @@
 # Recon Template
 
-Template for `.ace/stages/XX-name/RECON.md` - shallow research for library/option decisions.
+Template for `.ace/stages/XX-name/recon.md` - shallow research for library/option decisions.
 
 **Purpose:** Answer "which library/option should we use" questions during mandatory recon in plan-stage.
 
@@ -30,7 +30,7 @@ Discover [topic] to inform [stage name] implementation.
 
 Purpose: [What decision/implementation this enables]
 Scope: [Boundaries]
-Output: RECON.md with recommendation
+Output: recon.md with recommendation
 </recon_objective>
 
 <recon_scope>
@@ -71,7 +71,7 @@ Before completing recon, verify:
 
 
 <output_structure>
-Create `.ace/stages/XX-name/RECON.md`:
+Create `.ace/stages/XX-name/recon.md`:
 
 ```markdown
 # [Topic] Recon
@@ -123,7 +123,7 @@ Create `.ace/stages/XX-name/RECON.md`:
 - Quality checklist items completed
 - Clear primary recommendation
 - Low-confidence findings marked with validation checkpoints
-- Ready to inform RUN.md creation
+- Ready to inform run.md creation
 </success_criteria>
 
 <guidelines>

@@ -17,12 +17,12 @@ Validate built features through conversational testing with persistent state.
 
 Purpose: Confirm what Claude built actually works from user's perspective. One test at a time, plain text responses, no interrogation. When issues are found, automatically diagnose, plan fixes, and prepare for execution.
 
-Output: {stage}-UAT.md tracking all test results. If issues found: diagnosed gaps, verified fix runs ready for /ace.run-stage
+Output: {stage}-uat.md tracking all test results. If issues found: diagnosed gaps, verified fix runs ready for /ace.run-stage
 </objective>
 
 <execution_context>
 @~/.claude/ace/workflows/audit-work.md
-@~/.claude/ace/templates/UAT.md
+@~/.claude/ace/templates/uat.md
 </execution_context>
 
 <context>
@@ -30,20 +30,20 @@ Stage: $ARGUMENTS (optional)
 - If provided: Test specific stage (e.g., "4")
 - If not provided: Check for active sessions or prompt for stage
 
-@.ace/PULSE.md
-@.ace/TRACK.md
+@.ace/pulse.md
+@.ace/track.md
 </context>
 
 <process>
 1. Check for active UAT sessions (resume or start new)
-2. Find RECAP.md files for the stage
+2. Find recap.md files for the stage
 3. Extract testable deliverables (user-observable outcomes)
-4. Create {stage}-UAT.md with test list
+4. Create {stage}-uat.md with test list
 5. Present tests one at a time:
    - Show expected behavior
    - Wait for plain text response
    - "yes/y/next" = pass, anything else = issue (severity inferred)
-6. Update UAT.md after each response
+6. Update uat.md after each response
 7. On completion: commit, present summary
 8. If issues found:
    - Spawn parallel debug agents to diagnose root causes
@@ -88,7 +88,7 @@ UAT complete
 
 ## > Next Up
 
-**Stage {Z+1}: {Name}** — {Goal from TRACK.md}
+**Stage {Z+1}: {Name}** — {Goal from track.md}
 
 /ace.discuss-stage {Z+1} — gather context and clarify approach
 
@@ -148,7 +148,7 @@ Fix runs verified
 
 ### Issues Found
 
-{List issues with severity from UAT.md}
+{List issues with severity from uat.md}
 
 ---------------------------------------------------------------
 
@@ -163,7 +163,7 @@ Fix runs verified
 ---------------------------------------------------------------
 
 **Also available:**
-- cat .ace/stages/{stage_dir}/*-RUN.md — review fix runs
+- cat .ace/stages/{stage_dir}/*-run.md — review fix runs
 - /ace.plan-stage {Z} --gaps — regenerate fix runs
 
 ---------------------------------------------------------------
@@ -206,7 +206,7 @@ Review the issues above and either:
 </offer_next>
 
 <success_criteria>
-- [ ] UAT.md created with tests from RECAP.md
+- [ ] uat.md created with tests from recap.md
 - [ ] Tests presented one at a time with expected behavior
 - [ ] Plain text responses (no structured forms)
 - [ ] Severity inferred, never asked

@@ -1,6 +1,6 @@
 ---
 name: ace.start
-description: Initialize a new project with deep context gathering and BRIEF.md
+description: Initialize a new project with deep context gathering and brief.md
 allowed-tools:
   - Read
   - Bash
@@ -16,12 +16,12 @@ Initialize a new project through unified flow: questioning → research (optiona
 This is the most leveraged moment in any project. Deep questioning here means better runs, better execution, better outcomes. One command takes you from idea to ready-for-planning.
 
 **Creates:**
-- `.ace/BRIEF.md` — project context
+- `.ace/brief.md` — project context
 - `.ace/config.json` — workflow preferences
 - `.ace/recon/` — domain research (optional)
-- `.ace/SPECS.md` — scoped requirements
-- `.ace/TRACK.md` — stage structure
-- `.ace/PULSE.md` — project memory
+- `.ace/specs.md` — scoped requirements
+- `.ace/track.md` — stage structure
+- `.ace/pulse.md` — project memory
 
 **After this command:** Run `/ace.plan-stage 1` to start execution.
 
@@ -31,8 +31,8 @@ This is the most leveraged moment in any project. Deep questioning here means be
 
 @~/.claude/ace/references/questioning.md
 @~/.claude/ace/references/ui-brand.md
-@~/.claude/ace/templates/BRIEF.md
-@~/.claude/ace/templates/SPECS.md
+@~/.claude/ace/templates/brief.md
+@~/.claude/ace/templates/specs.md
 
 </execution_context>
 
@@ -44,7 +44,7 @@ This is the most leveraged moment in any project. Deep questioning here means be
 
 1. **Abort if project exists:**
    ```bash
-   [ -f .ace/BRIEF.md ] && echo "ERROR: Project already initialized. Use /ace.status" && exit 1
+   [ -f .ace/brief.md ] && echo "ERROR: Project already initialized. Use /ace.status" && exit 1
    ```
 
 2. **Initialize git repo in THIS directory** (required even if inside a parent repo):
@@ -133,21 +133,21 @@ As you go, mentally check the context checklist from `questioning.md`. If gaps r
 
 **Decision gate:**
 
-When you could write a clear BRIEF.md, use AskUserQuestion:
+When you could write a clear brief.md, use AskUserQuestion:
 
 - header: "Ready?"
-- question: "I think I understand what you're after. Ready to create BRIEF.md?"
+- question: "I think I understand what you're after. Ready to create brief.md?"
 - options:
-  - "Create BRIEF.md" — Let's move forward
+  - "Create brief.md" — Let's move forward
   - "Keep exploring" — I want to share more / ask me more
 
 If "Keep exploring" — ask what they want to add, or identify gaps and probe naturally.
 
-Loop until "Create BRIEF.md" selected.
+Loop until "Create brief.md" selected.
 
-## Stage 4: Write BRIEF.md
+## Stage 4: Write brief.md
 
-Synthesize all context into `.ace/BRIEF.md` using the template from `templates/BRIEF.md`.
+Synthesize all context into `.ace/brief.md` using the template from `templates/brief.md`.
 
 **For greenfield projects:**
 
@@ -222,15 +222,15 @@ Initialize with any decisions made during questioning:
 
 Do not compress. Capture everything gathered.
 
-**Commit BRIEF.md:**
+**Commit brief.md:**
 
 ```bash
 mkdir -p .ace
-git add .ace/BRIEF.md
+git add .ace/brief.md
 git commit -m "$(cat <<'EOF'
 docs: initialize project
 
-[One-liner from BRIEF.md What This Is section]
+[One-liner from brief.md What This Is section]
 EOF
 )"
 ```
@@ -424,7 +424,7 @@ mkdir -p .ace/recon
 **Determine milestone context:**
 
 Check if this is greenfield or subsequent milestone:
-- If no "Validated" requirements in BRIEF.md → Greenfield (building from scratch)
+- If no "Validated" requirements in brief.md → Greenfield (building from scratch)
 - If "Validated" requirements exist → Subsequent milestone (adding to existing app)
 
 Display spawning indicator:
@@ -457,7 +457,7 @@ What's the standard 2025 stack for [domain]?
 </question>
 
 <project_context>
-[BRIEF.md summary - core value, constraints, what they're building]
+[brief.md summary - core value, constraints, what they're building]
 </project_context>
 
 <downstream_consumer>
@@ -474,8 +474,8 @@ Your STACK.md feeds into track creation. Be prescriptive:
 </quality_gate>
 
 <output>
-Write to: .ace/recon/STACK.md
-Use template: ~/.claude/ace/templates/recon/STACK.md
+Write to: .ace/recon/stack.md
+Use template: ~/.claude/ace/templates/recon/stack.md
 </output>
 ", subagent_type="general-purpose", model="{scout_model}", description="Stack research")
 
@@ -497,7 +497,7 @@ What features do [domain] products have? What's table stakes vs differentiating?
 </question>
 
 <project_context>
-[BRIEF.md summary]
+[brief.md summary]
 </project_context>
 
 <downstream_consumer>
@@ -514,8 +514,8 @@ Your FEATURES.md feeds into requirements definition. Categorize clearly:
 </quality_gate>
 
 <output>
-Write to: .ace/recon/FEATURES.md
-Use template: ~/.claude/ace/templates/recon/FEATURES.md
+Write to: .ace/recon/features.md
+Use template: ~/.claude/ace/templates/recon/features.md
 </output>
 ", subagent_type="general-purpose", model="{scout_model}", description="Features research")
 
@@ -537,7 +537,7 @@ How are [domain] systems typically structured? What are major components?
 </question>
 
 <project_context>
-[BRIEF.md summary]
+[brief.md summary]
 </project_context>
 
 <downstream_consumer>
@@ -554,8 +554,8 @@ Your ARCHITECTURE.md informs stage structure in track. Include:
 </quality_gate>
 
 <output>
-Write to: .ace/recon/ARCHITECTURE.md
-Use template: ~/.claude/ace/templates/recon/ARCHITECTURE.md
+Write to: .ace/recon/architecture.md
+Use template: ~/.claude/ace/templates/recon/architecture.md
 </output>
 ", subagent_type="general-purpose", model="{scout_model}", description="Architecture research")
 
@@ -577,7 +577,7 @@ What do [domain] projects commonly get wrong? Critical mistakes?
 </question>
 
 <project_context>
-[BRIEF.md summary]
+[brief.md summary]
 </project_context>
 
 <downstream_consumer>
@@ -594,31 +594,31 @@ Your PITFALLS.md prevents mistakes in track/planning. For each pitfall:
 </quality_gate>
 
 <output>
-Write to: .ace/recon/PITFALLS.md
-Use template: ~/.claude/ace/templates/recon/PITFALLS.md
+Write to: .ace/recon/pitfalls.md
+Use template: ~/.claude/ace/templates/recon/pitfalls.md
 </output>
 ", subagent_type="general-purpose", model="{scout_model}", description="Pitfalls research")
 ```
 
-After all 4 agents complete, spawn synthesizer to create RECAP.md:
+After all 4 agents complete, spawn synthesizer to create recap.md:
 
 ```
 Task(prompt="
 <task>
-Synthesize research outputs into RECAP.md.
+Synthesize research outputs into recap.md.
 </task>
 
 <research_files>
 Read these files:
-- .ace/recon/STACK.md
-- .ace/recon/FEATURES.md
-- .ace/recon/ARCHITECTURE.md
-- .ace/recon/PITFALLS.md
+- .ace/recon/stack.md
+- .ace/recon/features.md
+- .ace/recon/architecture.md
+- .ace/recon/pitfalls.md
 </research_files>
 
 <output>
-Write to: .ace/recon/RECAP.md
-Use template: ~/.claude/ace/templates/recon/RECAP.md
+Write to: .ace/recon/recap.md
+Use template: ~/.claude/ace/templates/recon/recap.md
 Commit after writing.
 </output>
 ", subagent_type="ace-synthesizer", model="{synthesizer_model}", description="Synthesize research")
@@ -632,9 +632,9 @@ Display research complete banner and key findings:
 
 ## Key Findings
 
-**Stack:** [from RECAP.md]
-**Table Stakes:** [from RECAP.md]
-**Watch Out For:** [from RECAP.md]
+**Stack:** [from recap.md]
+**Table Stakes:** [from recap.md]
+**Watch Out For:** [from recap.md]
 
 Files: `.ace/recon/`
 ```
@@ -652,12 +652,12 @@ Display stage banner:
 
 **Load context:**
 
-Read BRIEF.md and extract:
+Read brief.md and extract:
 - Core value (the ONE thing that must work)
 - Stated constraints (budget, timeline, tech limitations)
 - Any explicit scope boundaries
 
-**If recon exists:** Read recon/FEATURES.md and extract feature categories.
+**If recon exists:** Read recon/features.md and extract feature categories.
 
 **Present features by category:**
 
@@ -722,11 +722,11 @@ Use AskUserQuestion:
 
 **Validate core value:**
 
-Cross-check requirements against Core Value from BRIEF.md. If gaps detected, surface them.
+Cross-check requirements against Core Value from brief.md. If gaps detected, surface them.
 
-**Generate SPECS.md:**
+**Generate specs.md:**
 
-Create `.ace/SPECS.md` with:
+Create `.ace/specs.md` with:
 - v1 Requirements grouped by category (checkboxes, REQ-IDs)
 - v2 Requirements (deferred)
 - Out of Scope (explicit exclusions with reasoning)
@@ -774,7 +774,7 @@ If "adjust": Return to scoping.
 **Commit requirements:**
 
 ```bash
-git add .ace/SPECS.md
+git add .ace/specs.md
 git commit -m "$(cat <<'EOF'
 docs: define v1 requirements
 
@@ -802,13 +802,13 @@ Task(prompt="
 <planning_context>
 
 **Project:**
-@.ace/BRIEF.md
+@.ace/brief.md
 
 **Requirements:**
-@.ace/SPECS.md
+@.ace/specs.md
 
 **Recon (if exists):**
-@.ace/recon/RECAP.md
+@.ace/recon/recap.md
 
 **Config:**
 @.ace/config.json
@@ -821,7 +821,7 @@ Create track:
 2. Map every v1 requirement to exactly one stage
 3. Derive 2-5 success criteria per stage (observable user behaviors)
 4. Validate 100% coverage
-5. Write files immediately (TRACK.md, PULSE.md, update SPECS.md traceability)
+5. Write files immediately (track.md, pulse.md, update specs.md traceability)
 6. Return TRACK CREATED with summary
 
 Write files first, then return. This ensures artifacts persist even if context is lost.
@@ -838,7 +838,7 @@ Write files first, then return. This ensures artifacts persist even if context i
 
 **If `## TRACK CREATED 🛤`:**
 
-Read the created TRACK.md and present it nicely inline:
+Read the created track.md and present it nicely inline:
 
 ```
 ---
@@ -884,7 +884,7 @@ Use AskUserQuestion:
 - options:
   - "Approve" — Commit and continue
   - "Adjust stages" — Tell me what to change
-  - "Review full file" — Show raw TRACK.md
+  - "Review full file" — Show raw track.md
 
 **If "Approve":** Continue to commit.
 
@@ -897,7 +897,7 @@ Use AskUserQuestion:
   User feedback on track:
   [user's notes]
 
-  Current TRACK.md: @.ace/TRACK.md
+  Current track.md: @.ace/track.md
 
   Update the track based on feedback. Edit files in place.
   Return TRACK REVISED with changes made.
@@ -907,12 +907,12 @@ Use AskUserQuestion:
 - Present revised track
 - Loop until user approves
 
-**If "Review full file":** Display raw `cat .ace/TRACK.md`, then re-ask.
+**If "Review full file":** Display raw `cat .ace/track.md`, then re-ask.
 
 **Commit track (after approval):**
 
 ```bash
-git add .ace/TRACK.md .ace/PULSE.md .ace/SPECS.md
+git add .ace/track.md .ace/pulse.md .ace/specs.md
 git commit -m "$(cat <<'EOF'
 docs: create track ([N] stages)
 
@@ -939,11 +939,11 @@ Present completion with next steps:
 
 | Artifact       | Location                    |
 |----------------|-----------------------------|
-| Project        | `.ace/BRIEF.md`             |
+| Project        | `.ace/brief.md`             |
 | Config         | `.ace/config.json`          |
 | Recon          | `.ace/recon/`               |
-| Requirements   | `.ace/SPECS.md`             |
-| Track          | `.ace/TRACK.md`             |
+| Requirements   | `.ace/specs.md`             |
+| Track          | `.ace/track.md`             |
 
 **[N] stages** | **[X] requirements** | Ready to build ✓
 
@@ -951,7 +951,7 @@ Present completion with next steps:
 
 ## ▶ Next Up
 
-**Stage 1: [Stage Name]** — [Goal from TRACK.md]
+**Stage 1: [Stage Name]** — [Goal from track.md]
 
 /ace.discuss-stage 1 — gather context and clarify approach
 
@@ -969,17 +969,17 @@ Present completion with next steps:
 
 <output>
 
-- `.ace/BRIEF.md`
+- `.ace/brief.md`
 - `.ace/config.json`
 - `.ace/recon/` (if recon selected)
   - `STACK.md`
   - `FEATURES.md`
   - `ARCHITECTURE.md`
   - `PITFALLS.md`
-  - `RECAP.md`
-- `.ace/SPECS.md`
-- `.ace/TRACK.md`
-- `.ace/PULSE.md`
+  - `recap.md`
+- `.ace/specs.md`
+- `.ace/track.md`
+- `.ace/pulse.md`
 
 </output>
 
@@ -989,18 +989,18 @@ Present completion with next steps:
 - [ ] Git repo initialized
 - [ ] Brownfield detection completed
 - [ ] Deep questioning completed (threads followed, not rushed)
-- [ ] BRIEF.md captures full context → **committed**
+- [ ] brief.md captures full context → **committed**
 - [ ] config.json has workflow style, depth, parallelization → **committed**
 - [ ] Recon completed (if selected) — 4 parallel agents spawned → **committed**
 - [ ] Requirements gathered (from recon or conversation)
 - [ ] User scoped each category (v1/v2/out of scope)
-- [ ] SPECS.md created with REQ-IDs → **committed**
+- [ ] specs.md created with REQ-IDs → **committed**
 - [ ] ace-navigator spawned with context
 - [ ] Track files written immediately (not draft)
 - [ ] User feedback incorporated (if any)
-- [ ] TRACK.md created with stages, requirement mappings, success criteria
-- [ ] PULSE.md initialized
-- [ ] SPECS.md traceability updated
+- [ ] track.md created with stages, requirement mappings, success criteria
+- [ ] pulse.md initialized
+- [ ] specs.md traceability updated
 - [ ] User knows next step is `/ace.discuss-stage 1`
 
 **Atomic commits:** Each stage commits its artifacts immediately. If context is lost, artifacts persist.

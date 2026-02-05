@@ -13,23 +13,23 @@ Template for spawning ace-architect agent. The agent contains all planning exper
 **Mode:** {standard | gap_closure}
 
 **Project State:**
-@.ace/PULSE.md
+@.ace/pulse.md
 
 **Track:**
-@.ace/TRACK.md
+@.ace/track.md
 
 **Specs (if exists):**
-@.ace/SPECS.md
+@.ace/specs.md
 
 **Stage Context (if exists):**
-@.ace/stages/{stage_dir}/{stage}-INTEL.md
+@.ace/stages/{stage_dir}/{stage}-intel.md
 
 **Research (if exists):**
-@.ace/stages/{stage_dir}/{stage}-RECON.md
+@.ace/stages/{stage_dir}/{stage}-recon.md
 
 **Gap Closure (if --gaps mode):**
-@.ace/stages/{stage_dir}/{stage}-PROOF.md
-@.ace/stages/{stage_dir}/{stage}-UAT.md
+@.ace/stages/{stage_dir}/{stage}-proof.md
+@.ace/stages/{stage_dir}/{stage}-uat.md
 
 </planning_context>
 
@@ -44,7 +44,7 @@ Runs must be executable prompts with:
 
 <quality_gate>
 Before returning PLANNING COMPLETE:
-- [ ] RUN.md files created in stage directory
+- [ ] run.md files created in stage directory
 - [ ] Each run has valid frontmatter
 - [ ] Tasks are specific and actionable
 - [ ] Dependencies correctly identified
@@ -99,13 +99,13 @@ Continue planning for Stage {stage_number}: {stage_name}
 
 <prior_state>
 Stage directory: @.ace/stages/{stage_dir}/
-Existing runs: @.ace/stages/{stage_dir}/*-RUN.md
+Existing runs: @.ace/stages/{stage_dir}/*-run.md
 </prior_state>
 
-<gate_response>
-**Type:** {gate_type}
+<checkpoint_response>
+**Type:** {checkpoint_type}
 **Response:** {user_response}
-</gate_response>
+</checkpoint_response>
 
 <mode>
 Continue: {standard | gap_closure}

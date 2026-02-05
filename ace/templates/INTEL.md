@@ -1,6 +1,6 @@
 # Stage Intel Template
 
-Template for `.ace/stages/XX-name/{stage}-INTEL.md` - captures implementation decisions for a stage.
+Template for `.ace/stages/XX-name/{stage}-intel.md` - captures implementation decisions for a stage.
 
 **Purpose:** Document decisions that downstream agents need. Scout uses this to know WHAT to investigate. Architect uses this to know WHAT choices are locked vs flexible.
 
@@ -23,7 +23,7 @@ Template for `.ace/stages/XX-name/{stage}-INTEL.md` - captures implementation de
 <domain>
 ## Stage Boundary
 
-[Clear statement of what this stage delivers — the scope anchor. This comes from TRACK.md and is fixed. Discussion clarifies implementation within this boundary.]
+[Clear statement of what this stage delivers — the scope anchor. This comes from track.md and is fixed. Discussion clarifies implementation within this boundary.]
 
 </domain>
 
@@ -276,7 +276,7 @@ The output should answer: "What does the scout need to investigate? What choices
 - "Easy to use"
 
 **After creation:**
-- File lives in stage directory: `.ace/stages/XX-name/{stage}-INTEL.md`
+- File lives in stage directory: `.ace/stages/XX-name/{stage}-intel.md`
 - `ace-stage-scout` uses decisions to focus investigation
 - `ace-architect` uses decisions + research to create executable tasks
 - Downstream agents should NOT need to ask the user again about captured decisions

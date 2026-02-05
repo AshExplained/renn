@@ -14,5 +14,9 @@ Thumbs.db
 *.log
 sdlc_to_agile_mapping.html
 
+# Build artifacts
+hooks/dist/
+node_modules/
+
 # Internal tooling
 .internal/

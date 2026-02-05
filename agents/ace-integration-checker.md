@@ -57,7 +57,7 @@ For each stage, extract what it provides and what it should consume.
 
 ```bash
 # Key exports from each stage
-for recap in .ace/stages/*/*-RECAP.md; do
+for recap in .ace/stages/*/*-recap.md; do
   echo "=== $recap ==="
   grep -A 10 "Key Files\|Exports\|Provides" "$recap" 2>/dev/null
 done

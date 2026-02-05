@@ -5,13 +5,13 @@ You are a thinking partner, not an interviewer. The user is the visionary — yo
 </purpose>
 
 <downstream_awareness>
-**INTEL.md feeds into:**
+**intel.md feeds into:**
 
-1. **ace-stage-scout** — Reads INTEL.md to know WHAT to research
+1. **ace-stage-scout** — Reads intel.md to know WHAT to research
    - "User wants card-based layout" → scout investigates card component patterns
    - "Infinite scroll decided" → scout looks into virtualization libraries
 
-2. **ace-architect** — Reads INTEL.md to know WHAT decisions are locked
+2. **ace-architect** — Reads intel.md to know WHAT decisions are locked
    - "Pull-to-refresh on mobile" → architect includes that in task specs
    - "Claude's Discretion: loading skeleton" → architect can decide approach
 
@@ -41,7 +41,7 @@ Ask about vision and implementation choices. Capture decisions for downstream ag
 <scope_guardrail>
 **CRITICAL: No scope creep.**
 
-The stage boundary comes from TRACK.md and is FIXED. Discussion clarifies HOW to implement what's scoped, never WHETHER to add new capabilities.
+The stage boundary comes from track.md and is FIXED. Discussion clarifies HOW to implement what's scoped, never WHETHER to add new capabilities.
 
 **Allowed (clarifying ambiguity):**
 - "How should posts be displayed?" (layout, density, info shown)
@@ -58,7 +58,7 @@ The stage boundary comes from TRACK.md and is FIXED. Discussion clarifies HOW to
 **When user suggests scope creep:**
 ```
 "[Feature X] would be a new capability — that's its own stage.
-Want me to note it for the roadmap backlog?
+Want me to note it for the track backlog?
 
 For now, let's focus on [stage domain]."
 ```
@@ -71,7 +71,7 @@ Gray areas are **implementation decisions the user cares about** — things that
 
 **How to identify gray areas:**
 
-1. **Read the stage goal** from TRACK.md
+1. **Read the stage goal** from track.md
 2. **Understand the domain** — What kind of thing is being built?
    - Something users SEE → visual presentation, interactions, states matter
    - Something users CALL → interface contracts, responses, errors matter
@@ -102,7 +102,7 @@ Stage: "API documentation"
 - Technical implementation details
 - Architecture patterns
 - Performance optimization
-- Scope (roadmap defines this)
+- Scope (track defines this)
 </gray_area_identification>
 
 <process>
@@ -111,13 +111,13 @@ Stage: "API documentation"
 Stage number from argument (required).
 
 Load and validate:
-- Read `.ace/TRACK.md`
+- Read `.ace/track.md`
 - Find stage entry
 - Extract: number, name, description, status
 
 **If stage not found:**
 ```
-Stage [X] not found in roadmap.
+Stage [X] not found in track.
 
 Use /ace.status to see available stages.
 ```
@@ -127,12 +127,12 @@ Exit workflow.
 </step>
 
 <step name="check_existing">
-Check if INTEL.md already exists:
+Check if intel.md already exists:
 
 ```bash
 # Match both zero-padded (05-*) and unpadded (5-*) folders
 PADDED_STAGE=$(printf "%02d" ${STAGE})
-ls .ace/stages/${PADDED_STAGE}-*/*-INTEL.md .ace/stages/${STAGE}-*/*-INTEL.md 2>/dev/null
+ls .ace/stages/${PADDED_STAGE}-*/*-intel.md .ace/stages/${STAGE}-*/*-intel.md 2>/dev/null
 ```
 
 **If exists:**
@@ -145,7 +145,7 @@ Use AskUserQuestion:
   - "Skip" — Use existing context as-is
 
 If "Update": Load existing, continue to analyze_stage
-If "View": Display INTEL.md, then offer update/skip
+If "View": Display intel.md, then offer update/skip
 If "Skip": Exit workflow
 
 **If doesn't exist:** Continue to analyze_stage.
@@ -154,7 +154,7 @@ If "Skip": Exit workflow
 <step name="analyze_stage">
 Analyze the stage to identify gray areas worth discussing.
 
-**Read the stage description from TRACK.md and determine:**
+**Read the stage description from track.md and determine:**
 
 1. **Domain boundary** — What capability is this stage delivering? State it clearly.
 
@@ -277,7 +277,7 @@ Track deferred ideas internally.
 </step>
 
 <step name="write_context">
-Create INTEL.md capturing decisions made.
+Create intel.md capturing decisions made.
 
 **Find or create stage directory:**
 
@@ -286,14 +286,14 @@ Create INTEL.md capturing decisions made.
 PADDED_STAGE=$(printf "%02d" ${STAGE})
 STAGE_DIR=$(ls -d .ace/stages/${PADDED_STAGE}-* .ace/stages/${STAGE}-* 2>/dev/null | head -1)
 if [ -z "$STAGE_DIR" ]; then
-  # Create from roadmap name (lowercase, hyphens)
-  STAGE_NAME=$(grep "Stage ${STAGE}:" .ace/TRACK.md | sed 's/.*Stage [0-9]*: //' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+  # Create from track name (lowercase, hyphens)
+  STAGE_NAME=$(grep "Stage ${STAGE}:" .ace/track.md | sed 's/.*Stage [0-9]*: //' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
   mkdir -p ".ace/stages/${PADDED_STAGE}-${STAGE_NAME}"
   STAGE_DIR=".ace/stages/${PADDED_STAGE}-${STAGE_NAME}"
 fi
 ```
 
-**File location:** `${STAGE_DIR}/${PADDED_STAGE}-INTEL.md`
+**File location:** `${STAGE_DIR}/${PADDED_STAGE}-intel.md`
 
 **Structure the content by what was discussed:**
 
@@ -356,7 +356,7 @@ Write file.
 Present summary and next steps:
 
 ```
-Created: .ace/stages/${PADDED_STAGE}-${SLUG}/${PADDED_STAGE}-INTEL.md
+Created: .ace/stages/${PADDED_STAGE}-${SLUG}/${PADDED_STAGE}-intel.md
 
 ## Decisions Captured
 
@@ -374,7 +374,7 @@ Created: .ace/stages/${PADDED_STAGE}-${SLUG}/${PADDED_STAGE}-INTEL.md
 
 ## ▶ Next Up
 
-**Stage ${STAGE}: [Name]** — [Goal from TRACK.md]
+**Stage ${STAGE}: [Name]** — [Goal from track.md]
 
 `/ace.plan-stage ${STAGE}`
 
@@ -384,7 +384,7 @@ Created: .ace/stages/${PADDED_STAGE}-${SLUG}/${PADDED_STAGE}-INTEL.md
 
 **Also available:**
 - `/ace.plan-stage ${STAGE} --skip-research` — plan without research
-- Review/edit INTEL.md before continuing
+- Review/edit intel.md before continuing
 
 ---
 ```
@@ -405,7 +405,7 @@ git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
 **If `COMMIT_PLANNING_DOCS=true` (default):**
 
 ```bash
-git add "${STAGE_DIR}/${PADDED_STAGE}-INTEL.md"
+git add "${STAGE_DIR}/${PADDED_STAGE}-intel.md"
 git commit -m "$(cat <<'EOF'
 docs(${PADDED_STAGE}): capture stage context
 
@@ -422,12 +422,12 @@ Confirm: "Committed: docs(${PADDED_STAGE}): capture stage context"
 </process>
 
 <success_criteria>
-- Stage validated against roadmap
+- Stage validated against track
 - Gray areas identified through intelligent analysis (not generic questions)
 - User selected which areas to discuss
 - Each selected area explored until user satisfied
 - Scope creep redirected to deferred ideas
-- INTEL.md captures actual decisions, not vague vision
+- intel.md captures actual decisions, not vague vision
 - Deferred ideas preserved for future stages
 - User knows next steps
 </success_criteria>

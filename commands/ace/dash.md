@@ -14,13 +14,13 @@ allowed-tools:
 ---
 
 <objective>
-Execute small, ad-hoc tasks with ACE guarantees (atomic commits, PULSE.md tracking) while skipping optional agents (recon, plan-reviewer, auditor).
+Execute small, ad-hoc tasks with ACE guarantees (atomic commits, pulse.md tracking) while skipping optional agents (recon, plan-reviewer, auditor).
 
 Dash mode is the same system with a shorter path:
 - Spawns ace-architect (quick mode) + ace-runner(s)
 - Skips ace-stage-scout, ace-plan-reviewer, ace-auditor
 - Dash tasks live in `.ace/quick/` separate from planned stages
-- Updates PULSE.md "Quick Tasks Completed" table (NOT TRACK.md)
+- Updates pulse.md "Quick Tasks Completed" table (NOT track.md)
 
 Use when: You know exactly what to do and the task is small enough to not need research or verification.
 </objective>
@@ -30,7 +30,7 @@ Orchestration is inline - no separate workflow file. Dash mode is deliberately s
 </execution_context>
 
 <context>
-@.ace/PULSE.md
+@.ace/pulse.md
 </context>
 
 <process>
@@ -60,8 +60,8 @@ Store resolved models for use in Task calls below.
 Check that an active ACE project exists:
 
 ```bash
-if [ ! -f .ace/TRACK.md ]; then
-  echo "Dash mode requires an active project with TRACK.md."
+if [ ! -f .ace/track.md ]; then
+  echo "Dash mode requires an active project with track.md."
   echo "Run /ace.start first."
   exit 1
 fi
@@ -69,7 +69,7 @@ fi
 
 If validation fails, stop immediately with the error message.
 
-Dash tasks can run mid-stage - validation only checks TRACK.md exists, not stage status.
+Dash tasks can run mid-stage - validation only checks track.md exists, not stage status.
 
 ---
 
@@ -149,7 +149,7 @@ Task(
 **Description:** ${DESCRIPTION}
 
 **Project State:**
-@.ace/PULSE.md
+@.ace/pulse.md
 
 </planning_context>
 
@@ -161,7 +161,7 @@ Task(
 </constraints>
 
 <output>
-Write run to: ${DASH_DIR}/${next_num}-RUN.md
+Write run to: ${DASH_DIR}/${next_num}-run.md
 Return: ## PLANNING COMPLETE with run path
 </output>
 ",
@@ -172,11 +172,11 @@ Return: ## PLANNING COMPLETE with run path
 ```
 
 After architect returns:
-1. Verify run exists at `${DASH_DIR}/${next_num}-RUN.md`
+1. Verify run exists at `${DASH_DIR}/${next_num}-run.md`
 2. Extract run count (typically 1 for dash tasks)
-3. Report: "Run created: ${DASH_DIR}/${next_num}-RUN.md"
+3. Report: "Run created: ${DASH_DIR}/${next_num}-run.md"
 
-If run not found, error: "Architect failed to create ${next_num}-RUN.md"
+If run not found, error: "Architect failed to create ${next_num}-run.md"
 
 ---
 
@@ -189,14 +189,14 @@ Task(
   prompt="
 Execute dash task ${next_num}.
 
-Run: @${DASH_DIR}/${next_num}-RUN.md
-Project state: @.ace/PULSE.md
+Run: @${DASH_DIR}/${next_num}-run.md
+Project state: @.ace/pulse.md
 
 <constraints>
 - Execute all tasks in the run
 - Commit each task atomically
-- Create recap at: ${DASH_DIR}/${next_num}-RECAP.md
-- Do NOT update TRACK.md (dash tasks are separate from planned stages)
+- Create recap at: ${DASH_DIR}/${next_num}-recap.md
+- Do NOT update track.md (dash tasks are separate from planned stages)
 </constraints>
 ",
   subagent_type="ace-runner",
@@ -206,23 +206,23 @@ Project state: @.ace/PULSE.md
 ```
 
 After runner returns:
-1. Verify recap exists at `${DASH_DIR}/${next_num}-RECAP.md`
+1. Verify recap exists at `${DASH_DIR}/${next_num}-recap.md`
 2. Extract commit hash from runner output
 3. Report completion status
 
-If recap not found, error: "Runner failed to create ${next_num}-RECAP.md"
+If recap not found, error: "Runner failed to create ${next_num}-recap.md"
 
 Note: For dash tasks producing multiple runs (rare), spawn runners in parallel batches per run-stage patterns.
 
 ---
 
-**Step 7: Update PULSE.md**
+**Step 7: Update pulse.md**
 
-Update PULSE.md with dash task completion record.
+Update pulse.md with dash task completion record.
 
 **7a. Check if "Quick Tasks Completed" section exists:**
 
-Read PULSE.md and check for `### Quick Tasks Completed` section.
+Read pulse.md and check for `### Quick Tasks Completed` section.
 
 **7b. If section doesn't exist, create it:**
 
@@ -258,9 +258,9 @@ Stage and commit dash task artifacts:
 
 ```bash
 # Stage dash task artifacts
-git add ${DASH_DIR}/${next_num}-RUN.md
-git add ${DASH_DIR}/${next_num}-RECAP.md
-git add .ace/PULSE.md
+git add ${DASH_DIR}/${next_num}-run.md
+git add ${DASH_DIR}/${next_num}-recap.md
+git add .ace/pulse.md
 
 # Commit with dash task format
 git commit -m "$(cat <<'EOF'
@@ -286,7 +286,7 @@ ACE > DASH TASK COMPLETE
 
 Dash Task ${next_num}: ${DESCRIPTION}
 
-Recap: ${DASH_DIR}/${next_num}-RECAP.md
+Recap: ${DASH_DIR}/${next_num}-recap.md
 Commit: ${commit_hash}
 
 ---
@@ -297,13 +297,13 @@ Ready for next task: /ace.dash
 </process>
 
 <success_criteria>
-- [ ] TRACK.md validation passes
+- [ ] track.md validation passes
 - [ ] User provides task description
 - [ ] Slug generated (lowercase, hyphens, max 40 chars)
 - [ ] Next number calculated (001, 002, 003...)
 - [ ] Directory created at `.ace/quick/NNN-slug/`
-- [ ] `${next_num}-RUN.md` created by architect
-- [ ] `${next_num}-RECAP.md` created by runner
-- [ ] PULSE.md updated with dash task row
+- [ ] `${next_num}-run.md` created by architect
+- [ ] `${next_num}-recap.md` created by runner
+- [ ] pulse.md updated with dash task row
 - [ ] Artifacts committed
 </success_criteria>

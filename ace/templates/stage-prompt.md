@@ -1,11 +1,11 @@
 # Stage Prompt Template
 
 > **Note:** Planning methodology is in `agents/ace-architect.md`.
-> This template defines the RUN.md output format that the agent produces.
+> This template defines the run.md output format that the agent produces.
 
-Template for `.ace/stages/XX-name/{stage}-{run}-RUN.md` - executable stage runs optimized for parallel execution.
+Template for `.ace/stages/XX-name/{stage}-{run}-run.md` - executable stage runs optimized for parallel execution.
 
-**Naming:** Use `{stage}-{run}-RUN.md` format (e.g., `01-02-RUN.md` for Stage 1, Run 2)
+**Naming:** Use `{stage}-{run}-run.md` format (e.g., `01-02-run.md` for Stage 1, Run 2)
 
 ---
 
@@ -44,9 +44,9 @@ Output: [What artifacts will be created]
 </execution_context>
 
 <context>
-@.ace/BRIEF.md
-@.ace/TRACK.md
-@.ace/PULSE.md
+@.ace/brief.md
+@.ace/track.md
+@.ace/pulse.md
 
 # Only reference prior run RECAPs if genuinely needed:
 # - This run uses types/exports from prior run
@@ -112,7 +112,7 @@ Before declaring run complete:
   </success_criteria>
 
 <output>
-After completion, create `.ace/stages/XX-name/{stage}-{run}-RECAP.md`
+After completion, create `.ace/stages/XX-name/{stage}-{run}-recap.md`
 </output>
 ```
 
@@ -206,9 +206,9 @@ Batch 3 runs after Batches 1 and 2. Pauses at gate, orchestrator presents to use
 
 ```markdown
 <context>
-@.ace/BRIEF.md
-@.ace/TRACK.md
-@.ace/PULSE.md
+@.ace/brief.md
+@.ace/track.md
+@.ace/pulse.md
 
 # Only include RECAP refs if genuinely needed:
 # - This run imports types from prior run
@@ -225,8 +225,8 @@ Batch 3 runs after Batches 1 and 2. Pauses at gate, orchestrator presents to use
 **Bad pattern (creates false dependencies):**
 ```markdown
 <context>
-@.ace/stages/03-features/03-01-RECAP.md  # Just because it's earlier
-@.ace/stages/03-features/03-02-RECAP.md  # Reflexive chaining
+@.ace/stages/03-features/03-01-recap.md  # Just because it's earlier
+@.ace/stages/03-features/03-02-recap.md  # Reflexive chaining
 </context>
 ```
 
@@ -313,9 +313,9 @@ Output: User model, API endpoints, and UI components.
 </objective>
 
 <context>
-@.ace/BRIEF.md
-@.ace/TRACK.md
-@.ace/PULSE.md
+@.ace/brief.md
+@.ace/track.md
+@.ace/pulse.md
 </context>
 
 <tasks>
@@ -347,7 +347,7 @@ Output: User model, API endpoints, and UI components.
 </success_criteria>
 
 <output>
-After completion, create `.ace/stages/03-features/03-01-RECAP.md`
+After completion, create `.ace/stages/03-features/03-01-recap.md`
 </output>
 ```
 
@@ -378,10 +378,10 @@ Output: Working dashboard component.
 </execution_context>
 
 <context>
-@.ace/BRIEF.md
-@.ace/TRACK.md
-@.ace/stages/03-features/03-01-RECAP.md
-@.ace/stages/03-features/03-02-RECAP.md
+@.ace/brief.md
+@.ace/track.md
+@.ace/stages/03-features/03-01-recap.md
+@.ace/stages/03-features/03-02-recap.md
 </context>
 
 <tasks>
@@ -418,7 +418,7 @@ Output: Working dashboard component.
 </success_criteria>
 
 <output>
-After completion, create `.ace/stages/03-features/03-03-RECAP.md`
+After completion, create `.ace/stages/03-features/03-03-recap.md`
 </output>
 ```
 
@@ -558,7 +558,7 @@ Task completion ≠ Goal achievement. A task "create chat component" can complet
 **Verification flow:**
 
 1. Plan-stage derives must_haves from stage goal (goal-backward)
-2. Must_haves written to RUN.md frontmatter
+2. Must_haves written to run.md frontmatter
 3. Run-stage runs all runs
 4. Verification subagent checks must_haves against codebase
 5. Gaps found → fix runs created → execute → re-verify

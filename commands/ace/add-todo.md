@@ -16,7 +16,7 @@ Enables "thought → capture → continue" flow without losing context or derail
 </objective>
 
 <context>
-@.ace/PULSE.md
+@.ace/pulse.md
 </context>
 
 <process>
@@ -117,7 +117,7 @@ files:
 </step>
 
 <step name="update_state">
-If `.ace/PULSE.md` exists:
+If `.ace/pulse.md` exists:
 
 1. Count todos: `ls .ace/todos/pending/*.md 2>/dev/null | wc -l`
 2. Update "### Pending Todos" under "## Accumulated Context"
@@ -139,7 +139,7 @@ git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
 
 ```bash
 git add .ace/todos/pending/[filename]
-[ -f .ace/PULSE.md ] && git add .ace/PULSE.md
+[ -f .ace/pulse.md ] && git add .ace/pulse.md
 git commit -m "$(cat <<'EOF'
 docs: capture todo - [title]
 
@@ -173,7 +173,7 @@ Would you like to:
 
 <output>
 - `.ace/todos/pending/[date]-[slug].md`
-- Updated `.ace/PULSE.md` (if exists)
+- Updated `.ace/pulse.md` (if exists)
 </output>
 
 <anti_patterns>
@@ -188,6 +188,6 @@ Would you like to:
 - [ ] Problem section has enough context for future Claude
 - [ ] No duplicates (checked and resolved)
 - [ ] Area consistent with existing todos
-- [ ] PULSE.md updated if exists
+- [ ] pulse.md updated if exists
 - [ ] Todo and state committed to git
 </success_criteria>

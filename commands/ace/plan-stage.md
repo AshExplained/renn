@@ -1,6 +1,6 @@
 ---
 name: ace.plan-stage
-description: Create detailed execution run for a stage (RUN.md) with verification loop
+description: Create detailed execution run for a stage (run.md) with verification loop
 argument-hint: "[stage] [--recon] [--skip-recon] [--gaps] [--skip-verify]"
 agent: ace-architect
 allowed-tools:
@@ -19,7 +19,7 @@ allowed-tools:
 </execution_context>
 
 <objective>
-Create executable stage prompts (RUN.md files) for a roadmap stage with integrated recon and verification.
+Create executable stage prompts (run.md files) for a track stage with integrated recon and verification.
 
 **Default flow:** Recon (if needed) → Plan → Verify → Done
 
@@ -32,9 +32,9 @@ Create executable stage prompts (RUN.md files) for a roadmap stage with integrat
 Stage number: $ARGUMENTS (optional - auto-detects next unplanned stage if not provided)
 
 **Flags:**
-- `--recon` — Force re-recon even if RECON.md exists
+- `--recon` — Force re-recon even if recon.md exists
 - `--skip-recon` — Skip recon entirely, go straight to planning
-- `--gaps` — Gap closure mode (reads PROOF.md, skips recon)
+- `--gaps` — Gap closure mode (reads proof.md, skips recon)
 - `--skip-verify` — Skip architect → reviewer verification loop
 
 Normalize stage input in step 2 before any directory lookups.
@@ -78,7 +78,7 @@ Extract from $ARGUMENTS:
 - `--gaps` flag for gap closure mode
 - `--skip-verify` flag to bypass verification loop
 
-**If no stage number:** Detect next unplanned stage from roadmap.
+**If no stage number:** Detect next unplanned stage from track.
 
 **Normalize stage to zero-padded format:**
 
@@ -94,32 +94,32 @@ fi
 **Check for existing recon and runs:**
 
 ```bash
-ls .ace/stages/${STAGE}-*/*-RECON.md 2>/dev/null
-ls .ace/stages/${STAGE}-*/*-RUN.md 2>/dev/null
+ls .ace/stages/${STAGE}-*/*-recon.md 2>/dev/null
+ls .ace/stages/${STAGE}-*/*-run.md 2>/dev/null
 ```
 
 ## 3. Validate Stage
 
 ```bash
-grep -A5 "Stage ${STAGE}:" .ace/TRACK.md 2>/dev/null
+grep -A5 "Stage ${STAGE}:" .ace/track.md 2>/dev/null
 ```
 
 **If not found:** Error with available stages. **If found:** Extract stage number, name, description.
 
-## 4. Ensure Stage Directory Exists and Load INTEL.md
+## 4. Ensure Stage Directory Exists and Load intel.md
 
 ```bash
 # STAGE is already normalized (08, 02.1, etc.) from step 2
 STAGE_DIR=$(ls -d .ace/stages/${STAGE}-* 2>/dev/null | head -1)
 if [ -z "$STAGE_DIR" ]; then
-  # Create stage directory from roadmap name
-  STAGE_NAME=$(grep "Stage ${STAGE}:" .ace/TRACK.md | sed 's/.*Stage [0-9]*: //' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+  # Create stage directory from track name
+  STAGE_NAME=$(grep "Stage ${STAGE}:" .ace/track.md | sed 's/.*Stage [0-9]*: //' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
   mkdir -p ".ace/stages/${STAGE}-${STAGE_NAME}"
   STAGE_DIR=".ace/stages/${STAGE}-${STAGE_NAME}"
 fi
 
-# Load INTEL.md immediately - this informs ALL downstream agents
-INTEL_CONTENT=$(cat "${STAGE_DIR}"/*-INTEL.md 2>/dev/null)
+# Load intel.md immediately - this informs ALL downstream agents
+INTEL_CONTENT=$(cat "${STAGE_DIR}"/*-intel.md 2>/dev/null)
 ```
 
 **CRITICAL:** Store `INTEL_CONTENT` now. It must be passed to:
@@ -128,11 +128,11 @@ INTEL_CONTENT=$(cat "${STAGE_DIR}"/*-INTEL.md 2>/dev/null)
 - **Reviewer** — verifies runs respect user's stated vision
 - **Revision** — context for targeted fixes
 
-If INTEL.md exists, display: `Using stage context from: ${STAGE_DIR}/*-INTEL.md`
+If intel.md exists, display: `Using stage context from: ${STAGE_DIR}/*-intel.md`
 
 ## 5. Handle Recon
 
-**If `--gaps` flag:** Skip recon (gap closure uses PROOF.md instead).
+**If `--gaps` flag:** Skip recon (gap closure uses proof.md instead).
 
 **If `--skip-recon` flag:** Skip to step 6.
 
@@ -149,14 +149,14 @@ WORKFLOW_RECON=$(cat .ace/config.json 2>/dev/null | grep -o '"recon"[[:space:]]*
 Check for existing recon:
 
 ```bash
-ls "${STAGE_DIR}"/*-RECON.md 2>/dev/null
+ls "${STAGE_DIR}"/*-recon.md 2>/dev/null
 ```
 
-**If RECON.md exists AND `--recon` flag NOT set:**
-- Display: `Using existing recon: ${STAGE_DIR}/${STAGE}-RECON.md`
+**If recon.md exists AND `--recon` flag NOT set:**
+- Display: `Using existing recon: ${STAGE_DIR}/${STAGE}-recon.md`
 - Skip to step 6
 
-**If RECON.md missing OR `--recon` flag set:**
+**If recon.md missing OR `--recon` flag set:**
 
 Display stage banner:
 ```
@@ -174,14 +174,14 @@ Proceed to spawn scout
 Gather additional context for recon prompt:
 
 ```bash
-# Get stage description from roadmap
-STAGE_DESC=$(grep -A3 "Stage ${STAGE}:" .ace/TRACK.md)
+# Get stage description from track
+STAGE_DESC=$(grep -A3 "Stage ${STAGE}:" .ace/track.md)
 
 # Get specs if they exist
-SPECS=$(cat .ace/SPECS.md 2>/dev/null | grep -A100 "## Requirements" | head -50)
+SPECS=$(cat .ace/specs.md 2>/dev/null | grep -A100 "## Requirements" | head -50)
 
-# Get prior decisions from PULSE.md
-DECISIONS=$(grep -A20 "### Decisions Made" .ace/PULSE.md 2>/dev/null)
+# Get prior decisions from pulse.md
+DECISIONS=$(grep -A20 "### Decisions Made" .ace/pulse.md 2>/dev/null)
 
 # INTEL_CONTENT already loaded in step 4
 ```
@@ -196,7 +196,7 @@ Answer: "What do I need to know to PLAN this stage well?"
 </objective>
 
 <stage_context>
-**IMPORTANT:** If INTEL.md exists below, it contains user decisions from /ace.discuss-stage.
+**IMPORTANT:** If intel.md exists below, it contains user decisions from /ace.discuss-stage.
 
 - **Decisions section** = Locked choices — recon THESE deeply, don't explore alternatives
 - **Claude's Discretion section** = Your freedom areas — recon options, make recommendations
@@ -212,12 +212,12 @@ Answer: "What do I need to know to PLAN this stage well?"
 **Specs (if any):**
 {specs}
 
-**Prior decisions from PULSE.md:**
+**Prior decisions from pulse.md:**
 {decisions}
 </additional_context>
 
 <output>
-Write recon findings to: {stage_dir}/{stage}-RECON.md
+Write recon findings to: {stage_dir}/{stage}-recon.md
 </output>
 ```
 
@@ -244,7 +244,7 @@ Task(
 ## 6. Check Existing Runs
 
 ```bash
-ls "${STAGE_DIR}"/*-RUN.md 2>/dev/null
+ls "${STAGE_DIR}"/*-run.md 2>/dev/null
 ```
 
 **If exists:** Offer: 1) Continue planning (add more runs), 2) View existing, 3) Replan from scratch. Wait for response.
@@ -255,17 +255,17 @@ Read and store context file contents for the architect agent. The `@` syntax doe
 
 ```bash
 # Read required files
-PULSE_CONTENT=$(cat .ace/PULSE.md)
-TRACK_CONTENT=$(cat .ace/TRACK.md)
+PULSE_CONTENT=$(cat .ace/pulse.md)
+TRACK_CONTENT=$(cat .ace/track.md)
 
 # Read optional files (empty string if missing)
-SPECS_CONTENT=$(cat .ace/SPECS.md 2>/dev/null)
+SPECS_CONTENT=$(cat .ace/specs.md 2>/dev/null)
 # INTEL_CONTENT already loaded in step 4
-RECON_CONTENT=$(cat "${STAGE_DIR}"/*-RECON.md 2>/dev/null)
+RECON_CONTENT=$(cat "${STAGE_DIR}"/*-recon.md 2>/dev/null)
 
 # Gap closure files (only if --gaps mode)
-PROOF_CONTENT=$(cat "${STAGE_DIR}"/*-PROOF.md 2>/dev/null)
-UAT_CONTENT=$(cat "${STAGE_DIR}"/*-UAT.md 2>/dev/null)
+PROOF_CONTENT=$(cat "${STAGE_DIR}"/*-proof.md 2>/dev/null)
+UAT_CONTENT=$(cat "${STAGE_DIR}"/*-uat.md 2>/dev/null)
 ```
 
 ## 8. Spawn ace-architect Agent
@@ -327,7 +327,7 @@ Runs must be executable prompts with:
 <quality_gate>
 Before returning ARCHITECTING COMPLETE:
 
-- [ ] RUN.md files created in stage directory
+- [ ] run.md files created in stage directory
 - [ ] Each run has valid frontmatter
 - [ ] Tasks are specific and actionable
 - [ ] Dependencies correctly identified
@@ -379,7 +379,7 @@ Read runs for the reviewer:
 
 ```bash
 # Read all runs in stage directory
-RUNS_CONTENT=$(cat "${STAGE_DIR}"/*-RUN.md 2>/dev/null)
+RUNS_CONTENT=$(cat "${STAGE_DIR}"/*-run.md 2>/dev/null)
 
 # INTEL_CONTENT already loaded in step 4
 # SPECS_CONTENT already loaded in step 7
@@ -451,7 +451,7 @@ Display: `Sending back to architect for revision... (iteration {N}/3)`
 Read current runs for revision context:
 
 ```bash
-RUNS_CONTENT=$(cat "${STAGE_DIR}"/*-RUN.md 2>/dev/null)
+RUNS_CONTENT=$(cat "${STAGE_DIR}"/*-run.md 2>/dev/null)
 # INTEL_CONTENT already loaded in step 4
 ```
 
@@ -545,7 +545,7 @@ Verification: {Passed | Passed with override | Skipped}
 ───────────────────────────────────────────────────────────────
 
 **Also available:**
-- cat .ace/stages/{stage-dir}/*-RUN.md — review runs
+- cat .ace/stages/{stage-dir}/*-run.md — review runs
 - /ace.plan-stage {X} --recon — re-recon first
 
 ───────────────────────────────────────────────────────────────
@@ -553,15 +553,15 @@ Verification: {Passed | Passed with override | Skipped}
 
 <success_criteria>
 - [ ] .ace/ directory validated
-- [ ] Stage validated against roadmap
+- [ ] Stage validated against track
 - [ ] Stage directory created if needed
-- [ ] INTEL.md loaded early (step 4) and passed to ALL agents
+- [ ] intel.md loaded early (step 4) and passed to ALL agents
 - [ ] Recon completed (unless --skip-recon or --gaps or exists)
-- [ ] ace-stage-scout spawned with INTEL.md (constrains recon scope)
+- [ ] ace-stage-scout spawned with intel.md (constrains recon scope)
 - [ ] Existing runs checked
-- [ ] ace-architect spawned with context (INTEL.md + RECON.md)
+- [ ] ace-architect spawned with context (intel.md + recon.md)
 - [ ] Runs created (ARCHITECTING COMPLETE or GATE handled)
-- [ ] ace-plan-reviewer spawned with INTEL.md (verifies intel compliance)
+- [ ] ace-plan-reviewer spawned with intel.md (verifies intel compliance)
 - [ ] Verification passed OR user override OR max iterations with user decision
 - [ ] User sees status between agent spawns
 - [ ] User knows next steps (execute or review)

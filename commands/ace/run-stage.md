@@ -33,8 +33,8 @@ Stage: $ARGUMENTS
 **Flags:**
 - `--gaps-only` — Execute only gap closure runs (runs with `gap_closure: true` in frontmatter). Use after audit creates fix runs.
 
-@.ace/TRACK.md
-@.ace/PULSE.md
+@.ace/track.md
+@.ace/pulse.md
 </context>
 
 <process>
@@ -58,12 +58,12 @@ Stage: $ARGUMENTS
 
 1. **Validate stage exists**
    - Find stage directory matching argument
-   - Count RUN.md files
+   - Count run.md files
    - Error if no runs found
 
 2. **Discover runs**
-   - List all *-RUN.md files in stage directory
-   - Check which have *-RECAP.md (already complete)
+   - List all *-run.md files in stage directory
+   - Check which have *-recap.md (already complete)
    - If `--gaps-only`: filter to only runs with `gap_closure: true`
    - Build list of incomplete runs
 
@@ -108,29 +108,29 @@ Stage: $ARGUMENTS
    **Otherwise:**
    - Spawn `ace-auditor` subagent with stage directory and goal
    - Auditor checks must_haves against actual codebase (not RECAP claims)
-   - Creates PROOF.md with detailed report
+   - Creates proof.md with detailed report
    - Route by status:
      - `passed` → continue to step 8
      - `human_needed` → present items, get approval or feedback
      - `gaps_found` → present gaps, offer `/ace.plan-stage {X} --gaps`
 
 8. **Update track and pulse**
-   - Update TRACK.md, PULSE.md
+   - Update track.md, pulse.md
 
 9. **Update specs**
    Mark stage requirements as Complete:
-   - Read TRACK.md, find this stage's `Requirements:` line (e.g., "AUTH-01, AUTH-02")
-   - Read SPECS.md traceability table
+   - Read track.md, find this stage's `Requirements:` line (e.g., "AUTH-01, AUTH-02")
+   - Read specs.md traceability table
    - For each REQ-ID in this stage: change Status from "Pending" to "Complete"
-   - Write updated SPECS.md
-   - Skip if: SPECS.md doesn't exist, or stage has no Requirements line
+   - Write updated specs.md
+   - Skip if: specs.md doesn't exist, or stage has no Requirements line
 
 10. **Commit stage completion**
     Check `COMMIT_PLANNING_DOCS` from config.json (default: true).
     If false: Skip git operations for .ace/ files.
     If true: Bundle all stage metadata updates in one commit:
-    - Stage: `git add .ace/TRACK.md .ace/PULSE.md`
-    - Stage SPECS.md if updated: `git add .ace/SPECS.md`
+    - Stage: `git add .ace/track.md .ace/pulse.md`
+    - Stage specs.md if updated: `git add .ace/specs.md`
     - Commit: `docs({stage}): complete {stage-name} stage`
 
 11. **Offer next steps**
@@ -164,7 +164,7 @@ Goal verified ✓
 
 ## ▶ Next Up
 
-**Stage {Z+1}: {Name}** — {Goal from TRACK.md}
+**Stage {Z+1}: {Name}** — {Goal from track.md}
 
 /ace.discuss-stage {Z+1} — gather context and clarify approach
 
@@ -220,11 +220,11 @@ All stage goals verified ✓
 **Stage {Z}: {Name}**
 
 Score: {N}/{M} must-haves verified
-Report: .ace/stages/{stage_dir}/{stage}-PROOF.md
+Report: .ace/stages/{stage_dir}/{stage}-proof.md
 
 ### What's Missing
 
-{Extract gap summaries from PROOF.md}
+{Extract gap summaries from proof.md}
 
 ───────────────────────────────────────────────────────────────
 
@@ -239,7 +239,7 @@ Report: .ace/stages/{stage_dir}/{stage}-PROOF.md
 ───────────────────────────────────────────────────────────────
 
 **Also available:**
-- cat .ace/stages/{stage_dir}/{stage}-PROOF.md — see full report
+- cat .ace/stages/{stage_dir}/{stage}-proof.md — see full report
 - /ace.audit {Z} — manual testing before planning
 
 ───────────────────────────────────────────────────────────────
@@ -247,7 +247,7 @@ Report: .ace/stages/{stage_dir}/{stage}-PROOF.md
 ---
 
 After user runs /ace.plan-stage {Z} --gaps:
-1. Architect reads PROOF.md gaps
+1. Architect reads proof.md gaps
 2. Creates runs 04, 05, etc. to close gaps
 3. User runs /ace.run-stage {Z} again
 4. Run-stage runs incomplete runs (04, 05...)
@@ -260,11 +260,11 @@ After user runs /ace.plan-stage {Z} --gaps:
 Before spawning, read file contents. The `@` syntax does not work across Task() boundaries.
 
 ```bash
-# Read each run and PULSE.md
+# Read each run and pulse.md
 RUN_01_CONTENT=$(cat "{run_01_path}")
 RUN_02_CONTENT=$(cat "{run_02_path}")
 RUN_03_CONTENT=$(cat "{run_03_path}")
-PULSE_CONTENT=$(cat .ace/PULSE.md)
+PULSE_CONTENT=$(cat .ace/pulse.md)
 ```
 
 Spawn all runs in a batch with a single message containing multiple Task calls, with inlined content:
@@ -286,7 +286,7 @@ Runs with `autonomous: false` have gates. The run-stage.md workflow handles the 
 - Orchestrator presents to user, collects response
 - Spawns fresh continuation agent (not resume)
 
-See `@~/.claude/ace/workflows/run-stage.md` step `checkpoint_handling` for complete details.
+See `@~/.claude/ace/workflows/run-stage.md` step `gate_handling` for complete details.
 </gate_handling>
 
 <drift_rules>
@@ -307,19 +307,19 @@ After each task completes:
 1. Stage only files modified by that task
 2. Commit with format: `{type}({stage}.{run}): {task-name}`
 3. Types: feat, fix, test, refactor, perf, chore
-4. Record commit hash for RECAP.md
+4. Record commit hash for recap.md
 
 **Run Metadata Commit:**
 
 After all tasks in a run complete:
-1. Stage run artifacts only: RUN.md, RECAP.md
+1. Stage run artifacts only: run.md, recap.md
 2. Commit with format: `docs({stage}.{run}): complete [run-name] run`
 3. NO code files (already committed per-task)
 
 **Stage Completion Commit:**
 
 After all runs in stage complete (step 7):
-1. Stage: TRACK.md, PULSE.md, SPECS.md (if updated), PROOF.md
+1. Stage: track.md, pulse.md, specs.md (if updated), proof.md
 2. Commit with format: `docs({stage}): complete {stage-name} stage`
 3. Bundles all stage-level state updates in one commit
 
@@ -333,11 +333,11 @@ After all runs in stage complete (step 7):
 
 <success_criteria>
 - [ ] All incomplete runs in stage executed
-- [ ] Each run has RECAP.md
+- [ ] Each run has recap.md
 - [ ] Stage goal verified (must_haves checked against codebase)
-- [ ] PROOF.md created in stage directory
-- [ ] PULSE.md reflects stage completion
-- [ ] TRACK.md updated
-- [ ] SPECS.md updated (stage requirements marked Complete)
+- [ ] proof.md created in stage directory
+- [ ] pulse.md reflects stage completion
+- [ ] track.md updated
+- [ ] specs.md updated (stage requirements marked Complete)
 - [ ] User informed of next steps
 </success_criteria>

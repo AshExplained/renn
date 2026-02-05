@@ -13,7 +13,7 @@ allowed-tools:
 <objective>
 Create all stages necessary to close gaps identified by `/ace.audit-milestone`.
 
-Reads MILESTONE-AUDIT.md, groups gaps into logical stages, creates stage entries in TRACK.md, and offers to plan each stage.
+Reads MILESTONE-AUDIT.md, groups gaps into logical stages, creates stage entries in track.md, and offers to plan each stage.
 
 One command creates all fix stages — no manual `/ace.add-stage` per gap.
 </objective>
@@ -27,12 +27,12 @@ One command creates all fix stages — no manual `/ace.add-stage` per gap.
 Glob: .ace/v*-MILESTONE-AUDIT.md (use most recent)
 
 **Original intent (for prioritization):**
-@.ace/BRIEF.md
-@.ace/SPECS.md
+@.ace/brief.md
+@.ace/specs.md
 
 **Current state:**
-@.ace/TRACK.md
-@.ace/PULSE.md
+@.ace/track.md
+@.ace/pulse.md
 </context>
 
 <process>
@@ -56,7 +56,7 @@ No audit gaps found. Run `/ace.audit-milestone` first.
 
 ## 2. Prioritize Gaps
 
-Group gaps by priority from SPECS.md:
+Group gaps by priority from specs.md:
 
 | Priority | Action |
 |----------|--------|
@@ -136,7 +136,7 @@ Create these {X} stages? (yes / adjust / defer all optional)
 
 Wait for user confirmation.
 
-## 6. Update TRACK.md
+## 6. Update track.md
 
 Add new stages to current milestone:
 
@@ -170,7 +170,7 @@ git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
 **If `COMMIT_PLANNING_DOCS=true` (default):**
 
 ```bash
-git add .ace/TRACK.md
+git add .ace/track.md
 git commit -m "docs(track): add gap closure stages {N}-{M}"
 ```
 
@@ -196,7 +196,7 @@ git commit -m "docs(track): add gap closure stages {N}-{M}"
 
 **Also available:**
 - /ace.run-stage {N} — if runs already exist
-- cat .ace/TRACK.md — see updated track
+- cat .ace/track.md — see updated track
 
 ───────────────────────────────────────────────────────────────
 
@@ -288,7 +288,7 @@ becomes:
 - [ ] Gaps prioritized (must/should/nice)
 - [ ] Gaps grouped into logical stages
 - [ ] User confirmed stage plan
-- [ ] TRACK.md updated with new stages
+- [ ] track.md updated with new stages
 - [ ] Stage directories created
 - [ ] Changes committed
 - [ ] User knows to run `/ace.plan-stage` next

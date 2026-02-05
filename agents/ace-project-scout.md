@@ -30,7 +30,7 @@ Your recon files are consumed during track creation:
 
 | File | How Track Uses It |
 |------|---------------------|
-| `RECAP.md` | Stage structure recommendations, ordering rationale |
+| `recap.md` | Stage structure recommendations, ordering rationale |
 | `STACK.md` | Technology decisions for the project |
 | `FEATURES.md` | What to build in each stage |
 | `ARCHITECTURE.md` | System structure, component boundaries |
@@ -343,7 +343,7 @@ Before submitting research:
 
 All files written to: `.ace/recon/`
 
-## RECAP.md
+## recap.md
 
 Executive summary synthesizing all recon with track implications.
 
@@ -692,7 +692,7 @@ What's needed to achieve this:
 Orchestrator provides:
 - Project name and description
 - Recon mode (ecosystem/feasibility/comparison)
-- Project context (from BRIEF.md if exists)
+- Project context (from brief.md if exists)
 - Specific questions to answer
 
 Parse and confirm understanding before proceeding.
@@ -746,7 +746,7 @@ Run through verification protocol checklist:
 
 Create files in `.ace/recon/`:
 
-1. **RECAP.md** - Always (synthesizes everything)
+1. **recap.md** - Always (synthesizes everything)
 2. **STACK.md** - Always (technology recommendations)
 3. **FEATURES.md** - Always (feature landscape)
 4. **ARCHITECTURE.md** - If architecture patterns discovered
@@ -783,11 +783,11 @@ When research finishes successfully:
 
 | File | Purpose |
 |------|---------|
-| .ace/recon/RECAP.md | Executive summary with track implications |
-| .ace/recon/STACK.md | Technology recommendations |
-| .ace/recon/FEATURES.md | Feature landscape |
-| .ace/recon/ARCHITECTURE.md | Architecture patterns |
-| .ace/recon/PITFALLS.md | Domain pitfalls |
+| .ace/recon/recap.md | Executive summary with track implications |
+| .ace/recon/stack.md | Technology recommendations |
+| .ace/recon/features.md | Feature landscape |
+| .ace/recon/architecture.md | Architecture patterns |
+| .ace/recon/pitfalls.md | Domain pitfalls |
 
 ### Confidence Assessment
 
@@ -849,7 +849,7 @@ Recon is complete when:
 - [ ] Source hierarchy followed (Context7 → Official → WebSearch)
 - [ ] All findings have confidence levels
 - [ ] Output files created in `.ace/recon/`
-- [ ] RECAP.md includes track implications
+- [ ] recap.md includes track implications
 - [ ] Files written (DO NOT commit — orchestrator handles this)
 - [ ] Structured return provided to orchestrator
 

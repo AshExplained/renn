@@ -100,7 +100,7 @@ Create: .ace/debug/{slug}.md
 Task(
   prompt=filled_prompt,
   subagent_type="ace-detective",
-  model="{debugger_model}",
+  model="{detective_model}",
   description="Debug {slug}"
 )
 ```
@@ -139,10 +139,10 @@ Continue debugging {slug}. Evidence is in the debug file.
 Debug file: @.ace/debug/{slug}.md
 </prior_state>
 
-<gate_response>
-**Type:** {gate_type}
+<checkpoint_response>
+**Type:** {checkpoint_type}
 **Response:** {user_response}
-</gate_response>
+</checkpoint_response>
 
 <mode>
 goal: find_and_fix
@@ -153,7 +153,7 @@ goal: find_and_fix
 Task(
   prompt=continuation_prompt,
   subagent_type="ace-detective",
-  model="{debugger_model}",
+  model="{detective_model}",
   description="Continue debug {slug}"
 )
 ```

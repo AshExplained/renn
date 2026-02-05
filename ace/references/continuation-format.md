@@ -27,7 +27,7 @@ Standard format for presenting next steps after completing a command or workflow
 ## Format Rules
 
 1. **Always show what it is** — name + description, never just a command path
-2. **Pull context from source** — TRACK.md for stages, RUN.md `<objective>` for runs
+2. **Pull context from source** — track.md for stages, run.md `<objective>` for runs
 3. **Command in inline code** — backticks, easy to copy-paste, renders as clickable link
 4. **`/clear` explanation** — always include, keeps it concise but explains why
 5. **"Also available" not "Other options"** — sounds more app-like
@@ -178,7 +178,7 @@ All 4 stages shipped
 
 ## Pulling Context
 
-### For stages (from TRACK.md):
+### For stages (from track.md):
 
 ```markdown
 ### Stage 2: Authentication
@@ -187,14 +187,14 @@ All 4 stages shipped
 
 Extract: `**Stage 2: Authentication** — JWT login flow with refresh tokens`
 
-### For runs (from TRACK.md):
+### For runs (from track.md):
 
 ```markdown
 Runs:
 - [ ] 02.03: Add refresh token rotation
 ```
 
-Or from RUN.md `<objective>`:
+Or from run.md `<objective>`:
 
 ```xml
 <objective>

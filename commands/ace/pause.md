@@ -14,7 +14,7 @@ Enables seamless resumption in fresh session with full context restoration.
 </objective>
 
 <context>
-@.ace/PULSE.md
+@.ace/pulse.md
 </context>
 
 <process>

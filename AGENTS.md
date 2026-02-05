@@ -46,8 +46,8 @@ What this does, why it matters, context budget (~15% orchestrator).
 <context>
 $ARGUMENTS
 
-@.ace/PULSE.md
-@.ace/TRACK.md
+@.ace/pulse.md
+@.ace/track.md
 </context>
 
 <process>
@@ -93,7 +93,7 @@ Your job: [success definition].
 Before any operation, read project state:
 
 ```bash
-cat .ace/PULSE.md 2>/dev/null
+cat .ace/pulse.md 2>/dev/null
 ```
 
 Parse: current position, decisions, blockers.
@@ -104,7 +104,7 @@ Do the actual work here.
 </step>
 
 <step name="create_output">
-Create RECAP.md or return structured result.
+Create recap.md or return structured result.
 </step>
 
 </execution_flow>
@@ -281,12 +281,12 @@ Build authentication
 ### Static (always load)
 ```markdown
 @~/.claude/ace/workflows/run-stage.md
-@.ace/PULSE.md
+@.ace/pulse.md
 ```
 
 ### Conditional (if exists)
 ```markdown
-@.ace/RECON.md (if exists)
+@.ace/recon.md (if exists)
 ```
 
 ### Path rule
@@ -300,18 +300,18 @@ Always use `~/.claude/` in source files. Installer transforms paths during copy:
 
 | File | Purpose | Updated By |
 |------|---------|------------|
-| `PULSE.md` | Living memory across sessions | Runner, orchestrator, commands |
-| `TRACK.md` | Stage structure | Navigator, stage commands |
-| `BRIEF.md` | Project context | Init, rarely after |
-| `SPECS.md` | Requirement traceability | Architect, auditor |
+| `pulse.md` | Living memory across sessions | Runner, orchestrator, commands |
+| `track.md` | Stage structure | Navigator, stage commands |
+| `brief.md` | Project context | Init, rarely after |
+| `specs.md` | Requirement traceability | Architect, auditor |
 | `config.json` | Workflow preferences | Init, settings command |
 
-### PULSE.md is double-loaded intentionally
+### pulse.md is double-loaded intentionally
 
 - **Orchestrator inlines:** Fallback if disk fails
 - **Runner reads disk:** Gets fresh state from other writers
 
-Multiple actors write PULSE.md → readers need fresh data.
+Multiple actors write pulse.md → readers need fresh data.
 
 ---
 
@@ -354,7 +354,7 @@ git add src/   # FORBIDDEN
 | Agents | `ace-kebab` | `ace-runner` |
 | Step names | snake_case | `name="load_state"` |
 | Bash vars | CAPS_SNAKE | `STAGE_ARG` |
-| State files | UPPERCASE | `PULSE.md` |
+| State files | UPPERCASE | `pulse.md` |
 | Stage dirs | `NN-kebab` | `01-authentication` |
 
 ---
@@ -463,7 +463,7 @@ Commands should delegate to workflows, not contain 500+ lines of execution logic
 - [ ] YAML frontmatter with name, description, tools, color
 - [ ] `<role>` defining identity and success
 - [ ] `<execution_flow>` with `<step>` elements
-- [ ] First step reads PULSE.md
+- [ ] First step reads pulse.md
 - [ ] Last step creates output (RECAP or structured return)
 - [ ] `<success_criteria>` checklist
 
@@ -495,7 +495,7 @@ Commands should delegate to workflows, not contain 500+ lines of execution logic
 2. **Commands delegate, workflows execute**
 3. **Runs are prompts, not documents**
 4. **Small runs (2-3 tasks) sidestep context issues**
-5. **PULSE.md is the living memory**
+5. **pulse.md is the living memory**
 6. **Fresh context per agent (200k each)**
 7. **Atomic commits enable recovery**
 8. **No enterprise patterns (solo dev + Claude)**

@@ -95,7 +95,7 @@ Consider starting over when:
 2. Write down what you know for certain
 3. Write down what you've ruled out
 4. List new hypotheses (different from before)
-5. Begin again from Phase 1: Evidence Gathering
+5. Begin again from Step 1: Evidence Gathering
 
 </philosophy>
 
@@ -788,7 +788,7 @@ files_changed: []
 
 | Section | Rule | When |
 |---------|------|------|
-| Frontmatter.status | OVERWRITE | Each phase transition |
+| Frontmatter.status | OVERWRITE | Each step transition |
 | Frontmatter.updated | OVERWRITE | Every file update |
 | Current Focus | OVERWRITE | Before every action |
 | Symptoms | IMMUTABLE | After gathering complete |
@@ -872,7 +872,7 @@ Gather symptoms through questioning. Update file after EACH answer.
 <step name="investigation_loop">
 **Autonomous investigation. Update file continuously.**
 
-**Phase 1: Initial evidence gathering**
+**Step 1: Initial evidence gathering**
 - Update Current Focus with "gathering initial evidence"
 - If errors exist, search codebase for error text
 - Identify relevant code area from symptoms
@@ -880,19 +880,19 @@ Gather symptoms through questioning. Update file after EACH answer.
 - Run app/tests to observe behavior
 - APPEND to Evidence after each finding
 
-**Phase 2: Form hypothesis**
+**Step 2: Form hypothesis**
 - Based on evidence, form SPECIFIC, FALSIFIABLE hypothesis
 - Update Current Focus with hypothesis, test, expecting, next_action
 
-**Phase 3: Test hypothesis**
+**Step 3: Test hypothesis**
 - Execute ONE test at a time
 - Append result to Evidence
 
-**Phase 4: Evaluate**
+**Step 4: Evaluate**
 - **CONFIRMED:** Update Resolution.root_cause
   - If `goal: find_root_cause_only` -> proceed to return_diagnosis
   - Otherwise -> proceed to fix_and_verify
-- **ELIMINATED:** Append to Eliminated section, form new hypothesis, return to Phase 2
+- **ELIMINATED:** Append to Eliminated section, form new hypothesis, return to Step 2
 
 **Context management:** After 5+ evidence entries, ensure Current Focus is updated. Suggest "/clear - run ace.debug to resume" if context is filling up.
 </step>

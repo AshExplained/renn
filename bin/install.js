@@ -11,6 +11,12 @@ const green = '\x1b[32m';
 const yellow = '\x1b[33m';
 const dim = '\x1b[2m';
 const reset = '\x1b[0m';
+const bold = '\x1b[1m';
+
+// TTY / color detection
+const noColor = 'NO_COLOR' in process.env || process.env.TERM === 'dumb' || 'CI' in process.env;
+const useColor = !noColor && !!process.stdout.isTTY;
+const useUnicode = useColor;
 
 // Get version from package.json
 const pkg = require('../package.json');
@@ -77,17 +83,57 @@ function getGlobalDir(runtime, explicitDir = null) {
   return path.join(os.homedir(), '.claude');
 }
 
-const banner = '\n' +
-  cyan + '   █████╗  ██████╗███████╗\n' +
-  '  ██╔══██╗██╔════╝██╔════╝\n' +
-  '  ███████║██║     █████╗\n' +
-  '  ██╔══██║██║     ██╔══╝\n' +
-  '  ██║  ██║╚██████╗███████╗\n' +
-  '  ╚═╝  ╚═╝ ╚═════╝╚══════╝' + reset + '\n' +
-  '\n' +
-  '  Agentic Code Execution ' + dim + 'v' + pkg.version + reset + '\n' +
-  '  A stage-driven, context-engineered agentic code\n' +
-  '  execution system for Claude Code, OpenCode, and Gemini.\n';
+// Gradient banner
+function buildBanner() {
+  const logo = [
+    ' █████╗  ██████╗███████╗',
+    '██╔══██╗██╔════╝██╔════╝',
+    '███████║██║     █████╗  ',
+    '██╔══██║██║     ██╔══╝  ',
+    '██║  ██║╚██████╗███████╗',
+    '╚═╝  ╚═╝ ╚═════╝╚══════╝',
+  ];
+
+  const asciiLogo = [
+    '    _    ____ _____',
+    '   / \\  / ___| ____|',
+    '  / _ \\| |   |  _|',
+    ' / ___ \\ |___| |___',
+    '/_/   \\_\\____|_____|',
+  ];
+
+  // Row-based gradient from bright cyan to deep cyan
+  const gradientColors = [
+    '38;2;0;255;255',   // bright cyan
+    '38;2;0;230;240',
+    '38;2;0;210;225',
+    '38;2;0;190;210',
+    '38;2;0;170;195',
+    '38;2;0;150;180',   // deep cyan
+  ];
+
+  const lines = [];
+  lines.push('');
+
+  if (useUnicode) {
+    logo.forEach((line, i) => {
+      const color = gradientColors[i % gradientColors.length];
+      lines.push(useColor ? `  \x1b[${color}m${line}\x1b[0m` : `  ${line}`);
+    });
+  } else {
+    asciiLogo.forEach(line => lines.push(`  ${line}`));
+  }
+
+  lines.push('');
+  lines.push(`  ${dim}Agentic Code Execution${reset}  ${dim}v${pkg.version}${reset}`);
+  lines.push(`  A stage-driven, context-engineered agentic code`);
+  lines.push(`  execution system for Claude Code, OpenCode, and Gemini.`);
+  lines.push('');
+
+  return lines.join('\n');
+}
+
+const banner = buildBanner();
 
 // Parse --config-dir argument
 function parseConfigDirArg() {

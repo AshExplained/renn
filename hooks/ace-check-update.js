@@ -22,7 +22,11 @@ if (!fs.existsSync(cacheDir)) {
 }
 
 // Run check in background
-const child = spawn(process.execPath, ['-e', `
+const child = spawn(
+  process.execPath,
+  [
+    '-e',
+    `
   const fs = require('fs');
   const { execSync } = require('child_process');
 
@@ -52,9 +56,12 @@ const child = spawn(process.execPath, ['-e', `
   };
 
   fs.writeFileSync(cacheFile, JSON.stringify(result));
-`], {
-  stdio: 'ignore',
-  windowsHide: true
-});
+`,
+  ],
+  {
+    stdio: 'ignore',
+    windowsHide: true,
+  }
+);
 
 child.unref();

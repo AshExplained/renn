@@ -11,7 +11,6 @@ const green = '\x1b[32m';
 const yellow = '\x1b[33m';
 const dim = '\x1b[2m';
 const reset = '\x1b[0m';
-const bold = '\x1b[1m';
 
 // TTY / color detection
 const noColor = 'NO_COLOR' in process.env || process.env.TERM === 'dumb' || 'CI' in process.env;
@@ -104,12 +103,12 @@ function buildBanner() {
 
   // Row-based gradient from bright cyan to deep cyan
   const gradientColors = [
-    '38;2;0;255;255',   // bright cyan
+    '38;2;0;255;255', // bright cyan
     '38;2;0;230;240',
     '38;2;0;210;225',
     '38;2;0;190;210',
     '38;2;0;170;195',
-    '38;2;0;150;180',   // deep cyan
+    '38;2;0;150;180', // deep cyan
   ];
 
   const lines = [];
@@ -121,7 +120,7 @@ function buildBanner() {
       lines.push(useColor ? `  \x1b[${color}m${line}\x1b[0m` : `  ${line}`);
     });
   } else {
-    asciiLogo.forEach(line => lines.push(`  ${line}`));
+    asciiLogo.forEach((line) => lines.push(`  ${line}`));
   }
 
   lines.push('');
@@ -137,7 +136,7 @@ const banner = buildBanner();
 
 // Parse --config-dir argument
 function parseConfigDirArg() {
-  const configDirIndex = args.findIndex(arg => arg === '--config-dir' || arg === '-c');
+  const configDirIndex = args.findIndex((arg) => arg === '--config-dir' || arg === '-c');
   if (configDirIndex !== -1) {
     const nextArg = args[configDirIndex + 1];
     if (!nextArg || nextArg.startsWith('-')) {
@@ -146,7 +145,7 @@ function parseConfigDirArg() {
     }
     return nextArg;
   }
-  const configDirArg = args.find(arg => arg.startsWith('--config-dir=') || arg.startsWith('-c='));
+  const configDirArg = args.find((arg) => arg.startsWith('--config-dir=') || arg.startsWith('-c='));
   if (configDirArg) {
     const value = configDirArg.split('=')[1];
     if (!value) {
@@ -165,7 +164,9 @@ console.log(banner);
 
 // Show help if requested
 if (hasHelp) {
-  console.log(`  ${yellow}Usage:${reset} npx ace-agentic-code-execution [options]\n\n  ${yellow}Options:${reset}\n    ${cyan}-g, --global${reset}              Install globally (to config directory)\n    ${cyan}-l, --local${reset}               Install locally (to current directory)\n    ${cyan}--claude${reset}                  Install for Claude Code only\n    ${cyan}--opencode${reset}                Install for OpenCode only\n    ${cyan}--gemini${reset}                  Install for Gemini only\n    ${cyan}--all${reset}                     Install for all runtimes\n    ${cyan}-u, --uninstall${reset}           Uninstall ACE (remove all ACE files)\n    ${cyan}-c, --config-dir <path>${reset}   Specify custom config directory\n    ${cyan}-h, --help${reset}                Show this help message\n    ${cyan}--force-statusline${reset}        Replace existing statusline config\n\n  ${yellow}Examples:${reset}\n    ${dim}# Interactive install (prompts for runtime and location)${reset}\n    npx ace-agentic-code-execution\n\n    ${dim}# Install for Claude Code globally${reset}\n    npx ace-agentic-code-execution --claude --global\n\n    ${dim}# Install for all runtimes globally${reset}\n    npx ace-agentic-code-execution --all --global\n\n    ${dim}# Install to custom config directory${reset}\n    npx ace-agentic-code-execution --claude --global --config-dir ~/.claude-bc\n\n    ${dim}# Install to current project only${reset}\n    npx ace-agentic-code-execution --claude --local\n\n    ${dim}# Uninstall ACE from Claude Code globally${reset}\n    npx ace-agentic-code-execution --claude --global --uninstall\n`);
+  console.log(
+    `  ${yellow}Usage:${reset} npx ace-agentic-code-execution [options]\n\n  ${yellow}Options:${reset}\n    ${cyan}-g, --global${reset}              Install globally (to config directory)\n    ${cyan}-l, --local${reset}               Install locally (to current directory)\n    ${cyan}--claude${reset}                  Install for Claude Code only\n    ${cyan}--opencode${reset}                Install for OpenCode only\n    ${cyan}--gemini${reset}                  Install for Gemini only\n    ${cyan}--all${reset}                     Install for all runtimes\n    ${cyan}-u, --uninstall${reset}           Uninstall ACE (remove all ACE files)\n    ${cyan}-c, --config-dir <path>${reset}   Specify custom config directory\n    ${cyan}-h, --help${reset}                Show this help message\n    ${cyan}--force-statusline${reset}        Replace existing statusline config\n\n  ${yellow}Examples:${reset}\n    ${dim}# Interactive install (prompts for runtime and location)${reset}\n    npx ace-agentic-code-execution\n\n    ${dim}# Install for Claude Code globally${reset}\n    npx ace-agentic-code-execution --claude --global\n\n    ${dim}# Install for all runtimes globally${reset}\n    npx ace-agentic-code-execution --all --global\n\n    ${dim}# Install to custom config directory${reset}\n    npx ace-agentic-code-execution --claude --global --config-dir ~/.claude-bc\n\n    ${dim}# Install to current project only${reset}\n    npx ace-agentic-code-execution --claude --local\n\n    ${dim}# Uninstall ACE from Claude Code globally${reset}\n    npx ace-agentic-code-execution --claude --global --uninstall\n`
+  );
   process.exit(0);
 }
 
@@ -194,7 +195,7 @@ function readSettings(settingsPath) {
   if (fs.existsSync(settingsPath)) {
     try {
       return JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
-    } catch (e) {
+    } catch (_e) {
       return {};
     }
   }
@@ -225,7 +226,9 @@ function getCommitAttribution(runtime) {
     const config = readSettings(path.join(getGlobalDir('opencode', null), 'opencode.json'));
     result = config.disable_ai_attribution === true ? null : undefined;
   } else if (runtime === 'gemini') {
-    const settings = readSettings(path.join(getGlobalDir('gemini', explicitConfigDir), 'settings.json'));
+    const settings = readSettings(
+      path.join(getGlobalDir('gemini', explicitConfigDir), 'settings.json')
+    );
     if (!settings.attribution || settings.attribution.commit === undefined) {
       result = undefined;
     } else if (settings.attribution.commit === '') {
@@ -234,7 +237,9 @@ function getCommitAttribution(runtime) {
       result = settings.attribution.commit;
     }
   } else {
-    const settings = readSettings(path.join(getGlobalDir('claude', explicitConfigDir), 'settings.json'));
+    const settings = readSettings(
+      path.join(getGlobalDir('claude', explicitConfigDir), 'settings.json')
+    );
     if (!settings.attribution || settings.attribution.commit === undefined) {
       result = undefined;
     } else if (settings.attribution.commit === '') {
@@ -360,7 +365,10 @@ function convertClaudeToGeminiAgent(content) {
     if (trimmed.startsWith('tools:')) {
       const toolsValue = trimmed.substring(6).trim();
       if (toolsValue) {
-        const parsed = toolsValue.split(',').map(t => t.trim()).filter(t => t);
+        const parsed = toolsValue
+          .split(',')
+          .map((t) => t.trim())
+          .filter((t) => t);
         for (const t of parsed) {
           const mapped = convertGeminiToolName(t);
           if (mapped) tools.push(mapped);
@@ -436,7 +444,10 @@ function convertClaudeToOpencodeFrontmatter(content) {
     if (trimmed.startsWith('tools:')) {
       const toolsValue = trimmed.substring(6).trim();
       if (toolsValue) {
-        const tools = toolsValue.split(',').map(t => t.trim()).filter(t => t);
+        const tools = toolsValue
+          .split(',')
+          .map((t) => t.trim())
+          .filter((t) => t);
         allowedTools.push(...tools);
       }
       continue;
@@ -665,10 +676,11 @@ function cleanupOrphanedHooks(settings) {
     for (const eventType of Object.keys(settings.hooks)) {
       const hookEntries = settings.hooks[eventType];
       if (Array.isArray(hookEntries)) {
-        const filtered = hookEntries.filter(entry => {
+        const filtered = hookEntries.filter((entry) => {
           if (entry.hooks && Array.isArray(entry.hooks)) {
-            const hasOrphaned = entry.hooks.some(h =>
-              h.command && orphanedHookPatterns.some(pattern => h.command.includes(pattern))
+            const hasOrphaned = entry.hooks.some(
+              (h) =>
+                h.command && orphanedHookPatterns.some((pattern) => h.command.includes(pattern))
             );
             if (hasOrphaned) {
               cleanedHooks = true;
@@ -708,7 +720,9 @@ function uninstall(isGlobal, runtime = 'claude') {
   if (runtime === 'opencode') runtimeLabel = 'OpenCode';
   if (runtime === 'gemini') runtimeLabel = 'Gemini';
 
-  console.log(`  Uninstalling ACE from ${cyan}${runtimeLabel}${reset} at ${cyan}${locationLabel}${reset}\n`);
+  console.log(
+    `  Uninstalling ACE from ${cyan}${runtimeLabel}${reset} at ${cyan}${locationLabel}${reset}\n`
+  );
 
   if (!fs.existsSync(targetDir)) {
     console.log(`  ${yellow}\u26a0${reset} Directory does not exist: ${locationLabel}`);
@@ -790,12 +804,15 @@ function uninstall(isGlobal, runtime = 'claude') {
   // 5. Clean up settings.json
   const settingsPath = path.join(targetDir, 'settings.json');
   if (fs.existsSync(settingsPath)) {
-    let settings = readSettings(settingsPath);
+    const settings = readSettings(settingsPath);
     let settingsModified = false;
 
     // Remove ACE statusline
-    if (settings.statusLine && settings.statusLine.command &&
-        settings.statusLine.command.includes('ace-statusline')) {
+    if (
+      settings.statusLine &&
+      settings.statusLine.command &&
+      settings.statusLine.command.includes('ace-statusline')
+    ) {
       delete settings.statusLine;
       settingsModified = true;
       console.log(`  ${green}\u2713${reset} Removed ACE statusline from settings`);
@@ -804,10 +821,12 @@ function uninstall(isGlobal, runtime = 'claude') {
     // Remove ACE hooks from SessionStart
     if (settings.hooks && settings.hooks.SessionStart) {
       const before = settings.hooks.SessionStart.length;
-      settings.hooks.SessionStart = settings.hooks.SessionStart.filter(entry => {
+      settings.hooks.SessionStart = settings.hooks.SessionStart.filter((entry) => {
         if (entry.hooks && Array.isArray(entry.hooks)) {
-          const hasAceHook = entry.hooks.some(h =>
-            h.command && (h.command.includes('ace-check-update') || h.command.includes('ace-statusline'))
+          const hasAceHook = entry.hooks.some(
+            (h) =>
+              h.command &&
+              (h.command.includes('ace-check-update') || h.command.includes('ace-statusline'))
           );
           return !hasAceHook;
         }
@@ -861,7 +880,7 @@ function uninstall(isGlobal, runtime = 'claude') {
           removedCount++;
           console.log(`  ${green}\u2713${reset} Removed ACE permissions from opencode.json`);
         }
-      } catch (e) {
+      } catch (_e) {
         // Ignore JSON parse errors
       }
     }
@@ -871,7 +890,9 @@ function uninstall(isGlobal, runtime = 'claude') {
     console.log(`  ${yellow}\u26a0${reset} No ACE files found to remove.`);
   }
 
-  console.log(`\n  ${green}Done!${reset} ACE has been uninstalled from ${runtimeLabel}.\n  Your other files and settings have been preserved.\n`);
+  console.log(
+    `\n  ${green}Done!${reset} ACE has been uninstalled from ${runtimeLabel}.\n  Your other files and settings have been preserved.\n`
+  );
 }
 
 /**
@@ -887,7 +908,7 @@ function configureOpencodePermissions() {
   if (fs.existsSync(configPath)) {
     try {
       config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-    } catch (e) {
+    } catch (_e) {
       console.log(`  ${yellow}\u26a0${reset} opencode.json had invalid JSON, recreating`);
     }
   }
@@ -895,9 +916,10 @@ function configureOpencodePermissions() {
   if (!config.permission) config.permission = {};
 
   const defaultConfigDir = path.join(os.homedir(), '.config', 'opencode');
-  const acePath = opencodeConfigDir === defaultConfigDir
-    ? '~/.config/opencode/ace/*'
-    : `${opencodeConfigDir}/ace/*`;
+  const acePath =
+    opencodeConfigDir === defaultConfigDir
+      ? '~/.config/opencode/ace/*'
+      : `${opencodeConfigDir}/ace/*`;
 
   let modified = false;
 
@@ -909,7 +931,10 @@ function configureOpencodePermissions() {
     modified = true;
   }
 
-  if (!config.permission.external_directory || typeof config.permission.external_directory !== 'object') {
+  if (
+    !config.permission.external_directory ||
+    typeof config.permission.external_directory !== 'object'
+  ) {
     config.permission.external_directory = {};
   }
   if (config.permission.external_directory[acePath] !== 'allow') {
@@ -928,13 +953,17 @@ function configureOpencodePermissions() {
  */
 function verifyInstalled(dirPath, description) {
   if (!fs.existsSync(dirPath)) {
-    console.error(`  ${yellow}\u2717${reset} Failed to install ${description}: directory not created`);
+    console.error(
+      `  ${yellow}\u2717${reset} Failed to install ${description}: directory not created`
+    );
     return false;
   }
   try {
     const entries = fs.readdirSync(dirPath);
     if (entries.length === 0) {
-      console.error(`  ${yellow}\u2717${reset} Failed to install ${description}: directory is empty`);
+      console.error(
+        `  ${yellow}\u2717${reset} Failed to install ${description}: directory is empty`
+      );
       return false;
     }
   } catch (e) {
@@ -972,15 +1001,15 @@ function install(isGlobal, runtime = 'claude') {
     ? targetDir.replace(os.homedir(), '~')
     : targetDir.replace(process.cwd(), '.');
 
-  const pathPrefix = isGlobal
-    ? `${targetDir}/`
-    : `./${dirName}/`;
+  const pathPrefix = isGlobal ? `${targetDir}/` : `./${dirName}/`;
 
   let runtimeLabel = 'Claude Code';
   if (isOpencode) runtimeLabel = 'OpenCode';
   if (isGemini) runtimeLabel = 'Gemini';
 
-  console.log(`  Installing for ${cyan}${runtimeLabel}${reset} to ${cyan}${locationLabel}${reset}\n`);
+  console.log(
+    `  Installing for ${cyan}${runtimeLabel}${reset} to ${cyan}${locationLabel}${reset}\n`
+  );
 
   const failures = [];
 
@@ -995,7 +1024,7 @@ function install(isGlobal, runtime = 'claude') {
     const commandsSrc = path.join(src, 'commands');
     copyCommandsForOpencode(commandsSrc, commandDir, pathPrefix, runtime);
     if (verifyInstalled(commandDir, 'command/ace-*')) {
-      const count = fs.readdirSync(commandDir).filter(f => f.startsWith('ace-')).length;
+      const count = fs.readdirSync(commandDir).filter((f) => f.startsWith('ace-')).length;
       console.log(`  ${green}\u2713${reset} Installed ${count} commands to command/`);
     } else {
       failures.push('command/ace-*');
@@ -1006,7 +1035,9 @@ function install(isGlobal, runtime = 'claude') {
 
     const commandsSrc = path.join(src, 'commands');
     copyCommandFiles(commandsSrc, commandsDir, pathPrefix, runtime);
-    const count = fs.readdirSync(commandsDir).filter(f => f.startsWith('ace.') && (f.endsWith('.md') || f.endsWith('.toml'))).length;
+    const count = fs
+      .readdirSync(commandsDir)
+      .filter((f) => f.startsWith('ace.') && (f.endsWith('.md') || f.endsWith('.toml'))).length;
     if (count > 0) {
       console.log(`  ${green}\u2713${reset} Installed ${count} commands`);
     } else {
@@ -1119,8 +1150,9 @@ function install(isGlobal, runtime = 'claude') {
     if (!settings.hooks) settings.hooks = {};
     if (!settings.hooks.SessionStart) settings.hooks.SessionStart = [];
 
-    const hasAceUpdateHook = settings.hooks.SessionStart.some(entry =>
-      entry.hooks && entry.hooks.some(h => h.command && h.command.includes('ace-check-update'))
+    const hasAceUpdateHook = settings.hooks.SessionStart.some(
+      (entry) =>
+        entry.hooks && entry.hooks.some((h) => h.command && h.command.includes('ace-check-update'))
     );
 
     if (!hasAceUpdateHook) {
@@ -1128,9 +1160,9 @@ function install(isGlobal, runtime = 'claude') {
         hooks: [
           {
             type: 'command',
-            command: updateCheckCommand
-          }
-        ]
+            command: updateCheckCommand,
+          },
+        ],
       });
       console.log(`  ${green}\u2713${reset} Configured update check hook`);
     }
@@ -1142,13 +1174,19 @@ function install(isGlobal, runtime = 'claude') {
 /**
  * Apply statusline config, then print completion message
  */
-function finishInstall(settingsPath, settings, statuslineCommand, shouldInstallStatusline, runtime = 'claude') {
+function finishInstall(
+  settingsPath,
+  settings,
+  statuslineCommand,
+  shouldInstallStatusline,
+  runtime = 'claude'
+) {
   const isOpencode = runtime === 'opencode';
 
   if (shouldInstallStatusline && !isOpencode) {
     settings.statusLine = {
       type: 'command',
-      command: statuslineCommand
+      command: statuslineCommand,
     };
     console.log(`  ${green}\u2713${reset} Configured statusline`);
   }
@@ -1194,10 +1232,12 @@ function handleStatusline(settings, isInteractive, callback) {
 
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
-  console.log(`\n  ${yellow}\u26a0${reset} Existing statusline detected\n\n  Your current statusline:\n    ${dim}command: ${existingCmd}${reset}\n\n  ACE includes a statusline showing:\n    \u2022 Model name\n    \u2022 Current task (from todo list)\n    \u2022 Context window usage (color-coded)\n\n  ${cyan}1${reset}) Keep existing\n  ${cyan}2${reset}) Replace with ACE statusline\n`);
+  console.log(
+    `\n  ${yellow}\u26a0${reset} Existing statusline detected\n\n  Your current statusline:\n    ${dim}command: ${existingCmd}${reset}\n\n  ACE includes a statusline showing:\n    \u2022 Model name\n    \u2022 Current task (from todo list)\n    \u2022 Context window usage (color-coded)\n\n  ${cyan}1${reset}) Keep existing\n  ${cyan}2${reset}) Replace with ACE statusline\n`
+  );
 
   rl.question(`  Choice ${dim}[1]${reset}: `, (answer) => {
     rl.close();
@@ -1212,7 +1252,7 @@ function handleStatusline(settings, isInteractive, callback) {
 function promptRuntime(callback) {
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
   let answered = false;
@@ -1225,7 +1265,9 @@ function promptRuntime(callback) {
     }
   });
 
-  console.log(`  ${yellow}Which runtime(s) would you like to install for?${reset}\n\n  ${cyan}1${reset}) Claude Code ${dim}(~/.claude)${reset}\n  ${cyan}2${reset}) OpenCode    ${dim}(~/.config/opencode)${reset} - open source, free models\n  ${cyan}3${reset}) Gemini      ${dim}(~/.gemini)${reset}\n  ${cyan}4${reset}) All\n`);
+  console.log(
+    `  ${yellow}Which runtime(s) would you like to install for?${reset}\n\n  ${cyan}1${reset}) Claude Code ${dim}(~/.claude)${reset}\n  ${cyan}2${reset}) OpenCode    ${dim}(~/.config/opencode)${reset} - open source, free models\n  ${cyan}3${reset}) Gemini      ${dim}(~/.gemini)${reset}\n  ${cyan}4${reset}) All\n`
+  );
 
   rl.question(`  Choice ${dim}[1]${reset}: `, (answer) => {
     answered = true;
@@ -1248,14 +1290,16 @@ function promptRuntime(callback) {
  */
 function promptLocation(runtimes) {
   if (!process.stdin.isTTY) {
-    console.log(`  ${yellow}Non-interactive terminal detected, defaulting to global install${reset}\n`);
+    console.log(
+      `  ${yellow}Non-interactive terminal detected, defaulting to global install${reset}\n`
+    );
     installAllRuntimes(runtimes, true, false);
     return;
   }
 
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
   let answered = false;
@@ -1268,14 +1312,18 @@ function promptLocation(runtimes) {
     }
   });
 
-  const pathExamples = runtimes.map(r => {
-    const globalPath = getGlobalDir(r, explicitConfigDir);
-    return globalPath.replace(os.homedir(), '~');
-  }).join(', ');
+  const pathExamples = runtimes
+    .map((r) => {
+      const globalPath = getGlobalDir(r, explicitConfigDir);
+      return globalPath.replace(os.homedir(), '~');
+    })
+    .join(', ');
 
-  const localExamples = runtimes.map(r => `./${getDirName(r)}`).join(', ');
+  const localExamples = runtimes.map((r) => `./${getDirName(r)}`).join(', ');
 
-  console.log(`  ${yellow}Where would you like to install?${reset}\n\n  ${cyan}1${reset}) Global ${dim}(${pathExamples})${reset} - available in all projects\n  ${cyan}2${reset}) Local  ${dim}(${localExamples})${reset} - this project only\n`);
+  console.log(
+    `  ${yellow}Where would you like to install?${reset}\n\n  ${cyan}1${reset}) Global ${dim}(${pathExamples})${reset} - available in all projects\n  ${cyan}2${reset}) Local  ${dim}(${localExamples})${reset} - this project only\n`
+  );
 
   rl.question(`  Choice ${dim}[1]${reset}: `, (answer) => {
     answered = true;
@@ -1297,28 +1345,52 @@ function installAllRuntimes(runtimes, isGlobal, isInteractive) {
     results.push(result);
   }
 
-  const claudeResult = results.find(r => r.runtime === 'claude');
-  const geminiResult = results.find(r => r.runtime === 'gemini');
+  const claudeResult = results.find((r) => r.runtime === 'claude');
+  const geminiResult = results.find((r) => r.runtime === 'gemini');
 
   if (claudeResult || geminiResult) {
     const primaryResult = claudeResult || geminiResult;
 
     handleStatusline(primaryResult.settings, isInteractive, (shouldInstallStatusline) => {
       if (claudeResult) {
-        finishInstall(claudeResult.settingsPath, claudeResult.settings, claudeResult.statuslineCommand, shouldInstallStatusline, 'claude');
+        finishInstall(
+          claudeResult.settingsPath,
+          claudeResult.settings,
+          claudeResult.statuslineCommand,
+          shouldInstallStatusline,
+          'claude'
+        );
       }
       if (geminiResult) {
-        finishInstall(geminiResult.settingsPath, geminiResult.settings, geminiResult.statuslineCommand, shouldInstallStatusline, 'gemini');
+        finishInstall(
+          geminiResult.settingsPath,
+          geminiResult.settings,
+          geminiResult.statuslineCommand,
+          shouldInstallStatusline,
+          'gemini'
+        );
       }
 
-      const opencodeResult = results.find(r => r.runtime === 'opencode');
+      const opencodeResult = results.find((r) => r.runtime === 'opencode');
       if (opencodeResult) {
-        finishInstall(opencodeResult.settingsPath, opencodeResult.settings, opencodeResult.statuslineCommand, false, 'opencode');
+        finishInstall(
+          opencodeResult.settingsPath,
+          opencodeResult.settings,
+          opencodeResult.statuslineCommand,
+          false,
+          'opencode'
+        );
       }
     });
   } else {
     const opencodeResult = results[0];
-    finishInstall(opencodeResult.settingsPath, opencodeResult.settings, opencodeResult.statuslineCommand, false, 'opencode');
+    finishInstall(
+      opencodeResult.settingsPath,
+      opencodeResult.settings,
+      opencodeResult.statuslineCommand,
+      false,
+      'opencode'
+    );
   }
 }
 
@@ -1348,7 +1420,9 @@ if (hasGlobal && hasLocal) {
   installAllRuntimes(['claude'], hasGlobal, false);
 } else {
   if (!process.stdin.isTTY) {
-    console.log(`  ${yellow}Non-interactive terminal detected, defaulting to Claude Code global install${reset}\n`);
+    console.log(
+      `  ${yellow}Non-interactive terminal detected, defaulting to Claude Code global install${reset}\n`
+    );
     installAllRuntimes(['claude'], true, false);
   } else {
     promptRuntime((runtimes) => {

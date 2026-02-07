@@ -1,0 +1,10 @@
+# ─── Branch guard: block commits to main/master ───
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
+  echo "✗ Direct commits to $branch are blocked."
+  echo "  Switch to dev first: git checkout dev"
+  exit 1
+fi
+
+npx lint-staged
+gitleaks protect --staged --verbose

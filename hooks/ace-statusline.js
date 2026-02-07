@@ -9,7 +9,7 @@ const os = require('os');
 // Read JSON from stdin
 let input = '';
 process.stdin.setEncoding('utf8');
-process.stdin.on('data', chunk => input += chunk);
+process.stdin.on('data', (chunk) => (input += chunk));
 process.stdin.on('end', () => {
   try {
     const data = JSON.parse(input);
@@ -45,19 +45,22 @@ process.stdin.on('end', () => {
     const todosDir = path.join(homeDir, '.claude', 'todos');
     if (session && fs.existsSync(todosDir)) {
       try {
-        const files = fs.readdirSync(todosDir)
-          .filter(f => f.startsWith(session) && f.includes('-agent-') && f.endsWith('.json'))
-          .map(f => ({ name: f, mtime: fs.statSync(path.join(todosDir, f)).mtime }))
+        const files = fs
+          .readdirSync(todosDir)
+          .filter((f) => f.startsWith(session) && f.includes('-agent-') && f.endsWith('.json'))
+          .map((f) => ({ name: f, mtime: fs.statSync(path.join(todosDir, f)).mtime }))
           .sort((a, b) => b.mtime - a.mtime);
 
         if (files.length > 0) {
           try {
             const todos = JSON.parse(fs.readFileSync(path.join(todosDir, files[0].name), 'utf8'));
-            const inProgress = todos.find(t => t.status === 'in_progress');
+            const inProgress = todos.find((t) => t.status === 'in_progress');
             if (inProgress) task = inProgress.activeForm || '';
-          } catch (e) {}
+          } catch (_e) {
+            /* ignore parse errors */
+          }
         }
-      } catch (e) {
+      } catch (_e) {
         // Silently fail on file system errors
       }
     }
@@ -71,17 +74,23 @@ process.stdin.on('end', () => {
         if (cache.update_available) {
           aceUpdate = '\x1b[33m\u2b06 ACE update\x1b[0m \u2502 ';
         }
-      } catch (e) {}
+      } catch (_e) {
+        /* ignore parse errors */
+      }
     }
 
     // Output
     const dirname = path.basename(dir);
     if (task) {
-      process.stdout.write(`${aceUpdate}\x1b[2m${model}\x1b[0m \u2502 \x1b[1m${task}\x1b[0m \u2502 \x1b[2m${dirname}\x1b[0m${ctx}`);
+      process.stdout.write(
+        `${aceUpdate}\x1b[2m${model}\x1b[0m \u2502 \x1b[1m${task}\x1b[0m \u2502 \x1b[2m${dirname}\x1b[0m${ctx}`
+      );
     } else {
-      process.stdout.write(`${aceUpdate}\x1b[2m${model}\x1b[0m \u2502 \x1b[2m${dirname}\x1b[0m${ctx}`);
+      process.stdout.write(
+        `${aceUpdate}\x1b[2m${model}\x1b[0m \u2502 \x1b[2m${dirname}\x1b[0m${ctx}`
+      );
     }
-  } catch (e) {
+  } catch (_e) {
     // Silent fail
   }
 });

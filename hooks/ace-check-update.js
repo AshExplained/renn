@@ -45,7 +45,7 @@ const child = spawn(
 
   let latest = null;
   try {
-    latest = execSync('npm view ace-agentic-code-execution version', { encoding: 'utf8', timeout: 10000, windowsHide: true }).trim();
+    latest = execSync('npm view ace-experience version', { encoding: 'utf8', timeout: 10000, windowsHide: true }).trim();
   } catch (e) {}
 
   const result = {

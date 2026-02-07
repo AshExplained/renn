@@ -1,9 +1,9 @@
 {
-  "name": "ace-agentic-code-execution",
+  "name": "ace-experience",
   "version": "0.1.0",
   "description": "A stage-driven, context-engineered agentic code execution system for Claude Code, OpenCode, and Gemini.",
   "bin": {
-    "ace-agentic-code-execution": "bin/install.js"
+    "ace-experience": "bin/install.js"
   },
   "files": [
     "bin",
@@ -22,11 +22,15 @@
     "gemini",
     "gemini-cli"
   ],
-  "author": "",
+  "author": "Ash",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/AshExplained/ace-agentic-code-experience.git"
+  },
+  "homepage": "https://github.com/AshExplained/ace-agentic-code-experience",
+  "bugs": {
+    "url": "https://github.com/AshExplained/ace-agentic-code-experience/issues"
   },
   "engines": {
     "node": ">=16.7.0"

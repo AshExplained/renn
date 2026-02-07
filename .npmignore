@@ -1,0 +1,7 @@
+.internal/
+.husky/
+.github/
+scripts/
+hooks/ace-*.js
+*.md
+!README.md

@@ -21,7 +21,7 @@ The installer walks you through setup — pick global or local install, choose y
 
 ## How it works
 
-1. **Initialize** — `/ace.init` sets up your project with a brief and stage structure
+1. **Initialize** — `/ace.start` sets up your project with a brief and stage structure
 2. **Plan** — `/ace.plan-stage` breaks a stage into concrete tasks
 3. **Build** — `/ace.run-stage` executes tasks with autonomous agents
 4. **Track** — State files keep context across sessions so nothing gets lost

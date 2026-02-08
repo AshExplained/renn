@@ -75,17 +75,3 @@ jobs:
       - name: Run tests
         run: npm test
 
-  cla:
-    name: CLA Check
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: contributor-assistant/github-action@v2.6.1
-        with:
-          remote-organization-name: AshExplained
-          remote-repository-name: ace-agentic-code-experience
-          path-to-signatures: .github/cla-signatures.json
-          path-to-document: https://github.com/AshExplained/ace-agentic-code-experience/blob/main/CLA.md
-          branch: main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

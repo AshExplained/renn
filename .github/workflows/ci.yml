@@ -29,6 +29,9 @@ jobs:
       - name: Validate markdown structure
         run: npm run validate
 
+      - name: Build hooks
+        run: npm run build:hooks
+
       - name: Check dist sync
         run: npm run validate:dist
 
@@ -77,7 +80,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: contributor-assistant/github-action@v2
+      - uses: contributor-assistant/github-action@v2.6.1
         with:
           remote-organization-name: AshExplained
           remote-repository-name: ace-agentic-code-experience

@@ -598,19 +598,19 @@ describe('validateCommandDelegation', () => {
   });
 
   it('passes for long commands with workflow reference', () => {
-    const content = 'Line\n'.repeat(100) + '@~/.claude/ace/workflows/run-stage.md';
+    const content = 'Line\n'.repeat(501) + '@~/.claude/ace/workflows/run-stage.md';
     validateCommandDelegation('test.md', content, 'command');
     assert.equal(warnings.length, 0);
   });
 
   it('warns for long commands without workflow reference', () => {
-    const content = 'Line\n'.repeat(100);
+    const content = 'Line\n'.repeat(501);
     validateCommandDelegation('test.md', content, 'command');
     assert.ok(warnings.some((w) => w.includes('no workflow reference')));
   });
 
   it('skips non-command files', () => {
-    validateCommandDelegation('test.md', 'Line\n'.repeat(100), 'agent');
+    validateCommandDelegation('test.md', 'Line\n'.repeat(501), 'agent');
     assert.equal(warnings.length, 0);
   });
 });

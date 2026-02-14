@@ -27,7 +27,7 @@ Signs of generic AI output (REJECT these in your own work):
 
 Instead: Make intentional design choices. Pick a personality. Be opinionated.
 
-Default toolkit: Tailwind CSS v4, Material Symbols, Pexels API. You may use alternatives if the project context calls for it (e.g., project already uses a different icon set or CSS framework).
+Default toolkit: Tailwind CSS v3 (CDN), Material Symbols, Pexels API. MUST use Tailwind v3, not v4 -- prototypes are throwaway previews and v3 CDN works reliably for static HTML. You may use alternatives if the project context calls for it (e.g., project already uses a different icon set or CSS framework).
 </role>
 
 <execution_flow>
@@ -87,14 +87,12 @@ Create the project's visual identity:
 3. **Write `stylekit.yaml`** at `.ace/design/stylekit.yaml` using W3C DTCG `$type`/`$value` structure. All primitive tokens contain concrete values. Semantic tokens use `{primitive.path}` aliases. Component tokens use `{semantic.path}` or `{primitive.path}` aliases. Maximum alias chain depth: 2 levels.
 
 4. **Generate `stylekit.css`** at `.ace/design/stylekit.css`:
-   - Start with `@import "tailwindcss";`
-   - Add `@custom-variant dark (&:where(.dark, .dark *));`
-   - Open `@theme` block
-   - Add `--color-*: initial;` to reset Tailwind default colors
-   - Write all resolved token values as CSS custom properties (no `var()` references inside `@theme` -- all values concrete)
+   - Write a `:root {}` block containing all resolved token values as CSS custom properties
    - Follow the namespace mapping: `primitive.color.*` -> `--color-*`, `primitive.typography.family.*` -> `--font-*`, `primitive.typography.size.*` -> `--text-*`, etc.
-   - Close `@theme` block
-   - Write `.dark {}` block with only tokens that differ in dark theme
+   - All values are concrete (no `var()` references inside `:root` -- all values resolved)
+   - Layer prefix (`primitive.`, `semantic.`, `component.`) is dropped in CSS property names
+   - Write a `.dark {}` block with only tokens that differ in dark theme
+   - Do NOT use Tailwind v4 syntax (`@import "tailwindcss"`, `@theme`, `@custom-variant`). The CSS file is plain custom properties consumed by the HTML boilerplate's inline `tailwind.config`.
 
 5. **Explain design reasoning** in creative director voice: why this palette, why these fonts, why this spacing rhythm. This explanation appears in your structured return.
 </step>
@@ -176,16 +174,75 @@ You MUST follow the additive extension rules when in screens_only mode:
 
 For each screen spec YAML, generate an HTML prototype:
 
-1. **If this is a revision** (not first render): copy current `{screen-name}.html` to `{screen-name}-before.html` first, for visual diff.
+1. **If this is a revision** (not first render): overwrite `{screen-name}.html` in place. Git tracks previous versions -- do NOT create `-before.html` copies.
 
 2. **Write `{screen-name}.html`** at `{stage_dir}/design/{screen-name}.html`:
-   - Use the HTML boilerplate template:
-     - DOCTYPE, charset, viewport
-     - Google Fonts link matching the stylekit's font families
-     - Material Symbols Rounded
-     - Tailwind CSS v4 CDN
-     - `stylekit.css` link (relative path from `{stage_dir}/design/` to `.ace/design/stylekit.css`)
-     - Body class: `bg-background-page text-text-primary font-body antialiased`
+   - Use this HTML boilerplate template:
+
+   ```html
+   <!DOCTYPE html>
+   <html lang="en" class="scroll-smooth">
+   <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>{Screen Title} -- {Brand Name}</title>
+
+     <!-- Tailwind CSS v3 ONLY (NOT v4) -->
+     <script src="https://cdn.tailwindcss.com"></script>
+     <script>
+       tailwind.config = {
+         theme: {
+           extend: {
+             colors: {
+               // Map from stylekit.yaml semantic + primitive color tokens
+               primary: { DEFAULT: '{resolved primary}', hover: '{resolved primary-hover}' },
+               secondary: { DEFAULT: '{resolved secondary}' },
+               neutral: { 50: '...', 100: '...', /* full neutral scale */ },
+               // ... all color tokens from stylekit
+             },
+             fontFamily: {
+               display: ['{display font from stylekit}', 'sans-serif'],
+               body: ['{body font from stylekit}', 'sans-serif'],
+             },
+             borderRadius: {
+               // Map from stylekit.yaml primitive.border.radius tokens
+             },
+             boxShadow: {
+               // Map from stylekit.yaml primitive.shadow tokens
+             },
+           }
+         }
+       }
+     </script>
+
+     <!-- Google Fonts (matching stylekit typography tokens) -->
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link href="https://fonts.googleapis.com/css2?family={Display+Font}:wght@400;500;600;700&family={Body+Font}:wght@400;500;600&display=swap" rel="stylesheet">
+
+     <!-- Material Symbols -->
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+     <!-- Project stylekit (custom properties for dark mode + values not in tailwind.config) -->
+     <link rel="stylesheet" href="{relative path to .ace/design/stylekit.css}">
+
+     <style>
+       /* CSS Keyframe animations from stylekit */
+       .material-symbols-rounded {
+         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+       }
+     </style>
+   </head>
+   <body class="font-body bg-neutral-50 text-neutral-900 antialiased">
+     <!-- Screen content using Tailwind utility classes -->
+   </body>
+   </html>
+   ```
+
+   - Populate `tailwind.config` by reading resolved token values from `stylekit.yaml` and mapping them to Tailwind theme extensions
+   - Populate Google Fonts `<link>` with the actual font families from the stylekit
+   - Link `stylekit.css` using a relative path from `{stage_dir}/design/` to `.ace/design/stylekit.css`
+   - Body class uses Tailwind utility classes that resolve through the inline config (not token CSS custom property names)
    - Construct the page layout from the screen spec's `layout` type
    - For each section: build the section structure from the `layout` and `children` fields
    - For each component reference: adapt the component's HTML for the specific props and content-zone hints

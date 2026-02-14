@@ -74,6 +74,16 @@ Verify that all design artifacts conform to the schemas defined in the token sch
 | stylekit.css linked | HTML includes a `<link>` to `stylekit.css` | Read HTML head section |
 | Required CDN resources | Tailwind CSS v3 CDN script (`cdn.tailwindcss.com` without version suffix), inline `tailwind.config` block, Google Fonts link, Material Symbols link present | Read HTML head section |
 | Body classes correct | Body has `bg-background-page text-text-primary font-body antialiased` | Read body tag |
+| stylekit-preview.html exists (full mode) | `.ace/design/stylekit-preview.html` file exists on disk when mode is `full` | `ls .ace/design/stylekit-preview.html` |
+
+**stylekit-preview.html (full mode only):**
+The composed design system preview receives minimal structural checks only:
+- File exists at `.ace/design/stylekit-preview.html`
+- Links `stylekit.css` (relative path: `stylekit.css`, same directory)
+- Uses Tailwind v3 CDN (`cdn.tailwindcss.com` without version suffix)
+- Contains the 4 required sections: Color Palette, Typography, Spacing Scale, Components
+
+Do NOT apply anti-generic checklist to the preview page -- it is a documentation artifact, not a design deliverable. The anti-generic checks apply to the stylekit tokens themselves, which are already reviewed separately.
 
 ---
 
@@ -169,6 +179,7 @@ Read the designer's structured return and all referenced artifacts.
    - All component YAML files (if full mode or new additions)
    - All screen spec YAML files
 3. **Read all HTML prototype files** listed in the artifact list
+3.5. **Read stylekit-preview.html** (if full mode) to verify structural checks
 4. **Read `stylekit.css`** (if full mode) to verify CSS generation
 5. **Read reference schemas** for validation:
    - Token schema format rules from `01-design-tokens.md` Section 8 (Format Rules)

@@ -426,6 +426,104 @@ Categorize findings:
 - ⚠️ Warning: Indicates incomplete (TODO comments, console.log)
 - ℹ️ Info: Notable but not problematic
 
+## Step 7.5: Design Conformance (Conditional)
+
+**Trigger condition:** Check BOTH:
+1. `{stage_dir}/design/` directory exists
+2. The directory contains `.yaml` screen spec files
+
+```bash
+DESIGN_SPECS=$(ls "${STAGE_DIR}"/design/*.yaml 2>/dev/null)
+```
+
+**If either condition is false:** Skip this step entirely. No design conformance section in proof.md.
+
+**If both conditions are true:** Run 4 categories of conformance checks for each screen spec.
+
+### 7.5.1 Layout Match
+
+For each screen spec YAML, extract section IDs and verify the implementation has corresponding structural elements in the same order.
+
+```bash
+# Extract section IDs from screen spec
+grep -E "^\s+- id:" ${STAGE_DIR}/design/{screen}.yaml
+
+# Search for corresponding structural elements in implementation
+# Identify the implementation page path from recap.md or run.md file references
+grep -rn "id=\"{section-id}\"\|className.*{section-id}" src/
+```
+
+**Pass:** All screen spec sections have corresponding implementation elements in the same order.
+**Fail:** A spec section has no corresponding element, or sections appear in different order.
+
+### 7.5.2 Component Usage
+
+Extract component references from screen specs and verify they are imported and rendered in the implementation.
+
+```bash
+# Extract component references from screen spec
+grep -E "component:" ${STAGE_DIR}/design/{screen}.yaml
+
+# Search for component imports and JSX usage in implementation
+grep -rn "import.*{ComponentName}" src/ --include="*.tsx" --include="*.jsx"
+grep -rn "<{ComponentName}" src/ --include="*.tsx" --include="*.jsx"
+```
+
+**Pass:** All components referenced in the spec are imported and rendered.
+**Fail:** A component referenced in the spec is not imported or rendered at all.
+
+Note: Repeat counts are guidance, not hard requirements. Dynamic data may change counts.
+
+### 7.5.3 Token Compliance
+
+Scan implementation files for hardcoded visual values that should come from the token system.
+
+```bash
+# Hardcoded hex colors
+grep -rn "#[0-9a-fA-F]\{3,8\}" src/app/{page}/ --include="*.tsx" --include="*.jsx"
+
+# Inline rgb/hsl/oklch values
+grep -rn "rgb(\|hsl(\|oklch(" src/app/{page}/ --include="*.tsx" --include="*.jsx"
+
+# Hardcoded px values in style attributes
+grep -rn "style=.*[0-9]\+px" src/app/{page}/ --include="*.tsx" --include="*.jsx"
+```
+
+**Pass:** No hardcoded visual values found. All styling uses Tailwind utility classes or token-derived custom properties.
+**Fail:** Hex color codes, inline style pixel values, or Tailwind arbitrary value syntax with hardcoded values (`bg-[#3b82f6]`).
+
+**Exceptions (NOT violations):**
+- SVG `fill` and `stroke` using `currentColor`
+- `style` attributes for dynamic computed values (progress bars, etc.)
+- Third-party library internal styles
+
+### 7.5.4 Responsive Behavior
+
+Check for Tailwind responsive prefixes corresponding to the screen spec's responsive overrides.
+
+```bash
+# Search for responsive prefix patterns
+grep -rn "sm:\|md:\|lg:\|xl:" src/app/{page}/ --include="*.tsx" --include="*.jsx"
+
+# Specifically check grid column responsive classes
+grep -rn "md:grid-cols-\|lg:grid-cols-\|sm:grid-cols-" src/app/{page}/
+```
+
+**Pass:** Responsive prefixes present for breakpoints specified in the screen spec.
+**Fail:** Screen spec defines responsive behavior but implementation uses only base classes.
+
+### 7.5.5 Advisory Status
+
+Design conformance is ADVISORY, NOT BLOCKING.
+
+- Conformance failures are flagged as concerns in proof.md
+- They do NOT automatically fail the stage
+- They do NOT trigger gap closure automatically
+- The auditor may recommend a gap closure task for actionable failures (e.g., "Badge component missing from implementation")
+- The user decides whether to address flagged concerns
+
+This is consistent with the spec rationale: pixel-perfect conformance between YAML screen specs and real implementations is unrealistic. The user already approved the design prototype. These checks catch gross mismatches only.
+
 ## Step 8: Identify Human Verification Needs
 
 Some things can't be verified programmatically:
@@ -566,6 +664,14 @@ human_verification: # Only include if status: human_needed
   - test: "What to do"
     expected: "What should happen"
     why_human: "Why can't verify programmatically"
+design_conformance:  # Only include if design specs exist
+  screens_checked: N
+  checks_passed: N
+  checks_total: M
+  advisory_concerns:
+    - screen: "{screen-name}"
+      check: "{category}"
+      issue: "{what failed}"
 ---
 
 # Stage {X}: {Name} Proof Report
@@ -606,6 +712,26 @@ human_verification: # Only include if status: human_needed
 
 | File | Line | Pattern | Severity | Impact |
 | ---- | ---- | ------- | -------- | ------ |
+
+### Design Conformance
+
+{Only include this section if Step 7.5 was triggered (design specs exist).}
+
+**Screen specs verified:** {count} screens from {stage_dir}/design/
+
+#### {screen-name}.yaml
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Layout match | PASS/FAIL | {evidence: sections found/missing, order match/mismatch} |
+| Component usage | PASS/FAIL | {evidence: components imported/missing} |
+| Token compliance | PASS/FAIL | {evidence: hardcoded values found or "No hardcoded values"} |
+| Responsive behavior | PASS/FAIL | {evidence: responsive classes found/missing} |
+
+{Repeat for each screen spec}
+
+**Overall: {N}/{M} checks passed. {K} concern(s) flagged.**
+**Status: Advisory** -- concerns noted for awareness, not blocking stage completion.
 
 ### Human Verification Required
 
@@ -774,5 +900,6 @@ return <div>No messages</div>  // Always shows "no messages"
 - [ ] Gaps structured in YAML frontmatter (if gaps_found)
 - [ ] Re-verification metadata included (if previous existed)
 - [ ] proof.md created with complete report
+- [ ] Design conformance checked if design specs exist (advisory, not blocking)
 - [ ] Results returned to orchestrator (NOT committed)
 </success_criteria>

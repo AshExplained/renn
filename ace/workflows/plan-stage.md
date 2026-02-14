@@ -562,6 +562,7 @@ The design workflow runs in two phases with an approval gate between them. Each 
 | `stage_goal` | track.md stage details |
 | `research_content` | `${STAGE_DIR}/research.md` content |
 | `intel_content` | INTEL_CONTENT (loaded in ensure_stage_directory) |
+| `design_preferences` | DESIGN_PREFERENCES (compiled from design interview Step 6) |
 | `pexels_key` | Pexels API key check result |
 | `stage_dir` | STAGE_DIR path |
 
@@ -578,6 +579,8 @@ First, read ./.claude/agents/ace-designer.md for your role and instructions.
 **Phase:** stylekit
 **Stage:** {stage_name}
 **Goal:** {stage_goal}
+
+{DESIGN_PREFERENCES}
 
 **Research:**
 {research_content}

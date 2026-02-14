@@ -143,7 +143,7 @@ Evaluate design coherence and completeness.
 
 **Phase scope:**
 - Phase `stylekit`: Component consistency check, preview completeness check. Skip layout coherence (no screens yet), responsive overrides, and image integration checks.
-- Phase `screens`: Layout coherence, component usage consistency, responsive overrides, image integration, artifact completeness. Skip component-internal consistency (already approved).
+- Phase `screens`: Layout coherence, component usage consistency, responsive overrides, image integration, artifact completeness. Also includes: prototype interactivity, state coverage, modal context checks. Skip component-internal consistency (already approved).
 - No phase: All quality checks.
 
 | Check | What to Verify | Method |
@@ -153,6 +153,9 @@ Evaluate design coherence and completeness.
 | Responsive overrides present | Screens with multi-column layouts have responsive breakpoint classes (`md:grid-cols-*`, `sm:grid-cols-*`) | Grep HTML prototypes for responsive prefixes where screen specs define responsive overrides |
 | Image integration | Real Pexels images loaded (if API key was available) or proper placeholder divs (if not). No broken `<img>` tags with missing sources | Read HTML prototypes, check for broken image patterns |
 | Complete artifact set | All screens listed in the designer's structured return actually exist on disk | Verify file existence for every listed artifact path |
+| Prototype interactivity | Demo toggle buttons exist (fixed bottom-right control panel with state toggle buttons). At least one toggle button present for screens with more than the `default` state. Script block contains `function toggle` definitions | Grep HTML prototypes for `function toggle` and `fixed bottom` patterns |
+| State coverage | Each state defined in the screen spec's `states` field has a corresponding toggle button and hidden DOM section in the prototype. Count toggle functions vs spec states | Cross-reference screen spec YAML states against prototype toggle functions |
+| Modal context | For screens described as modal/dialog/overlay, verify the prototype contains a dimmed parent background (`opacity-40` or similar reduced opacity element with `aria-hidden`) and an overlay backdrop | Read modal screen prototypes for opacity and backdrop patterns |
 
 </review_dimensions>
 

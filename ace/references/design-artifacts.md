@@ -264,6 +264,140 @@ The approval gate lists only these HTML files for user review:
 
 Individual component HTMLs at `.ace/design/components/{name}/{name}.html` exist on disk for agent use but are NOT listed in the approval gate.
 
+## Prototype Interactivity
+
+Screen prototypes are interactive state machines, not static layouts. Each prototype supports multiple UI states via toggle controls and includes working JavaScript for form interactions.
+
+### Demo Toggle Controls
+
+Every screen prototype includes a floating control panel for state switching:
+
+```html
+<!-- Fixed bottom-right toggle controls -->
+<div class="fixed bottom-4 right-4 z-[60] flex gap-2">
+  <button onclick="toggleErrorState()" id="toggle-error-btn"
+    class="bg-base-surface-raised border border-base-border-strong
+           text-neutral-50 px-3 py-1.5 rounded-lg text-xs font-medium
+           hover:bg-base-surface-hover transition-colors shadow-lg">
+    Toggle Error State
+  </button>
+  <button onclick="resetForm()"
+    class="bg-base-surface-raised border border-base-border-strong
+           text-neutral-50 px-3 py-1.5 rounded-lg text-xs font-medium
+           hover:bg-base-surface-hover transition-colors shadow-lg">
+    Reset
+  </button>
+</div>
+```
+
+Toggle buttons map to the screen spec's `states` field. One button per non-default state. Button styling adapts to the project's token system.
+
+### JavaScript Interaction Patterns
+
+Prototype JavaScript is demo-quality: global variables, global functions, plain DOM manipulation. No state management, no error handling beyond form validation.
+
+**Form validation:**
+```javascript
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = document.getElementById('email-input');
+  if (!input.value.trim()) {
+    input.classList.add('border-red-500', 'animate-shake');
+    errorMsg.classList.remove('hidden');
+    setTimeout(() => input.classList.remove('animate-shake'), 500);
+    return;
+  }
+  // proceed with success flow
+});
+```
+
+**Tag/chip input:**
+```javascript
+tagInput.addEventListener('keydown', (e) => {
+  if (e.key === ',' || e.key === 'Enter') {
+    e.preventDefault();
+    addTag(tagInput.value.trim());
+  }
+  if (e.key === 'Backspace' && tagInput.value === '' && tags.length > 0) {
+    removeTag(tags.length - 1);
+  }
+});
+```
+
+**Loading state transition:**
+```javascript
+saveBtn.innerHTML = '<span class="material-symbols-rounded text-lg animate-spin">progress_activity</span> Saving...';
+saveBtn.disabled = true;
+setTimeout(() => {
+  saveBtn.innerHTML = '<span class="material-symbols-rounded text-lg">check</span> Saved!';
+  setTimeout(() => {
+    saveBtn.innerHTML = originalText;
+    saveBtn.disabled = false;
+  }, 1200);
+}, 800);
+```
+
+**Modal open/close:**
+```javascript
+function openModal() {
+  modal.classList.remove('hidden');
+  modal.querySelector('.modal-card').classList.add('animate-scale-in');
+}
+function closeModal() {
+  modal.querySelector('.modal-card').classList.add('animate-scale-out');
+  setTimeout(() => modal.classList.add('hidden'), 200);
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+```
+
+**State toggle:**
+```javascript
+let errorStateActive = false;
+function toggleErrorState() {
+  errorStateActive = !errorStateActive;
+  document.getElementById('error-section').classList.toggle('hidden');
+  document.getElementById('default-section').classList.toggle('hidden');
+  document.getElementById('toggle-error-btn').textContent =
+    errorStateActive ? 'Show Default' : 'Toggle Error State';
+}
+```
+
+### Modal Context Pattern
+
+Modal/dialog screens render the parent screen dimmed behind the overlay:
+
+```html
+<!-- Dimmed parent background -->
+<div class="min-h-screen" aria-hidden="true">
+  <div class="opacity-40">
+    <!-- Simplified skeleton of parent screen (header, sidebar hints, card grid with colored divs) -->
+  </div>
+</div>
+
+<!-- Overlay backdrop -->
+<div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"></div>
+
+<!-- Modal content -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <!-- Modal card with actual interactive content -->
+</div>
+```
+
+The parent screen uses skeleton content (colored divs with rounded corners) at 40% opacity, not a full-fidelity replica. This conveys spatial context without duplicating the full parent screen.
+
+### Script Block Convention
+
+Each prototype's script block appears after all HTML content, just before the closing body tag. Structure:
+
+1. State variables (`let errorStateActive = false;`)
+2. Toggle functions (`function toggleErrorState() { ... }`)
+3. Interaction handlers (`form.addEventListener(...)`)
+4. Initialization (if needed)
+
+Target: under 100 lines of JS per screen. If a screen needs more, the interactions are too complex for a throwaway prototype.
+
 ## Format Rules
 
 1. **Token-driven previews:** All visual values in component preview HTML trace to design tokens via Tailwind utility classes. No hardcoded hex colors, pixel sizes, or font names in preview snippets.

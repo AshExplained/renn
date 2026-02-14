@@ -329,7 +329,30 @@ If `restyle`: Set `DESIGN_MODE="full"`. Designer receives existing stylekit as r
 PEXELS_KEY=$(cat .ace/secrets.json 2>/dev/null | grep -o '"pexels_api_key"[[:space:]]*:[[:space:]]*"[^"]*"' | grep -o '"[^"]*"$' | tr -d '"' || echo "")
 ```
 
-If empty or missing: Display informational nudge: "Pexels API key not found. Add to .ace/secrets.json for real stock images, or continue with placeholder fallbacks." This is NOT blocking.
+If empty or missing, use the subagent's interactive prompt (AskUserQuestion tool or equivalent) to present:
+
+```
+Pexels API key not found.
+
+This key enables real stock images in design prototypes.
+Get a free key at: https://www.pexels.com/api/
+
+Paste your API key below, or type 'skip' to use placeholder images:
+```
+
+If the user provides a key (non-empty string that is not "skip"):
+1. Read existing `.ace/secrets.json` content (if file exists) to preserve other fields
+2. Merge `{"pexels_api_key": "{user_input}"}` into the existing JSON object
+3. Write merged JSON back to `.ace/secrets.json`
+4. Set `PEXELS_KEY` to the provided value
+5. Display: "Pexels API key saved to .ace/secrets.json"
+
+If the user types "skip":
+1. Set `PEXELS_KEY="NOT_AVAILABLE"`
+2. Display: "Skipping Pexels -- using placeholder images."
+3. Do NOT create or modify secrets.json
+
+This prompt appears only when no key exists. On subsequent UI stages where secrets.json already has the key, it is read silently (no prompt).
 
 Ensure `.ace/secrets.json` is gitignored:
 
@@ -337,7 +360,7 @@ Ensure `.ace/secrets.json` is gitignored:
 grep -q "secrets.json" .gitignore 2>/dev/null || echo ".ace/secrets.json" >> .gitignore
 ```
 
-If key is present: `PEXELS_KEY` holds the value. If absent: `PEXELS_KEY="NOT_AVAILABLE"`.
+If key is present: `PEXELS_KEY` holds the value. If absent after prompt: `PEXELS_KEY="NOT_AVAILABLE"`.
 
 ### Initialize Counters
 

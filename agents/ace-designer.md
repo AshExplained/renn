@@ -125,6 +125,82 @@ For each component the stage needs (minimum: the 7 base components -- button, ca
 4. **Ensure token consistency:** Every token referenced in the YAML `tokens` field must exist in `stylekit.yaml`. Every Tailwind class used in preview HTML must resolve through the token system.
 </step>
 
+<step name="create_stylekit_preview">
+**Skip this step if mode is `screens_only`.**
+
+Generate `.ace/design/stylekit-preview.html` -- a single-page composed view of the entire design system. The user reviews this one file instead of opening individual component HTMLs.
+
+1. **HTML boilerplate:** Use the same template as all other prototypes:
+
+   ```html
+   <!DOCTYPE html>
+   <html lang="en" class="scroll-smooth">
+   <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Design System -- {Brand Name}</title>
+
+     <!-- Tailwind CSS v3 ONLY (NOT v4) -->
+     <script src="https://cdn.tailwindcss.com"></script>
+     <script>
+       tailwind.config = {
+         theme: {
+           extend: {
+             colors: {
+               // Map from stylekit.yaml semantic + primitive color tokens
+             },
+             fontFamily: {
+               display: ['{display font}', 'sans-serif'],
+               body: ['{body font}', 'sans-serif'],
+             },
+             borderRadius: {
+               // Map from stylekit.yaml primitive.border.radius tokens
+             },
+             boxShadow: {
+               // Map from stylekit.yaml primitive.shadow tokens
+             },
+           }
+         }
+       }
+     </script>
+
+     <!-- Google Fonts (matching stylekit typography tokens) -->
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link href="https://fonts.googleapis.com/css2?family={Display+Font}:wght@400;500;600;700&family={Body+Font}:wght@400;500;600&display=swap" rel="stylesheet">
+
+     <!-- Material Symbols -->
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+     <!-- Project stylekit (SAME DIRECTORY -- not a multi-level relative path) -->
+     <link rel="stylesheet" href="stylekit.css">
+
+     <style>
+       .material-symbols-rounded {
+         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+       }
+     </style>
+   </head>
+   <body class="font-body bg-neutral-50 text-neutral-900 antialiased">
+   ```
+
+   The relative path to `stylekit.css` is simply `stylekit.css` (same directory). This is different from screen prototypes which use a multi-level relative path from `{stage_dir}/design/` back to `.ace/design/`.
+
+2. **Page wrapper:** Header with h1 "Design System" and subtitle "{Project name} -- {Stage name}". Main content in `max-w-6xl mx-auto px-6 pb-20 space-y-16`.
+
+3. **Page sections (4 mandatory sections):**
+
+   **Color Palette:** Visual grid of all `primitive.color` tokens. Each swatch shows a colored rectangle (`h-20 rounded-lg` with inline `background` style set to the resolved value), the token name, and the hex/oklch value. Use a responsive grid (`grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4`).
+
+   **Typography:** Specimens of each font family at each defined size. Each row shows the size name label (`text-xs text-neutral-400 w-20 shrink-0`), then the specimen text "The quick brown fox jumps over the lazy dog" rendered at that font-family/font-size/line-height. Use `space-y-4`.
+
+   **Spacing Scale:** Visual bars for each `primitive.spacing` token. Each row shows the token name (`text-xs text-neutral-400 w-16 shrink-0`), a colored bar (`h-4 bg-primary rounded`) with inline `width` style set to the spacing value, and the value label. Use `space-y-3`.
+
+   **Components Gallery:** For each component in `.ace/design/components/`, render the component in its default state. Each component gets an h3 heading (capitalize the component name), wrapped in a container div (`border border-neutral-200 rounded-xl p-6 bg-white`). Use the preview HTML from the component's YAML `preview` field (default state only).
+
+4. **Revision behavior:** If this is a revision (not first render), overwrite `stylekit-preview.html` in place. The preview must always reflect the current state of tokens and components.
+</step>
+
 <step name="create_screen_specs">
 **Executes in BOTH full and screens_only modes.**
 
@@ -277,10 +353,11 @@ Produce ALL artifacts before returning. Do not return after creating the styleki
 **Full mode produces:**
 1. `.ace/design/stylekit.yaml` -- token definitions
 2. `.ace/design/stylekit.css` -- generated CSS
-3. `.ace/design/components/{name}/{name}.yaml` -- component specs (one per component)
-4. `.ace/design/components/{name}/{name}.html` -- component previews (one per component)
-5. `{stage_dir}/design/{screen-name}.yaml` -- screen specs (one per screen)
-6. `{stage_dir}/design/{screen-name}.html` -- screen prototypes (one per screen)
+3. `.ace/design/stylekit-preview.html` -- composed design system preview
+4. `.ace/design/components/{name}/{name}.yaml` -- component specs (one per component)
+5. `.ace/design/components/{name}/{name}.html` -- component previews (one per component)
+6. `{stage_dir}/design/{screen-name}.yaml` -- screen specs (one per screen)
+7. `{stage_dir}/design/{screen-name}.html` -- screen prototypes (one per screen)
 
 **Screens_only mode produces:**
 1. `{stage_dir}/design/{screen-name}.yaml` -- screen specs (one per screen)
@@ -371,6 +448,9 @@ Return this when completing the first render or first render in a new mode:
 - .ace/design/stylekit.yaml
 - .ace/design/stylekit.css
 
+**Design System Preview** (full mode only):
+- .ace/design/stylekit-preview.html
+
 **Components** (full mode or new additions):
 - .ace/design/components/{name}/{name}.yaml
 - .ace/design/components/{name}/{name}.html
@@ -435,7 +515,7 @@ Return this after receiving feedback from reviewer or user:
 
 ### Orchestrator Parsing
 
-The orchestrator detects `## DESIGN COMPLETE` or `## DESIGN REVISION` as the completion marker. It parses the artifact list for the approval gate presentation and reads the checklist results for the gate's transparency note.
+The orchestrator detects `## DESIGN COMPLETE` or `## DESIGN REVISION` as the completion marker. It parses the artifact list for the approval gate presentation, reads the checklist results for the gate's transparency note, and uses the artifact list to determine which files to auto-open in the browser.
 
 </structured_returns>
 

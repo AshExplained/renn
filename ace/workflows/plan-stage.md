@@ -514,20 +514,20 @@ If `## ISSUES FOUND`:
 
 If `## REVIEW PASSED`:
 - Reset `auto_revision_count = 0`
-- Proceed to approval gate
+- Proceed to Human-Verify Approval Gate (which auto-opens files first, then presents the gate)
 
-### Auto-Open Prototypes in Browser
+### Human-Verify Approval Gate (PLAN-06)
 
-Before displaying the approval gate, open all review-listed HTML files in the user's default browser.
+**Step 1 -- Auto-open prototypes in browser:**
+
+Execute this bash command NOW to open all review-listed HTML files in the user's default browser before presenting the gate:
 
 Build the file list based on mode:
 - Full mode: `.ace/design/stylekit-preview.html` + all `{stage_dir}/design/*.html` files
 - Screens-only mode: all `{stage_dir}/design/*.html` files only
 
-Open each file using platform-detected commands:
-
 ```bash
-# Platform-specific browser open (best-effort, non-blocking)
+# EXECUTE THIS NOW -- open files before showing gate prompt
 for file in $GATE_FILES; do
   if [[ -f "$file" ]]; then
     if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
@@ -544,16 +544,9 @@ for file in $GATE_FILES; do
 done
 ```
 
-Important:
-- Open files BEFORE displaying the gate prompt (user sees prototypes while reading the gate text)
-- Use `sleep 0.5` between opens to avoid overwhelming the browser with simultaneous tab opens
-- Wrap in best-effort pattern -- if open fails (headless environment, missing command), proceed silently
-- The `start ""` pattern on Windows is required because `start` interprets the first quoted argument as a window title
-- The `cmd.exe` fallback handles WSL and native Windows PowerShell where `$OSTYPE` may not be `msys`
+Silent failure: if no open command works (headless environment), proceed without error. The `start ""` pattern on Windows is required because `start` interprets the first quoted argument as a window title. The `cmd.exe` fallback handles WSL where `$OSTYPE` may not be `msys`.
 
-### Human-Verify Approval Gate (PLAN-06)
-
-Present `checkpoint:human-verify`:
+**Step 2 -- Present checkpoint:human-verify:**
 
 Full mode gate:
 ```

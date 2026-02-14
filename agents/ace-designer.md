@@ -203,19 +203,35 @@ Generate `.ace/design/stylekit-preview.html` -- a single-page composed view of t
 
    The relative path to `stylekit.css` is simply `stylekit.css` (same directory). This is different from screen prototypes which use a multi-level relative path from `{stage_dir}/design/` back to `.ace/design/`.
 
-2. **Page wrapper:** Header with h1 "Design System" and subtitle "{Project name} -- {Stage name}". Main content in `max-w-6xl mx-auto px-6 pb-20 space-y-16`.
+2. **Page wrapper:** A sticky top navigation bar containing the page title on the left and jump links to each section on the right. The navigation uses sticky positioning with a backdrop blur effect so content scrolls beneath it. Include a theme toggle button (light/dark icon) that only appears when `themes.dark` exists in `stylekit.yaml`. The toggle calls `document.documentElement.classList.toggle('dark')` and swaps the icon between `dark_mode` and `light_mode` using Material Symbols. Main content below the navigation in a centered container with generous vertical spacing between sections.
 
-3. **Page sections (4 mandatory sections):**
+3. **Page sections (5 mandatory + 2 conditional sections):**
 
-   **Color Palette:** Visual grid of all `primitive.color` tokens. Each swatch shows a colored rectangle (`h-20 rounded-lg` with inline `background` style set to the resolved value), the token name, and the hex/oklch value. Use a responsive grid (`grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4`).
+   The following sections are the FLOOR, not the ceiling. The designer is encouraged to add 1-2 additional project-specific sections based on context (e.g., icon gallery if the project uses a curated icon set, illustration style guide, data visualization palette). Use the project's own design tokens to style the preview -- each preview should feel like it belongs to that project.
 
-   **Typography:** Specimens of each font family at each defined size. Each row shows the size name label (`text-xs text-neutral-400 w-20 shrink-0`), then the specimen text "The quick brown fox jumps over the lazy dog" rendered at that font-family/font-size/line-height. Use `space-y-4`.
+   **Mandatory sections (always present):**
 
-   **Spacing Scale:** Visual bars for each `primitive.spacing` token. Each row shows the token name (`text-xs text-neutral-400 w-16 shrink-0`), a colored bar (`h-4 bg-primary rounded`) with inline `width` style set to the spacing value, and the value label. Use `space-y-3`.
+   **1. Color Palette:** Visual grid of all `primitive.color` tokens. Each swatch shows the color as a visual rectangle, the token name, and the hex/oklch value. Semantic color mappings should be indicated alongside their primitive source. The designer chooses the grid layout based on the project's spacing and sizing tokens.
 
-   **Components Gallery:** For each component in `.ace/design/components/`, render the component in its default state. Each component gets an h3 heading (capitalize the component name), wrapped in a container div (`border border-neutral-200 rounded-xl p-6 bg-white`). Use the preview HTML from the component's YAML `preview` field (default state only).
+   **2. Typography (contextual):** Each specimen uses real project text derived from the stage context (project name, feature descriptions, UI labels) -- NOT generic "quick brown fox" or "lorem ipsum" placeholder. Each specimen is labeled with its typographic role (Page Title / h1, Section Heading / h2, Body Text, Small / Caption, Code / Mono). Show each font family at each defined size with its weight and line-height values displayed alongside. The specimens should demonstrate what the typography actually looks like in context.
 
-4. **Revision behavior:** If this is a revision (not first render), overwrite `stylekit-preview.html` in place. The preview must always reflect the current state of tokens and components.
+   **3. Spacing Scale (semantic):** Each spacing token shows the semantic name derived from common usage (e.g., `card-padding`, `section-gap`, `input-padding`, `page-margin`) alongside the raw value. A visual bar representation still communicates relative scale, but the semantic name label gives each value meaning beyond a number.
+
+   **4. Components Gallery (all states):** For each component in `.ace/design/components/`, render ALL relevant states -- not just the default. Show default, hover (simulated with a variant), focus (with focus ring), disabled (greyed), and loading (with spinner if applicable). Use the component's `states` field from its YAML to determine which states to render. Lay out states in a horizontal row per component so the user sees the full state spectrum at a glance.
+
+   **5. Patterns / Compositions:** Show components composed into real UI patterns that the project will use. Select 3-5 compositions relevant to the project's screens. Examples: a navigation header with logo + nav links + avatar, a modal dialog (card + heading + input + buttons), a toast notification (badge + text + close button), an empty state (heading + descriptive text + button CTA). Each pattern gets a title and a brief description of when it is used.
+
+   **Conditional sections (included when applicable):**
+
+   **6. Animations:** Include ONLY when `@keyframes` are defined in `stylekit.css`. Show each animation with a label (name + duration + easing), a preview element demonstrating the animation, and a CSS-only replay button. The replay button uses the class removal + reflow + re-add pattern: `element.classList.remove(cls); element.offsetHeight; element.classList.add(cls);`. If no animations are defined, omit this section entirely.
+
+   **7. Responsive Breakpoints:** Include ONLY when the project defines breakpoint values that differ from Tailwind v3 defaults (sm: 640px, md: 768px, lg: 1024px, xl: 1280px). Show a table of breakpoints with their pixel values and a brief note about what layout changes occur at each breakpoint.
+
+4. **Script block:** Add a `<script>` block at the end of the page containing:
+   - **Theme toggle function:** `toggleTheme()` that toggles the `dark` class on `<html>` and swaps the toggle button icon. Only relevant when `themes.dark` exists.
+   - **Animation replay function:** `replay(btn, className)` that removes and re-adds the animation class with a reflow trigger between. Only relevant when animations section is present.
+
+5. **Revision behavior:** If this is a revision (not first render), overwrite `stylekit-preview.html` in place. The preview must always reflect the current state of tokens and components.
 </step>
 
 <step name="create_screen_specs">

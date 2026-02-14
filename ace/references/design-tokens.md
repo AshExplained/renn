@@ -21,6 +21,8 @@ Token schema reference for the three-layer W3C DTCG design token system used by 
 | Durations | `duration` | Object: `{ value: 300, unit: "ms" }` |
 | Easing | `cubicBezier` | Array of 4 numbers: `[0, 0, 0.2, 1]` |
 
+**Animations:** CSS `@keyframes` are defined directly in `stylekit.css` as standard CSS, not as formal DTCG tokens. The DTCG spec has no native animation type. The designer writes keyframe definitions in `stylekit.css` after the `.dark {}` block, using existing `duration` and `cubicBezier` tokens for timing values. The stylekit preview documents defined animations with interactive replay buttons.
+
 ## Three-Layer Architecture
 
 | Layer | Purpose | Naming Pattern | Alias Rules |

@@ -1199,6 +1199,140 @@ HAS_DESIGN=true
 
 </step>
 
+<step name="generate_implementation_guide">
+**Trigger:** `HAS_DESIGN=true` (design phase completed and approved).
+
+**Skip if:** `.ace/design/implementation-guide.md` already exists AND no design artifacts have changed since last generation:
+
+```bash
+if [ "$HAS_DESIGN" != "true" ]; then
+  # No design -- skip entirely
+  :
+elif [ -f ".ace/design/implementation-guide.md" ]; then
+  # Guide exists -- check if design artifacts changed since guide was generated
+  GUIDE_MTIME=$(stat -c %Y .ace/design/implementation-guide.md 2>/dev/null || stat -f %m .ace/design/implementation-guide.md 2>/dev/null)
+  DESIGN_CHANGED=false
+  for f in .ace/design/screens/*.html .ace/design/stylekit.yaml .ace/design/stylekit.css; do
+    [ -f "$f" ] || continue
+    FILE_MTIME=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null)
+    if [ "$FILE_MTIME" -gt "$GUIDE_MTIME" ] 2>/dev/null; then
+      DESIGN_CHANGED=true
+      break
+    fi
+  done
+  if [ "$DESIGN_CHANGED" = "false" ]; then
+    echo "Implementation guide up to date. Skipping regeneration."
+    # Skip to check_existing_runs
+  fi
+fi
+```
+
+If skip conditions are not met, proceed with generation:
+
+### 1. Detect CSS Framework
+
+```bash
+# Check for Tailwind
+TAILWIND_VERSION=""
+if grep -q '"tailwindcss"' package.json 2>/dev/null; then
+  TAILWIND_VERSION=$(grep '"tailwindcss"' package.json | grep -oE '[0-9]+\.[0-9]+')
+fi
+
+# Determine CSS framework
+CSS_FRAMEWORK="unknown"
+if [ -n "$TAILWIND_VERSION" ]; then
+  if echo "$TAILWIND_VERSION" | grep -qE '^4\.'; then
+    CSS_FRAMEWORK="tailwind-v4"
+  else
+    CSS_FRAMEWORK="tailwind-v3"
+  fi
+elif grep -q '"styled-components"' package.json 2>/dev/null; then
+  CSS_FRAMEWORK="styled-components"
+elif ls src/**/*.module.css 2>/dev/null | head -1; then
+  CSS_FRAMEWORK="css-modules"
+else
+  CSS_FRAMEWORK="vanilla-css"
+fi
+
+echo "Detected CSS framework: $CSS_FRAMEWORK"
+```
+
+### 2. Read Prototype HTML File List
+
+```bash
+PROTOTYPE_FILES=$(ls .ace/design/screens/*.html 2>/dev/null)
+STYLEKIT_YAML=".ace/design/stylekit.yaml"
+STYLEKIT_CSS=".ace/design/stylekit.css"
+```
+
+### 3. Spawn Implementation Guide Generator
+
+Display:
+```
+ACE > GENERATING IMPLEMENTATION GUIDE
+
+Detected CSS framework: {CSS_FRAMEWORK}
+Spawning guide generator...
+```
+
+Spawn a focused Task call (uses designer_model tier -- no new agent needed):
+
+```
+Task(
+  prompt="You are generating a design implementation guide that bridges HTML prototypes (Tailwind v3 CDN) to the project's actual CSS framework.\n\n" +
+    "<guide_context>\n" +
+    "**Project CSS Framework:** " + CSS_FRAMEWORK + "\n" +
+    "**Stylekit YAML:** Read @.ace/design/stylekit.yaml\n" +
+    "**Stylekit CSS:** Read @.ace/design/stylekit.css\n" +
+    "**HTML Prototypes:** Read each file in .ace/design/screens/*.html\n\n" +
+    "Generate .ace/design/implementation-guide.md with these 5 sections:\n\n" +
+    "## Framework Detection\n" +
+    "- CSS framework: {detected}\n" +
+    "- Version: {detected}\n" +
+    "- Configuration approach: {e.g., 'Tailwind v4 CSS-first config' or 'CSS custom properties in :root'}\n\n" +
+    "## Token System Translation\n" +
+    "- How to implement stylekit.yaml tokens in the project's framework\n" +
+    "- Exact file path and syntax for the project's CSS system\n" +
+    "- Token namespace mapping (stylekit token names -> project CSS custom properties or framework equivalents)\n" +
+    "- For vanilla CSS: map to CSS custom properties in :root {} (stylekit.css is directly usable)\n" +
+    "- For Tailwind v3: map to tailwind.config theme extensions\n" +
+    "- For Tailwind v4: map to CSS-first @theme declarations in the project's CSS entry point\n" +
+    "- For CSS Modules: map to shared CSS custom properties imported in each module\n" +
+    "- For styled-components: map to a theme object with token values\n\n" +
+    "## Icon System\n" +
+    "- Icon library used in prototypes: {detect from HTML -- typically Material Symbols Rounded}\n" +
+    "- npm install command for the project\n" +
+    "- Import pattern for the project's framework\n" +
+    "- Usage syntax (component vs font vs SVG)\n\n" +
+    "## Animation Patterns\n" +
+    "- List each @keyframes animation found in prototypes and stylekit.css\n" +
+    "- Where to define them in the project (globals.css, tailwind config, CSS module)\n" +
+    "- How to reference them (utility class, CSS class name, animation property)\n\n" +
+    "## Component Class Mapping\n" +
+    "- For each screen prototype: list key visual sections\n" +
+    "- For each section: the Tailwind v3 CDN classes used and their project-framework equivalent\n" +
+    "- Focus on classes that DIFFER between v3 CDN and the project framework\n" +
+    "- Skip structural classes (flex, grid, items-center) that are identical across frameworks\n\n" +
+    "**Target:** 100-200 lines. Summary document, not full prototype inline.\n" +
+    "**Output:** Write to .ace/design/implementation-guide.md\n" +
+    "</guide_context>",
+  subagent_type="general-purpose",
+  model="{designer_model}",
+  description="Generate implementation guide for CSS framework: " + CSS_FRAMEWORK
+)
+```
+
+### 4. Verify Guide Was Created
+
+```bash
+if [ ! -f ".ace/design/implementation-guide.md" ]; then
+  echo "WARNING: Implementation guide was not created. Continuing without guide."
+fi
+```
+
+Display: `Implementation guide generated at .ace/design/implementation-guide.md`
+</step>
+
 <step name="check_existing_runs">
 ```bash
 ls "${STAGE_DIR}"/*-run.md 2>/dev/null
@@ -1233,6 +1367,9 @@ if [ "$HAS_DESIGN" = "true" ]; then
     DESIGN_SUMMARIES="${DESIGN_SUMMARIES}\n- ${screen_name}: ${description} (@.ace/design/screens/${screen_name}.yaml)"
   done
   DESIGN_STYLEKIT_PATH=".ace/design/stylekit.yaml"
+
+  # Load implementation guide (generated by generate_implementation_guide step)
+  IMPLEMENTATION_GUIDE=$(cat .ace/design/implementation-guide.md 2>/dev/null)
 fi
 
 # Gap closure files (only if --gaps mode)

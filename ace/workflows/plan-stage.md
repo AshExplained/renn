@@ -293,10 +293,13 @@ User selects No -> skip to check_existing_runs. User selects Yes -> proceed as D
 ### Existing Design Detection (PLAN-03 partial)
 
 ```bash
-ls "${STAGE_DIR}"/design/*.yaml 2>/dev/null
+# Check if screens for this stage already exist in global location
+# This requires checking if the stage previously ran Phase 2 and produced screens
+# Look for design output markers in recap files
+grep -l "Screen Specs" "${STAGE_DIR}"/*-recap.md 2>/dev/null
 ```
 
-If files exist and no `--force` flag: Display "Using existing design: ${STAGE_DIR}/design/". Store design paths for read_context. Skip to check_existing_runs.
+If a recap references screen specs and no `--force` flag: Display "Using existing design from prior run.". Store design paths for read_context. Skip to check_existing_runs.
 
 ### Mode Determination (PLAN-03)
 
@@ -933,6 +936,21 @@ After Phase 1 approval (or accept-as-is):
 | `component_names` | `ls .ace/design/components/` directory listing |
 | `pexels_key` | Pexels API key check result |
 | `stage_dir` | STAGE_DIR path |
+| `existing_screens` | `ls .ace/design/screens/*.yaml 2>/dev/null` with name + description for each |
+
+**Assemble existing screen context:**
+
+```bash
+EXISTING_SCREENS=""
+for spec in .ace/design/screens/*.yaml; do
+  [ -f "$spec" ] || continue
+  screen_name=$(grep -m1 "^screen:" "$spec" | sed 's/screen: //')
+  description=$(grep -m1 "^description:" "$spec" | sed 's/description: //')
+  EXISTING_SCREENS="${EXISTING_SCREENS}\n- ${screen_name}: ${description}"
+done
+```
+
+If `EXISTING_SCREENS` is empty, the designer creates all screens as new. If populated, the designer reads each relevant existing screen before deciding whether to create new or update.
 
 Phase 2 designer spawn template:
 
@@ -960,9 +978,11 @@ First, read ./.claude/agents/ace-designer.md for your role and instructions.
 
 **Pexels API Key:** {pexels_key}
 
-**Output Directories:**
-- Screen specs: {stage_dir}/design/
-- Screen prototypes: {stage_dir}/design/
+**Existing Screens** (at .ace/design/screens/ -- read before creating):
+{EXISTING_SCREENS}
+
+**Output Directory:**
+- Screen specs and prototypes: .ace/design/screens/
 
 </design_context>
 ```
@@ -1062,11 +1082,24 @@ If `## REVIEW PASSED`:
 
 **Step 1 -- Auto-open prototypes in browser:**
 
-Build the file list for Phase 2: `{stage_dir}/design/*.html` ONLY (screen prototypes, not stylekit-preview.html).
+Build the file list for Phase 2: `.ace/design/screens/*.html` ONLY (screen prototypes created or modified this session, not stylekit-preview.html).
 
 ```bash
 # EXECUTE THIS NOW -- open Phase 2 prototypes before showing gate
-GATE_FILES=$(ls ${STAGE_DIR}/design/*.html 2>/dev/null)
+# Use the designer's structured return to get only new/modified screen files
+# The designer return lists artifacts with [NEW] and [MODIFIED] markers
+# Parse the artifact list from the designer's last return to get specific files
+GATE_FILES=""
+for f in .ace/design/screens/*.html; do
+  [ -f "$f" ] || continue
+  # Only include screens that the designer created or modified this session
+  # The designer's structured return lists specific files -- parse them
+  GATE_FILES="$GATE_FILES $f"
+done
+# NOTE: The orchestrator should filter GATE_FILES using the artifact paths
+# from the designer's ## DESIGN COMPLETE return (new + modified only).
+# If the designer return is not parseable, fall back to opening all screens
+# in .ace/design/screens/ (user can identify which are relevant).
 for file in $GATE_FILES; do
   if [[ -f "$file" ]]; then
     if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
@@ -1089,7 +1122,10 @@ done
 what-built: "Screen prototypes for Stage {N}: {stage_name}"
 how-to-verify:
   1. Review screen prototypes in browser (auto-opened):
-     - {list screen prototype .html files from {stage_dir}/design/}
+     {For each [NEW] screen from designer return:}
+     - .ace/design/screens/{screen-name}.html [NEW] -- {description}
+     {For each [MODIFIED] screen from designer return:}
+     - .ace/design/screens/{screen-name}.html [MODIFIED] -- {modification summary}
   2. Check that layouts match your vision for each screen
   3. Verify components are used consistently across screens
   4. Review responsive behavior if applicable
@@ -1132,8 +1168,12 @@ Select: accept, restart, or skip
 
 Behavior:
 - `accept`: Store current screen artifacts as approved. Continue to Store Design Output.
-- `restart`: Delete `{stage_dir}/design/` contents only (NOT .ace/design/ -- stylekit stays). Reset Phase 2 counters to 0. Re-run Phase 2 from designer spawn.
-- `skip`: Delete `{stage_dir}/design/` contents. Stylekit remains. Continue to Store Design Output (HAS_DESIGN still true since stylekit exists, but no screen specs for this stage).
+- `restart`: Revert current session's screen changes only (NOT all screens in .ace/design/screens/):
+  - For screens marked [NEW] in the designer's return: delete the .yaml and .html files from .ace/design/screens/
+  - For screens marked [MODIFIED] in the designer's return: `git checkout .ace/design/screens/{screen-name}.yaml .ace/design/screens/{screen-name}.html` to restore pre-session state
+  - The stylekit and screens from prior stages are untouched.
+  Reset Phase 2 counters to 0. Re-run Phase 2 from designer spawn.
+- `skip`: Revert current session's screen changes (same scoped approach as restart). Stylekit remains. Continue to Store Design Output (HAS_DESIGN still true since stylekit exists, but no new/modified screen specs for this stage).
 
 ---
 
@@ -1142,9 +1182,10 @@ Behavior:
 After Phase 2 approval (or accept-as-is escalation), store the design output paths for `read_context_files`:
 
 ```
-DESIGN_SCREEN_SPECS=$(ls ${STAGE_DIR}/design/*.yaml 2>/dev/null)
+# Screen specs are now at the global location
+# Use the designer's return to know which screens belong to this stage
+DESIGN_SCREEN_SPECS=$(ls .ace/design/screens/*.yaml 2>/dev/null)
 DESIGN_STYLEKIT_PATH=".ace/design/stylekit.yaml"
-DESIGN_STAGE_DIR="${STAGE_DIR}/design"
 HAS_DESIGN=true
 ```
 
@@ -1153,7 +1194,6 @@ If Phase 2 was skipped but Phase 1 completed (Phase 2 skip escalation):
 ```
 DESIGN_SCREEN_SPECS=""
 DESIGN_STYLEKIT_PATH=".ace/design/stylekit.yaml"
-DESIGN_STAGE_DIR="${STAGE_DIR}/design"
 HAS_DESIGN=true
 ```
 
@@ -1182,13 +1222,15 @@ RESEARCH_CONTENT=$(cat "${STAGE_DIR}"/*-research.md 2>/dev/null)
 
 # Design context (only if handle_design produced approved artifacts)
 if [ "$HAS_DESIGN" = "true" ]; then
-  # Read screen spec YAML files to build summaries
-  DESIGN_SCREEN_SPECS=$(ls "${STAGE_DIR}"/design/*.yaml 2>/dev/null)
+  # Read screen spec YAML files from global location to build summaries
+  # Include new/modified status from designer's return when available
+  DESIGN_SCREEN_SPECS=$(ls .ace/design/screens/*.yaml 2>/dev/null)
   DESIGN_SUMMARIES=""
   for spec in $DESIGN_SCREEN_SPECS; do
+    [ -f "$spec" ] || continue
     screen_name=$(grep -m1 "^screen:" "$spec" | sed 's/screen: //')
     description=$(grep -m1 "^description:" "$spec" | sed 's/description: //')
-    DESIGN_SUMMARIES="${DESIGN_SUMMARIES}\n- ${screen_name}: ${description} (${spec})"
+    DESIGN_SUMMARIES="${DESIGN_SUMMARIES}\n- ${screen_name}: ${description} (@.ace/design/screens/${screen_name}.yaml)"
   done
   DESIGN_STYLEKIT_PATH=".ace/design/stylekit.yaml"
 fi
@@ -1248,19 +1290,22 @@ IMPORTANT: If stage intel exists below, it contains USER DECISIONS from /ace.dis
 
 **Design:**
 Global stylekit: .ace/design/stylekit.yaml
-Screen specs for this stage: {stage_dir}/design/
+All screen specs: .ace/design/screens/
 
-Screen summary:
+Screen summary (all screens -- [NEW] = created this stage, [EXISTING] = from prior stages):
 {design_summaries}
 
 IMPORTANT: Every UI implementation task MUST reference the specific screen spec
 it implements. Include the screen spec path in the task's <context> section as an
-@ reference. Example:
+@ reference. The path is STABLE across stages (always .ace/design/screens/).
 
   <context>
   @.ace/design/stylekit.yaml
-  @.ace/stages/{NN}-{stage-name}/design/{screen-name}.yaml
+  @.ace/design/screens/{screen-name}.yaml
   </context>
+
+For screens marked [NEW]: task implements the full screen from scratch.
+For screens from prior stages that this stage modifies: task modifies the existing implementation to match updated screen spec. Use `git diff .ace/design/screens/{screen-name}.yaml` to see what changed.
 
 Tasks that implement UI without referencing their screen spec will produce
 output inconsistent with the approved design.

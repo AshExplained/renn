@@ -441,43 +441,13 @@ If screen specs exist, identify which ones are relevant to this stage by checkin
 
 **If either condition is false:** Skip this step entirely. No design conformance section in proof.md.
 
-**If both conditions are true:** Run 4 categories of conformance checks for each screen spec.
+**If both conditions are true:** Run conformance checks organized into two tiers.
 
-### 7.5.1 Layout Match
+### Tier 1: Must-Have Conformance (BLOCKING)
 
-For each screen spec YAML, extract section IDs and verify the implementation has corresponding structural elements in the same order.
+These checks are included in run must_haves and affect the pass/fail score. Tier 1 failures appear in the gaps section of proof.md and block stage completion.
 
-```bash
-# Extract section IDs from screen spec
-grep -E "^\s+- id:" ${STAGE_DIR}/design/{screen}.yaml
-
-# Search for corresponding structural elements in implementation
-# Identify the implementation page path from recap.md or run.md file references
-grep -rn "id=\"{section-id}\"\|className.*{section-id}" src/
-```
-
-**Pass:** All screen spec sections have corresponding implementation elements in the same order.
-**Fail:** A spec section has no corresponding element, or sections appear in different order.
-
-### 7.5.2 Component Usage
-
-Extract component references from screen specs and verify they are imported and rendered in the implementation.
-
-```bash
-# Extract component references from screen spec
-grep -E "component:" ${STAGE_DIR}/design/{screen}.yaml
-
-# Search for component imports and JSX usage in implementation
-grep -rn "import.*{ComponentName}" src/ --include="*.tsx" --include="*.jsx"
-grep -rn "<{ComponentName}" src/ --include="*.tsx" --include="*.jsx"
-```
-
-**Pass:** All components referenced in the spec are imported and rendered.
-**Fail:** A component referenced in the spec is not imported or rendered at all.
-
-Note: Repeat counts are guidance, not hard requirements. Dynamic data may change counts.
-
-### 7.5.3 Token Compliance
+#### 7.5.1 Token Compliance
 
 Scan implementation files for hardcoded visual values that should come from the token system.
 
@@ -500,7 +470,83 @@ grep -rn "style=.*[0-9]\+px" src/app/{page}/ --include="*.tsx" --include="*.jsx"
 - `style` attributes for dynamic computed values (progress bars, etc.)
 - Third-party library internal styles
 
-### 7.5.4 Responsive Behavior
+#### 7.5.2 Icon System Check
+
+If `.ace/design/implementation-guide.md` exists, extract the icon system specified and verify the project uses it.
+
+```bash
+# Extract icon system from implementation guide
+grep -A 5 "Icon System" .ace/design/implementation-guide.md 2>/dev/null
+
+# Check package.json for the specified icon package
+grep -E "lucide-react|@heroicons|react-icons|@phosphor-icons|@tabler/icons" package.json 2>/dev/null
+
+# Check imports for icon usage patterns
+grep -rn "import.*Icon\|import.*from.*icons" src/ --include="*.tsx" --include="*.jsx" 2>/dev/null
+
+# Check for inline SVGs that should use the icon system
+grep -rn "<svg" src/app/{page}/ --include="*.tsx" --include="*.jsx" 2>/dev/null
+```
+
+**Pass:** Project uses the icon system specified in the implementation guide. Icon imports match the expected package.
+**Fail:** Inline SVGs used when the guide specifies an icon library, or a different icon library is used than what the guide specifies.
+
+#### 7.5.3 Dark Mode Approach
+
+If `stylekit.yaml` defines `themes.dark`, verify dark mode uses systematic token overrides.
+
+```bash
+# Check if stylekit defines dark theme
+grep -A 2 "themes:" .ace/design/stylekit.yaml 2>/dev/null | grep "dark"
+
+# Scan for hardcoded dark mode values (violations)
+grep -rn "dark:bg-\[#\|dark:text-\[#\|dark:border-\[#" src/app/{page}/ --include="*.tsx" --include="*.jsx" 2>/dev/null
+
+# Scan for dark mode using hardcoded colors
+grep -rn "dark:bg-\[rgb\|dark:text-\[rgb\|dark:bg-\[hsl" src/app/{page}/ --include="*.tsx" --include="*.jsx" 2>/dev/null
+```
+
+**Pass:** Dark mode classes reference token-based utilities. No hardcoded values in dark: variants.
+**Fail:** Dark mode uses hardcoded values per-component (`dark:bg-[#1a1a1a]`, `dark:text-[#e5e5e5]`).
+
+### Tier 2: Advisory Conformance (NON-BLOCKING)
+
+These are flagged as concerns but do NOT affect pass/fail score. The user decides whether to address them.
+
+#### 7.5.4 Layout Match
+
+For each screen spec YAML, extract section IDs and verify the implementation has corresponding structural elements in the same order.
+
+```bash
+# Extract section IDs from screen spec
+grep -E "^\s+- id:" .ace/design/screens/{screen}.yaml
+
+# Search for corresponding structural elements in implementation
+grep -rn "id=\"{section-id}\"\|className.*{section-id}" src/
+```
+
+**Pass:** All screen spec sections have corresponding implementation elements in the same order.
+**Fail:** A spec section has no corresponding element, or sections appear in different order.
+
+#### 7.5.5 Component Usage
+
+Extract component references from screen specs and verify they are imported and rendered in the implementation.
+
+```bash
+# Extract component references from screen spec
+grep -E "component:" .ace/design/screens/{screen}.yaml
+
+# Search for component imports and JSX usage in implementation
+grep -rn "import.*{ComponentName}" src/ --include="*.tsx" --include="*.jsx"
+grep -rn "<{ComponentName}" src/ --include="*.tsx" --include="*.jsx"
+```
+
+**Pass:** All components referenced in the spec are imported and rendered.
+**Fail:** A component referenced in the spec is not imported or rendered at all.
+
+Note: Repeat counts are guidance, not hard requirements. Dynamic data may change counts.
+
+#### 7.5.6 Responsive Behavior
 
 Check for Tailwind responsive prefixes corresponding to the screen spec's responsive overrides.
 
@@ -515,17 +561,14 @@ grep -rn "md:grid-cols-\|lg:grid-cols-\|sm:grid-cols-" src/app/{page}/
 **Pass:** Responsive prefixes present for breakpoints specified in the screen spec.
 **Fail:** Screen spec defines responsive behavior but implementation uses only base classes.
 
-### 7.5.5 Advisory Status
+### 7.5.7 Tiered Status
 
-Design conformance is ADVISORY, NOT BLOCKING.
+Design conformance uses a two-tier system:
 
-- Conformance failures are flagged as concerns in proof.md
-- They do NOT automatically fail the stage
-- They do NOT trigger gap closure automatically
-- The auditor may recommend a gap closure task for actionable failures (e.g., "Badge component missing from implementation")
-- The user decides whether to address flagged concerns
+- **Tier 1 failures are BLOCKING** -- they affect the audit pass/fail score and appear in the gaps section of proof.md. Token violations, wrong icon systems, and hardcoded dark mode values indicate the design system is not being followed.
+- **Tier 2 failures are ADVISORY** -- flagged as concerns, do not affect pass/fail, user decides whether to address. Layout order, component coverage, and responsive classes are guidance-level checks where implementation may intentionally deviate.
 
-This is consistent with the spec rationale: pixel-perfect conformance between YAML screen specs and real implementations is unrealistic. The user already approved the design prototype. These checks catch gross mismatches only.
+This reflects that token compliance, icon systems, and dark mode approach are structural decisions that must be consistent project-wide, while layout and component details may evolve during implementation.
 
 ## Step 8: Identify Human Verification Needs
 
@@ -669,8 +712,14 @@ human_verification: # Only include if status: human_needed
     why_human: "Why can't verify programmatically"
 design_conformance:  # Only include if design specs exist
   screens_checked: N
-  checks_passed: N
-  checks_total: M
+  tier1_passed: N
+  tier1_total: M
+  tier2_passed: N
+  tier2_total: M
+  blocking_failures:
+    - screen: "{screen-name}"
+      check: "{category}"
+      issue: "{what failed}"
   advisory_concerns:
     - screen: "{screen-name}"
       check: "{category}"
@@ -724,17 +773,26 @@ design_conformance:  # Only include if design specs exist
 
 #### {screen-name}.yaml
 
+**Tier 1: Must-Have (BLOCKING)**
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| Token compliance | PASS/FAIL | {evidence: hardcoded values found or "No hardcoded values"} |
+| Icon system | PASS/FAIL | {evidence: correct library used or "Inline SVGs found"} |
+| Dark mode approach | PASS/FAIL | {evidence: token overrides or "Hardcoded dark: values found"} |
+
+**Tier 2: Advisory (NON-BLOCKING)**
+
 | Check | Status | Evidence |
 |-------|--------|----------|
 | Layout match | PASS/FAIL | {evidence: sections found/missing, order match/mismatch} |
 | Component usage | PASS/FAIL | {evidence: components imported/missing} |
-| Token compliance | PASS/FAIL | {evidence: hardcoded values found or "No hardcoded values"} |
 | Responsive behavior | PASS/FAIL | {evidence: responsive classes found/missing} |
 
 {Repeat for each screen spec}
 
-**Overall: {N}/{M} checks passed. {K} concern(s) flagged.**
-**Status: Advisory** -- concerns noted for awareness, not blocking stage completion.
+**Tier 1: {N}/{M} blocking checks passed.** {Failures affect audit score.}
+**Tier 2: {N}/{M} advisory checks passed.** {Concerns noted, not blocking.}
 
 ### Human Verification Required
 

@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1](https://github.com/AshExplained/ace-agentic-code-experience/compare/ace-experience-v0.2.0...ace-experience-v0.2.1) (2026-02-13)
+
+
+### Fixed
+
+* gate skip and template normalization ([4f1ec2e](https://github.com/AshExplained/ace-agentic-code-experience/commit/4f1ec2eeeeaa8aba476106defc48cb1e14168ef0))
+* normalize template filenames and naming convention to lowercase ([c461889](https://github.com/AshExplained/ace-agentic-code-experience/commit/c461889fd46ae121fdf9ee467a9ac826ff596219))
+* prevent human verification gate from being silently skipped ([7abc90d](https://github.com/AshExplained/ace-agentic-code-experience/commit/7abc90d485b5427df9a15a1536a42495d84c3fc9))
+
 ## [0.2.0](https://github.com/AshExplained/ace-agentic-code-experience/compare/ace-experience-v0.1.0...ace-experience-v0.2.0) (2026-02-10)
 
 

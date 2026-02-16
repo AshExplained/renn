@@ -1,7 +1,7 @@
 ---
 name: ace.design-stage
 description: Run the full design pipeline for a UI stage (UX interview, design system, screen prototypes)
-argument-hint: "[stage] [--skip-ux-interview]"
+argument-hint: "[stage] [--skip-ux-interview] [--restyle]"
 allowed-tools:
   - Read
   - Write

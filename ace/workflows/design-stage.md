@@ -45,6 +45,7 @@ Extract from $ARGUMENTS:
 
 - Stage number (integer or decimal like `2.1`)
 - `--skip-ux-interview` flag to skip UX interview
+- `--restyle` flag to enter restyle mode (invoked by ace.restyle command)
 
 **If no stage number:** Detect next unplanned stage from track.
 
@@ -515,6 +516,15 @@ ls .ace/design/stylekit.yaml 2>/dev/null
 ls .ace/codebase/DESIGN.md 2>/dev/null
 ```
 
+**Restyle mode override (when --restyle flag is set):**
+
+If `RESTYLE_MODE=true`:
+- Check `ls .ace/design/stylekit.yaml 2>/dev/null`
+- If stylekit.yaml does NOT exist: **ERROR** -- Display: "No existing design to restyle. Run `/ace.design-stage N` first." STOP.
+- If stylekit.yaml exists: Set `DESIGN_MODE="screens_only"`. Skip the normal priority order below. Jump directly to the Restyle Trigger (PLAN-07) section.
+
+**Normal mode determination (when --restyle flag is NOT set):**
+
 Priority order (check in this sequence):
 1. If stylekit.yaml exists: `DESIGN_MODE="screens_only"` (approved design system takes precedence)
 2. Else if .ace/codebase/DESIGN.md exists: `DESIGN_MODE="translate"` (brownfield design detected)
@@ -614,7 +624,22 @@ Display: "Extension preferences captured. Proceeding to design system creation..
 
 Only when `DESIGN_MODE="screens_only"` (existing stylekit detected):
 
-Present `checkpoint:decision`:
+**If RESTYLE_MODE=true:** Present the restyle-specific checkpoint:
+
+```
+Existing design found. How would you like to restyle?
+
+Options:
+  Keep stylekit - Redo screens only using the current design system
+  Full redo - Create a new design system and new screens
+
+Select: keep-stylekit or full-redo
+```
+
+If `keep-stylekit`: Continue with `DESIGN_MODE="screens_only"`.
+If `full-redo`: Set `DESIGN_MODE="full"`. Designer receives existing stylekit as reference context.
+
+**If RESTYLE_MODE is NOT set (normal flow):** Present the existing checkpoint:
 
 ```
 Existing stylekit found at .ace/design/stylekit.yaml

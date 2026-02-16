@@ -156,6 +156,9 @@ SPECS=$(cat .ace/specs.md 2>/dev/null | grep -A100 "## Requirements" | head -50)
 DECISIONS=$(grep -A20 "### Decisions Made" .ace/pulse.md 2>/dev/null)
 
 # INTEL_CONTENT already loaded in ensure_stage_directory
+
+# Read UX.md for scout (if exists)
+UX_CONTENT_FOR_SCOUT=$(cat .ace/research/UX.md 2>/dev/null)
 ```
 
 Fill research prompt and spawn:
@@ -187,6 +190,14 @@ Answer: "What do I need to know to PLAN this stage well?"
 **Prior decisions from pulse.md:**
 {decisions}
 </additional_context>
+
+<ux_context>
+**UX.md content (if exists -- use for Stage UX Patterns section):**
+
+If UX.md content is present below, generate a ## Stage UX Patterns section in your research.md output. Cross-reference these project-level findings with the specific stage being researched. If no UX.md content below, omit the Stage UX Patterns section.
+
+{ux_content_for_scout}
+</ux_context>
 
 <output>
 Write research findings to: {stage_dir}/{stage}-research.md
@@ -372,6 +383,64 @@ Research default: {what UX.md recommends}
 - `UX_QUESTIONS_ASKED` -- count for visual interview budget
 - `UX_CONTENT` -- original UX.md content for synthesis
 - `RESEARCH_UX_SECTION` -- stage-specific UX section for synthesis
+</step>
+
+<step name="ux_synthesis">
+**Skip conditions:**
+1. handle_ux_interview was skipped -> skip (`UX_INTERVIEW_ANSWERS` is empty)
+2. `UI_STAGE` is false -> skip
+
+**Synthesize inline (UXSY-03: no agent spawn):**
+
+Read:
+- `UX_CONTENT` (project-level UX.md research)
+- `RESEARCH_UX_SECTION` (stage-specific UX patterns from research.md)
+- `UX_INTERVIEW_ANSWERS` (user decisions from UX interview)
+
+Produce `UX_BRIEF` by combining all three sources into concrete design implications:
+
+```xml
+<ux_brief>
+
+## UX Direction for Stage {X}: {Name}
+
+### Interaction Model
+- [Concrete decisions from interview answers, e.g., "Inline form validation with debounced checks"]
+- [Research-backed defaults for "Let Claude decide" answers, e.g., "Toast notifications for async operations, auto-dismiss 5s"]
+
+### Spacing and Density
+- [Implied from adopted patterns, e.g., "Comfortable density -- 16px base padding, 24px section gaps"]
+- [From UX.md emotional design implications, e.g., "Generous whitespace to achieve calm emotion"]
+
+### Component Implications
+- [From adopted patterns + interview answers, e.g., "Data tables with sortable headers per UX.md proven pattern"]
+- [From anti-pattern avoidance, e.g., "No infinite scroll -- paginate with clear page numbers per UX.md anti-pattern guidance"]
+
+### Flow Design
+- [From critical flow decisions, e.g., "Onboarding: 3-step wizard with skip option and progress indicator"]
+- [From friction tolerance, e.g., "Checkout: minimal friction -- single page, no account required"]
+
+### Emotional Guardrails
+- Primary: [from UX.md + calibration answer, e.g., "confident -- clear feedback at every step"]
+- Avoid: [from UX.md anti-emotion, e.g., "overwhelmed -- progressive disclosure, max 5 options per screen"]
+
+### Research References
+- [Cross-references to UX.md sections that informed decisions]
+- [Pattern names and confidence levels from research]
+
+</ux_brief>
+```
+
+**Rules for synthesis:**
+- For answers where user made a choice: use the user's choice verbatim
+- For "Let Claude decide" answers: use the research-backed default from UX.md
+- Translate abstract UX principles into concrete design implications (spacing values, component types, flow structures)
+- If all answers were "Let Claude decide": produce ux_brief entirely from UX.md research defaults
+- Keep ux_brief concise (30-50 lines). This is a digest, not a research report
+
+**Store:** `UX_BRIEF` variable for read_context_files and architect context.
+
+Display: "UX brief synthesized. Proceeding to design..."
 </step>
 
 <step name="handle_design">
@@ -1469,6 +1538,10 @@ if [ "$HAS_DESIGN" = "true" ]; then
   IMPLEMENTATION_GUIDE=$(cat .ace/design/implementation-guide.md 2>/dev/null)
 fi
 
+# UX brief (only if ux_synthesis produced one)
+# UX_BRIEF already stored from ux_synthesis step
+# Will be inlined into architect planning_context if non-empty
+
 # Gap closure files (only if --gaps mode)
 PROOF_CONTENT=$(cat "${STAGE_DIR}"/*-proof.md 2>/dev/null)
 UAT_CONTENT=$(cat "${STAGE_DIR}"/*-uat.md 2>/dev/null)
@@ -1515,6 +1588,19 @@ IMPORTANT: If stage intel exists below, it contains USER DECISIONS from /ace.dis
 
 **Research (if exists):**
 {research_content}
+
+{IF UX_BRIEF is non-empty:}
+
+**UX Brief (if exists):**
+{UX_BRIEF}
+
+This ux_brief was produced by inline synthesis of UX.md research + UX interview answers.
+It provides concrete UX direction for this stage. When planning UI tasks, reference these
+interaction patterns, spacing guidelines, component choices, and emotional guardrails.
+The ux_brief is INFORMATIONAL context for the architect -- it does NOT override user
+decisions from intel.md.
+
+{END IF}
 
 **Gap Closure (if --gaps mode):**
 {proof_content}

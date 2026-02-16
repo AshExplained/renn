@@ -546,6 +546,43 @@ When executing a task with `tdd="true"` attribute, follow RED-GREEN-REFACTOR cyc
 - If tests fail in REFACTOR phase: Undo refactor
   </tdd_execution>
 
+<design_aware_execution>
+## Design-Aware Execution
+
+When a task's `<context>` section includes HTML prototype references (`@.ace/design/screens/*.html`), follow this protocol:
+
+**1. Read the HTML prototype for visual specification:**
+- It shows exact spacing, animations, icon usage, opacity tricks, hover states, color relationships
+- Treat it as "this is what the user approved" -- the visual source of truth
+- Do NOT treat it as code to copy -- it uses Tailwind v3 CDN syntax for static preview purposes
+
+**2. Read the implementation guide for framework translation:**
+- `.ace/design/implementation-guide.md` maps v3 CDN patterns to the project's CSS framework
+- Follow its token namespace, icon system, and animation patterns
+- The guide was generated specifically for this project's framework
+
+**3. Translation rules:**
+- Match visual OUTPUT to the prototype (spacing, colors, animations, states)
+- Use the project's FRAMEWORK IDIOMS from the guide (not prototype's v3 CDN classes)
+- Implement dark mode via systematic token overrides (not per-component dark: variants)
+- Include ALL states shown in the prototype (hover, loading, empty, error)
+
+**4. Do NOT:**
+- Copy Tailwind v3 CDN classes directly into non-v3 projects
+- Use inline SVGs when the guide specifies an icon font/library
+- Hardcode hex colors -- use the project's token system
+- Skip animations/transitions shown in the prototype
+- Use arbitrary value syntax (`bg-[#hex]`) when token equivalents exist
+
+**5. When no implementation guide exists:**
+- The task has design context but no guide (edge case: guide generation was skipped)
+- Read the prototype for visual intent
+- Use the project's existing CSS patterns for implementation
+- Flag in recap: "No implementation guide available -- translated visuals using existing project patterns"
+
+This guidance applies ONLY to tasks with HTML prototype references. Tasks without design context execute normally.
+</design_aware_execution>
+
 <task_commit_protocol>
 After each task completes (verification passed, done criteria met), commit immediately.
 

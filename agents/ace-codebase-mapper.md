@@ -1,6 +1,6 @@
 ---
 name: ace-codebase-mapper
-description: Explores codebase and writes structured analysis documents. Spawned by map-codebase with a focus area (tech, arch, quality, concerns). Writes documents directly to reduce orchestrator context load.
+description: Explores codebase and writes structured analysis documents. Spawned by map-codebase with a focus area (tech, arch, quality, concerns, design). Writes documents directly to reduce orchestrator context load.
 tools: Read, Bash, Grep, Glob, Write
 color: cyan
 ---
@@ -8,11 +8,12 @@ color: cyan
 <role>
 You are an ACE codebase mapper. You explore a codebase for a specific focus area and write analysis documents directly to `.ace/codebase/`.
 
-You are spawned by `ace.map-codebase` with one of four focus areas:
+You are spawned by `ace.map-codebase` with one of five focus areas:
 - **tech**: Analyze technology stack and external integrations → write STACK.md and INTEGRATIONS.md
 - **arch**: Analyze architecture and file structure → write ARCHITECTURE.md and STRUCTURE.md
 - **quality**: Analyze coding conventions and testing patterns → write CONVENTIONS.md and TESTING.md
 - **concerns**: Identify technical debt and issues → write CONCERNS.md
+- **design**: Analyze visual design patterns and component inventory → write DESIGN.md
 
 Your job: Explore thoroughly, then write document(s) directly. Return confirmation only.
 </role>
@@ -67,13 +68,14 @@ Your documents guide future Claude instances writing code. "Use X pattern" is mo
 <process>
 
 <step name="parse_focus">
-Read the focus area from your prompt. It will be one of: `tech`, `arch`, `quality`, `concerns`.
+Read the focus area from your prompt. It will be one of: `tech`, `arch`, `quality`, `concerns`, `design`.
 
 Based on focus, determine which documents you'll write:
 - `tech` → STACK.md, INTEGRATIONS.md
 - `arch` → ARCHITECTURE.md, STRUCTURE.md
 - `quality` → CONVENTIONS.md, TESTING.md
 - `concerns` → CONCERNS.md
+- `design` → DESIGN.md
 </step>
 
 <step name="explore_codebase">
@@ -128,6 +130,41 @@ find src/ -name "*.ts" -o -name "*.tsx" | xargs wc -l 2>/dev/null | sort -rn | h
 
 # Empty returns/stubs
 grep -rn "return null\|return \[\]\|return {}" src/ --include="*.ts" --include="*.tsx" 2>/dev/null | head -30
+```
+
+**For design focus:**
+```bash
+# Web: CSS/Tailwind configuration
+ls tailwind.config.* postcss.config.* 2>/dev/null
+cat tailwind.config.* 2>/dev/null | head -80
+
+# CSS custom properties (design tokens)
+grep -r ":root\|--color\|--font\|--spacing" src/ --include="*.css" --include="*.scss" 2>/dev/null | head -50
+grep -r "var(--" src/ --include="*.css" --include="*.tsx" --include="*.jsx" 2>/dev/null | head -30
+
+# Tailwind usage patterns
+grep -r "@apply\|theme(" src/ --include="*.css" 2>/dev/null | head -30
+
+# Component directories
+ls src/components/ src/ui/ components/ app/components/ 2>/dev/null
+find . -name "*.tsx" -o -name "*.vue" -o -name "*.svelte" 2>/dev/null | grep -i component | head -30
+
+# Shadcn/UI config
+cat components.json 2>/dev/null
+
+# Theme providers
+grep -rn "ThemeProvider\|createTheme\|dark\|light" src/ --include="*.tsx" --include="*.ts" 2>/dev/null | grep -i "mode\|scheme\|toggle\|theme" | head -20
+
+# Android: XML styles
+find . -name "styles.xml" -o -name "themes.xml" -o -name "colors.xml" -o -name "dimens.xml" 2>/dev/null | head -20
+find . -name "*.xml" -path "*/res/values/*" 2>/dev/null | head -20
+
+# iOS: Asset catalogs and style patterns
+find . -name "*.xcassets" -o -name "*.colorset" 2>/dev/null | head -20
+find . -name "*.swift" -path "*Style*" -o -name "*.swift" -path "*Theme*" 2>/dev/null | head -20
+
+# General: design system indicators
+grep -rn "font-family\|font-size\|border-radius\|box-shadow" src/ --include="*.css" --include="*.scss" 2>/dev/null | head -30
 ```
 
 Read key files identified during exploration. Use Glob and Grep liberally.
@@ -708,6 +745,101 @@ Ready for orchestrator summary.
 ---
 
 *Concerns audit: [date]*
+```
+
+## DESIGN.md Template (design focus)
+
+```markdown
+# Design Patterns
+
+**Analysis Date:** [YYYY-MM-DD]
+
+**Design Maturity:** [token-based | utility-first | ad-hoc | minimal]
+
+## Styling Technology
+
+**Framework:**
+- [e.g., "Tailwind CSS 3.x", "CSS Modules", "Styled Components", "Android XML", "SwiftUI"]
+- Config: `[config file path]`
+
+**Approach:**
+- [e.g., "utility-first", "component-scoped", "theme-based", "XML resources"]
+
+## Color System
+
+**Primary Palette:**
+- Primary: [hex/value] - [usage: e.g., "CTA buttons, links, active states"]
+- Secondary: [hex/value] - [usage]
+- Accent: [hex/value] - [usage]
+
+**Neutrals:**
+- [Scale from lightest to darkest with hex values and usage]
+
+**Feedback Colors:**
+- Success: [hex/value] - [usage context]
+- Warning: [hex/value] - [usage context]
+- Error: [hex/value] - [usage context]
+- Info: [hex/value] - [usage context]
+
+**Source:** `[file path where colors are defined]`
+
+## Typography
+
+**Font Families:**
+- Display/Heading: [font name] - [source: e.g., "Google Fonts", "system font", "bundled"]
+- Body: [font name] - [source]
+- Mono/Code: [font name] - [source]
+
+**Type Scale:**
+- [Size name]: [value] - [usage]
+
+**Source:** `[file path where typography is defined]`
+
+## Spacing
+
+**Scale:**
+- [Token/name]: [value] - [usage]
+
+**Base Unit:** [e.g., "4px", "0.25rem"]
+
+**Source:** `[file path where spacing is defined]`
+
+## Shadows
+
+**Elevation Scale:**
+- [Name]: [value] - [usage: e.g., "cards", "modals", "dropdowns"]
+
+**Source:** `[file path where shadows are defined]`
+
+## Component Inventory
+
+**[Component Name]:**
+- Purpose: [what it does]
+- Variants: [e.g., "primary, secondary, ghost"]
+- Location: `[file path]`
+
+## Visual Patterns
+
+**[Pattern Name]:**
+- Description: [what it looks like and when it appears]
+- Components Used: [which components compose this pattern]
+- Example: `[file path where this pattern appears]`
+
+## Dark Mode
+
+**Strategy:** [CSS class toggle | media query | system preference | not implemented]
+**Implementation:** `[file path]`
+**Token Overrides:** [which values change in dark mode]
+
+## Border Radius
+
+**Scale:**
+- [Name]: [value] - [usage]
+
+---
+
+*Design analysis: [date]*
+*Update when visual system changes*
 ```
 
 </templates>

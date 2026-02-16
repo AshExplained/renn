@@ -92,6 +92,9 @@ fi
 
 # Load intel.md immediately - this informs ALL downstream agents
 INTEL_CONTENT=$(cat "${STAGE_DIR}"/*-intel.md 2>/dev/null)
+
+# Extract project name from brief.md heading (used in designer spawn)
+PROJECT_NAME=$(head -1 .ace/brief.md 2>/dev/null | sed 's/^# //')
 ```
 
 **CRITICAL:** Store `INTEL_CONTENT` now. It must be passed to:
@@ -842,6 +845,7 @@ The design workflow runs in two phases with an approval gate between them. Each 
 | `translation_strategy` | TRANSLATE_STRATEGY ("absorb" or "extend", only when DESIGN_MODE="translate") |
 | `design_extension_preferences` | DESIGN_EXTENSION_PREFERENCES (only when TRANSLATE_STRATEGY="extend") |
 | `ux_brief` | UX_BRIEF (from ux_synthesis step, if non-empty) |
+| `project_name` | PROJECT_NAME (from brief.md heading) |
 
 Note: `stylekit_content` and `component_names` are NOT passed in Phase 1 (they don't exist yet).
 
@@ -852,6 +856,7 @@ First, read ./.claude/agents/ace-designer.md for your role and instructions.
 
 <design_context>
 
+**Project Name:** {PROJECT_NAME}
 **Mode:** {DESIGN_MODE}
 **Phase:** stylekit
 **Stage:** {stage_name}
@@ -1144,6 +1149,7 @@ After Phase 1 approval (or accept-as-is):
 | `stage_dir` | STAGE_DIR path |
 | `existing_screens` | `ls .ace/design/screens/*.yaml 2>/dev/null` with name + description for each |
 | `ux_brief` | UX_BRIEF (from ux_synthesis step, if non-empty) |
+| `project_name` | PROJECT_NAME (from brief.md heading) |
 
 **Assemble existing screen context:**
 
@@ -1166,6 +1172,7 @@ First, read ./.claude/agents/ace-designer.md for your role and instructions.
 
 <design_context>
 
+**Project Name:** {PROJECT_NAME}
 **Mode:** {design_mode}
 **Phase:** screens
 **Stage:** {stage_name}

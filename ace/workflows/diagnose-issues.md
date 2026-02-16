@@ -80,7 +80,7 @@ For each gap, fill the detective-prompt template and spawn:
 ```
 Task(
   prompt=filled_detective_prompt,
-  subagent_type="general-purpose",
+  subagent_type="ace-detective",
   description="Debug: {truth_short}"
 )
 ```

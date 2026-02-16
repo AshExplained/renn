@@ -48,6 +48,7 @@ Extract from $ARGUMENTS:
 - `--skip-research` flag to skip research
 - `--gaps` flag for gap closure mode
 - `--skip-verify` flag to bypass verification loop
+- `--skip-ux-interview` flag to skip UX interview
 
 **If no stage number:** Detect next unplanned stage from track.
 
@@ -91,6 +92,9 @@ fi
 
 # Load intel.md immediately - this informs ALL downstream agents
 INTEL_CONTENT=$(cat "${STAGE_DIR}"/*-intel.md 2>/dev/null)
+
+# Extract project name from brief.md heading (used in designer spawn)
+PROJECT_NAME=$(head -1 .ace/brief.md 2>/dev/null | sed 's/^# //')
 ```
 
 **CRITICAL:** Store `INTEL_CONTENT` now. It must be passed to:
@@ -155,6 +159,9 @@ SPECS=$(cat .ace/specs.md 2>/dev/null | grep -A100 "## Requirements" | head -50)
 DECISIONS=$(grep -A20 "### Decisions Made" .ace/pulse.md 2>/dev/null)
 
 # INTEL_CONTENT already loaded in ensure_stage_directory
+
+# Read UX.md for scout (if exists)
+UX_CONTENT_FOR_SCOUT=$(cat .ace/research/UX.md 2>/dev/null)
 ```
 
 Fill research prompt and spawn:
@@ -187,6 +194,14 @@ Answer: "What do I need to know to PLAN this stage well?"
 {decisions}
 </additional_context>
 
+<ux_context>
+**UX.md content (if exists -- use for Stage UX Patterns section):**
+
+If UX.md content is present below, generate a ## Stage UX Patterns section in your research.md output. Cross-reference these project-level findings with the specific stage being researched. If no UX.md content below, omit the Stage UX Patterns section.
+
+{ux_content_for_scout}
+</ux_context>
+
 <output>
 Write research findings to: {stage_dir}/{stage}-research.md
 </output>
@@ -194,8 +209,8 @@ Write research findings to: {stage_dir}/{stage}-research.md
 
 ```
 Task(
-  prompt="First, read ~/.claude/agents/ace-stage-scout.md for your role and instructions.\n\n" + research_prompt,
-  subagent_type="general-purpose",
+  prompt=research_prompt,
+  subagent_type="ace-stage-scout",
   model="{scout_model}",
   description="Research Stage {stage}"
 )
@@ -213,13 +228,12 @@ Task(
 - Wait for user response
 </step>
 
-<step name="handle_design">
+<step name="detect_ui_stage">
+**If `--gaps` flag:** Set `UI_STAGE=false`. Skip to handle_design.
 
-**If `--gaps` flag:** Skip handle_design entirely (gap closure does not re-run design).
+Run UI detection ONCE. Both handle_ux_interview and handle_design use this result.
 
-**If `--skip-research` flag was used AND no research exists:** Design still runs if triggered -- design does not require research.
-
-### UI Detection (PLAN-02)
+### UI Detection (moved from handle_design)
 
 Define the three keyword lists:
 
@@ -269,12 +283,12 @@ function detect_ui_stage(stage_name, goal_text, intel_content, specs_content):
 
 ### Routing by Detection Result
 
-- `NO_DESIGN`: Skip to check_existing_runs. Zero side effects -- no directory creation, no file reads beyond detection, no state changes, no messages emitted.
+- `NO_DESIGN`: Set `UI_STAGE=false`. No side effects.
 
 - `UNCERTAIN`: Present a `checkpoint:decision`:
 
 ```
-This stage may need design. Include design phase?
+This stage may need UX research and design. Include design pipeline?
 
 Context:
   Stage: {stage_name}
@@ -282,13 +296,175 @@ Context:
   Signals found: {list of matched keywords and sources}
 
 Options:
-  Yes - Run design phase (stylekit + screen specs)
-  No  - Skip design, proceed to architect
+  Yes - Run UX interview + design phase
+  No  - Skip UX interview and design, proceed to architect
 ```
 
-User selects No -> skip to check_existing_runs. User selects Yes -> proceed as DESIGN_NEEDED.
+User selects No -> set `UI_STAGE=false`.
+User selects Yes -> set `UI_STAGE=true`.
 
-- `DESIGN_NEEDED`: Continue to existing design detection.
+- `DESIGN_NEEDED`: Set `UI_STAGE=true`.
+
+Store `UI_STAGE` for use by handle_ux_interview and handle_design.
+</step>
+
+<step name="handle_ux_interview">
+**Skip conditions (check in order):**
+1. `--gaps` flag set -> skip (gap closure does not re-run interviews)
+2. `UI_STAGE` is false -> skip
+3. UX.md does not exist -> skip (display: "No UX.md found. Skipping UX interview. Run /ace.start or /ace.new-milestone to generate UX research.")
+4. `--skip-ux-interview` flag set -> skip
+
+**Read UX context:**
+
+```bash
+UX_CONTENT=$(cat .ace/research/UX.md 2>/dev/null)
+if [ -z "$UX_CONTENT" ]; then
+  echo "No UX.md found. Skipping UX interview."
+  UX_INTERVIEW_ANSWERS=""
+  UX_QUESTIONS_ASKED=0
+fi
+
+RESEARCH_UX_SECTION=""
+if [ -f "${STAGE_DIR}"/*-research.md ]; then
+  RESEARCH_UX_SECTION=$(sed -n '/## Stage UX Patterns/,/^## [^S]/p' "${STAGE_DIR}"/*-research.md 2>/dev/null)
+fi
+```
+
+**Display banner:**
+
+```
+ACE > UX INTERVIEW FOR STAGE {X}
+
+Before visual design, let's discuss how users should experience this stage.
+```
+
+**Generate 4-6 questions dynamically from UX.md findings (UXIN-04):**
+
+Read UX.md content and extract questions from these categories:
+
+1. **Critical Flows (1-2 questions):** For each critical flow with LOW or MEDIUM friction tolerance in UX.md, generate a question about how that flow should behave in this stage. Use third-person framing (UXIN-05):
+   - "When a user reaches [flow_name] for the first time, should the experience prioritize [option A] or [option B]?"
+
+2. **Proven Patterns (1-2 questions):** For proven patterns from UX.md that apply to this stage's features, ask whether to adopt the pattern. Direct framing acceptable for preference questions:
+   - "Research shows [pattern] works well in [domain]. Should this stage use [pattern implementation]?"
+
+3. **Anti-Pattern Awareness (0-1 questions):** If UX.md identifies anti-patterns relevant to this stage, generate one awareness question. Third-person framing:
+   - "UX research flagged [anti_pattern] as common in [domain]. When a user encounters [scenario], how should we handle it?"
+
+4. **Emotional Design (1 question):** Generate one emotional calibration question from UX.md emotional design goals. Direct framing:
+   - "UX research targets '[emotion]' as the primary user feeling. For this stage, which approach better achieves that?"
+
+**Question format (UXIN-02, UXIN-03):**
+
+Every question presented via AskUserQuestion:
+- 2-4 concrete options informed by UX.md findings
+- EVERY question includes a "Let Claude decide" option with research-backed default: "(Research suggests: [UX.md recommendation])"
+- Third-person framing for interaction/flow questions (UXIN-05); direct framing for preference/calibration questions
+- Track `UX_QUESTIONS_ASKED` count (target 4-6)
+
+**Compile answers:**
+
+```xml
+<ux_interview_answers>
+### [Question Topic 1]
+Question: {question text}
+Answer: {user's choice or "Let Claude decide"}
+Research default: {what UX.md recommends}
+
+### [Question Topic 2]
+Question: {question text}
+Answer: {user's choice or "Let Claude decide"}
+Research default: {what UX.md recommends}
+
+...
+</ux_interview_answers>
+```
+
+**Store for downstream:**
+- `UX_INTERVIEW_ANSWERS` -- compiled answers
+- `UX_QUESTIONS_ASKED` -- count for visual interview budget
+- `UX_CONTENT` -- original UX.md content for synthesis
+- `RESEARCH_UX_SECTION` -- stage-specific UX section for synthesis
+</step>
+
+<step name="ux_synthesis">
+**Skip conditions:**
+1. handle_ux_interview was skipped -> skip (`UX_INTERVIEW_ANSWERS` is empty)
+2. `UI_STAGE` is false -> skip
+
+**Synthesize inline (UXSY-03: no agent spawn):**
+
+Read:
+- `UX_CONTENT` (project-level UX.md research)
+- `RESEARCH_UX_SECTION` (stage-specific UX patterns from research.md)
+- `UX_INTERVIEW_ANSWERS` (user decisions from UX interview)
+
+Produce `UX_BRIEF` by combining all three sources into concrete design implications:
+
+```xml
+<ux_brief>
+
+## UX Direction for Stage {X}: {Name}
+
+### Interaction Model
+- [Concrete decisions from interview answers, e.g., "Inline form validation with debounced checks"]
+- [Research-backed defaults for "Let Claude decide" answers, e.g., "Toast notifications for async operations, auto-dismiss 5s"]
+
+### Spacing and Density
+- [Implied from adopted patterns, e.g., "Comfortable density -- 16px base padding, 24px section gaps"]
+- [From UX.md emotional design implications, e.g., "Generous whitespace to achieve calm emotion"]
+
+### Component Implications
+- [From adopted patterns + interview answers, e.g., "Data tables with sortable headers per UX.md proven pattern"]
+- [From anti-pattern avoidance, e.g., "No infinite scroll -- paginate with clear page numbers per UX.md anti-pattern guidance"]
+
+### Flow Design
+- [From critical flow decisions, e.g., "Onboarding: 3-step wizard with skip option and progress indicator"]
+- [From friction tolerance, e.g., "Checkout: minimal friction -- single page, no account required"]
+
+### Emotional Guardrails
+- Primary: [from UX.md + calibration answer, e.g., "confident -- clear feedback at every step"]
+- Avoid: [from UX.md anti-emotion, e.g., "overwhelmed -- progressive disclosure, max 5 options per screen"]
+
+### Research References
+- [Cross-references to UX.md sections that informed decisions]
+- [Pattern names and confidence levels from research]
+
+</ux_brief>
+```
+
+**Rules for synthesis:**
+- For answers where user made a choice: use the user's choice verbatim
+- For "Let Claude decide" answers: use the research-backed default from UX.md
+- Translate abstract UX principles into concrete design implications (spacing values, component types, flow structures)
+- If all answers were "Let Claude decide": produce ux_brief entirely from UX.md research defaults
+- Keep ux_brief concise (30-50 lines). This is a digest, not a research report
+
+**Store:** `UX_BRIEF` variable for read_context_files and architect context.
+
+Display: "UX brief synthesized. Proceeding to design..."
+</step>
+
+<step name="handle_design">
+
+**If `--gaps` flag:** Skip handle_design entirely (gap closure does not re-run design).
+
+**Load commit config for design artifact commits:**
+
+```bash
+COMMIT_PLANNING_DOCS=$(cat .ace/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
+git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
+```
+
+**If `--skip-research` flag was used AND no research exists:** Design still runs if triggered -- design does not require research.
+
+### UI Detection (PLAN-02)
+
+UI detection has already run in detect_ui_stage. Check the stored result:
+
+- `UI_STAGE=false`: Skip handle_design entirely. Zero side effects.
+- `UI_STAGE=true`: Continue to Existing Design Detection.
 
 ### Existing Design Detection (PLAN-03 partial)
 
@@ -515,7 +691,7 @@ For each selected area, in order:
 Let's focus on the design direction for [current stage]."
 ```
 
-**Target 8-15 total questions across all areas.** The interview should take 2-3 minutes, not 10.
+**Target up to {VISUAL_BUDGET} questions across all areas, where VISUAL_BUDGET = 15 - UX_QUESTIONS_ASKED.** If UX interview was skipped (UX_QUESTIONS_ASKED=0), target 8-15. The combined interview (UX + visual) should take 2-3 minutes, not 10.
 
 #### Step 4: Core Question Fallback
 
@@ -668,22 +844,34 @@ The design workflow runs in two phases with an approval gate between them. Each 
 | `translation_context` | TRANSLATION_CONTEXT (DESIGN.md content, only when DESIGN_MODE="translate") |
 | `translation_strategy` | TRANSLATE_STRATEGY ("absorb" or "extend", only when DESIGN_MODE="translate") |
 | `design_extension_preferences` | DESIGN_EXTENSION_PREFERENCES (only when TRANSLATE_STRATEGY="extend") |
+| `ux_brief` | UX_BRIEF (from ux_synthesis step, if non-empty) |
+| `project_name` | PROJECT_NAME (from brief.md heading) |
 
 Note: `stylekit_content` and `component_names` are NOT passed in Phase 1 (they don't exist yet).
 
 Phase 1 designer spawn template:
 
 ```
-First, read ./.claude/agents/ace-designer.md for your role and instructions.
-
 <design_context>
 
+**Project Name:** {PROJECT_NAME}
 **Mode:** {DESIGN_MODE}
 **Phase:** stylekit
 **Stage:** {stage_name}
 **Goal:** {stage_goal}
 
 {DESIGN_PREFERENCES}
+
+{IF UX_BRIEF is non-empty:}
+
+**UX Brief (from UX research + interview):**
+{UX_BRIEF}
+
+This ux_brief provides concrete UX direction based on research and user interview answers.
+Use it to inform spacing/density decisions, component selection, and interaction patterns.
+The ux_brief is INFORMATIONAL -- it supplements design preferences but does not override them.
+
+{END IF}
 
 {IF DESIGN_MODE == "translate":}
 
@@ -763,7 +951,7 @@ Spawn:
 ```
 Task(
   prompt=designer_prompt,
-  subagent_type="general-purpose",
+  subagent_type="ace-designer",
   model="{designer_model}",
   description="Design Stage {stage} - Phase 1 (stylekit)"
 )
@@ -776,8 +964,6 @@ Parse designer return: `## DESIGN COMPLETE` or `## DESIGN REVISION`. Verify `**P
 Reviewer spawn template:
 
 ```
-First, read ./.claude/agents/ace-design-reviewer.md for your role and instructions.
-
 <review_context>
 
 **Mode:** full
@@ -798,7 +984,7 @@ Return REVIEW PASSED or ISSUES FOUND with actionable feedback.
 ```
 Task(
   prompt=reviewer_prompt,
-  subagent_type="general-purpose",
+  subagent_type="ace-design-reviewer",
   model="{reviewer_model}",
   description="Review design Phase 1 (stylekit) for Stage {stage}"
 )
@@ -900,6 +1086,27 @@ Behavior:
 
 **CRITICAL:** Phase 1 skip aborts BOTH phases. There is no path where Phase 1 is skipped but Phase 2 runs.
 
+#### Phase 1 -- Commit Design Artifacts
+
+**After Phase 1 approval (before Phase 2 transition):**
+
+```bash
+if [ "$COMMIT_PLANNING_DOCS" = "true" ]; then
+  git add .ace/design/stylekit.yaml
+  git add .ace/design/stylekit.css
+  git add .ace/design/stylekit-preview.html
+  git add .ace/design/components/
+  git commit -m "docs(${STAGE}): approve Phase 1 design system
+
+Phase 1 (stylekit) approved for Stage ${STAGE}: ${STAGE_NAME}
+- Design tokens: stylekit.yaml + stylekit.css
+- Component inventory committed
+- Preview: stylekit-preview.html"
+else
+  echo "Skipping Phase 1 design commit (commit_docs: false)"
+fi
+```
+
 #### Phase 1 -> Phase 2 Transition
 
 After Phase 1 approval (or accept-as-is):
@@ -937,6 +1144,8 @@ After Phase 1 approval (or accept-as-is):
 | `pexels_key` | Pexels API key check result |
 | `stage_dir` | STAGE_DIR path |
 | `existing_screens` | `ls .ace/design/screens/*.yaml 2>/dev/null` with name + description for each |
+| `ux_brief` | UX_BRIEF (from ux_synthesis step, if non-empty) |
+| `project_name` | PROJECT_NAME (from brief.md heading) |
 
 **Assemble existing screen context:**
 
@@ -955,10 +1164,9 @@ If `EXISTING_SCREENS` is empty, the designer creates all screens as new. If popu
 Phase 2 designer spawn template:
 
 ```
-First, read ./.claude/agents/ace-designer.md for your role and instructions.
-
 <design_context>
 
+**Project Name:** {PROJECT_NAME}
 **Mode:** {design_mode}
 **Phase:** screens
 **Stage:** {stage_name}
@@ -969,6 +1177,17 @@ First, read ./.claude/agents/ace-designer.md for your role and instructions.
 
 **Intel (raw -- extract design-relevant decisions yourself):**
 {intel_content}
+
+{IF UX_BRIEF is non-empty:}
+
+**UX Brief (from UX research + interview):**
+{UX_BRIEF}
+
+This ux_brief provides concrete UX direction. Reference it for flow design,
+component density, and interaction patterns when creating screen layouts.
+The ux_brief is INFORMATIONAL -- it supplements intel decisions.
+
+{END IF}
 
 **Approved Stylekit:** (locked -- do not modify)
 {stylekit_content}
@@ -1020,7 +1239,7 @@ Spawn:
 ```
 Task(
   prompt=designer_prompt,
-  subagent_type="general-purpose",
+  subagent_type="ace-designer",
   model="{designer_model}",
   description="Design Stage {stage} - Phase 2 (screens)"
 )
@@ -1031,8 +1250,6 @@ Parse designer return: `## DESIGN COMPLETE` or `## DESIGN REVISION`. Verify `**P
 #### Phase 2 -- Spawn Reviewer
 
 ```
-First, read ./.claude/agents/ace-design-reviewer.md for your role and instructions.
-
 <review_context>
 
 **Mode:** {design_mode}
@@ -1053,7 +1270,7 @@ Return REVIEW PASSED or ISSUES FOUND with actionable feedback.
 ```
 Task(
   prompt=reviewer_prompt,
-  subagent_type="general-purpose",
+  subagent_type="ace-design-reviewer",
   model="{reviewer_model}",
   description="Review design Phase 2 (screens) for Stage {stage}"
 )
@@ -1176,6 +1393,26 @@ Behavior:
 - `skip`: Revert current session's screen changes (same scoped approach as restart). Stylekit remains. Continue to Store Design Output (HAS_DESIGN still true since stylekit exists, but no new/modified screen specs for this stage).
 
 ---
+
+#### Phase 2 -- Commit Design Artifacts
+
+**After Phase 2 approval (before Store Design Output):**
+
+```bash
+if [ "$COMMIT_PLANNING_DOCS" = "true" ]; then
+  git add .ace/design/screens/
+  if [ -f ".ace/design/implementation-guide.md" ]; then
+    git add .ace/design/implementation-guide.md
+  fi
+  git commit -m "docs(${STAGE}): approve Phase 2 screen prototypes
+
+Phase 2 (screens) approved for Stage ${STAGE}: ${STAGE_NAME}
+- Screen specs and prototypes committed
+- Implementation guide included"
+else
+  echo "Skipping Phase 2 design commit (commit_docs: false)"
+fi
+```
 
 ### Store Design Output
 
@@ -1372,6 +1609,10 @@ if [ "$HAS_DESIGN" = "true" ]; then
   IMPLEMENTATION_GUIDE=$(cat .ace/design/implementation-guide.md 2>/dev/null)
 fi
 
+# UX brief (only if ux_synthesis produced one)
+# UX_BRIEF already stored from ux_synthesis step
+# Will be inlined into architect planning_context if non-empty
+
 # Gap closure files (only if --gaps mode)
 PROOF_CONTENT=$(cat "${STAGE_DIR}"/*-proof.md 2>/dev/null)
 UAT_CONTENT=$(cat "${STAGE_DIR}"/*-uat.md 2>/dev/null)
@@ -1418,6 +1659,19 @@ IMPORTANT: If stage intel exists below, it contains USER DECISIONS from /ace.dis
 
 **Research (if exists):**
 {research_content}
+
+{IF UX_BRIEF is non-empty:}
+
+**UX Brief (if exists):**
+{UX_BRIEF}
+
+This ux_brief was produced by inline synthesis of UX.md research + UX interview answers.
+It provides concrete UX direction for this stage. When planning UI tasks, reference these
+interaction patterns, spacing guidelines, component choices, and emotional guardrails.
+The ux_brief is INFORMATIONAL context for the architect -- it does NOT override user
+decisions from intel.md.
+
+{END IF}
 
 **Gap Closure (if --gaps mode):**
 {proof_content}
@@ -1518,8 +1772,8 @@ Before returning ARCHITECTING COMPLETE:
 
 ```
 Task(
-  prompt="First, read ~/.claude/agents/ace-architect.md for your role and instructions.\n\n" + filled_prompt,
-  subagent_type="general-purpose",
+  prompt=filled_prompt,
+  subagent_type="ace-architect",
   model="{architect_model}",
   description="Plan Stage {stage}"
 )
@@ -1669,8 +1923,8 @@ Return what changed.
 
 ```
 Task(
-  prompt="First, read ~/.claude/agents/ace-architect.md for your role and instructions.\n\n" + revision_prompt,
-  subagent_type="general-purpose",
+  prompt=revision_prompt,
+  subagent_type="ace-architect",
   model="{architect_model}",
   description="Revise Stage {stage} runs"
 )

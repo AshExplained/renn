@@ -65,6 +65,20 @@ Template for `.ace/research/recap.md` — executive summary of project research 
 2. **[Pitfall]** — [how to avoid]
 3. **[Pitfall]** — [how to avoid]
 
+### UX/DX Insights
+
+[Summary from UX.md]
+
+**Type:** [UX (UI project) or DX (CLI/API/Library)]
+
+**Key patterns:**
+- [Pattern] — [evidence]
+- [Pattern] — [evidence]
+
+**Emotional design:** [Primary emotion] (avoid: [Anti-emotion])
+
+**Critical flow:** [Most important flow] — [friction tolerance]
+
 ## Implications for Track
 
 Based on research, suggested stage structure:
@@ -110,6 +124,7 @@ Stages with standard patterns (skip research-stage):
 | Features | [HIGH/MEDIUM/LOW] | [reason] |
 | Architecture | [HIGH/MEDIUM/LOW] | [reason] |
 | Pitfalls | [HIGH/MEDIUM/LOW] | [reason] |
+| UX/DX | [HIGH/MEDIUM/LOW] | [reason] |
 
 **Overall confidence:** [HIGH/MEDIUM/LOW]
 
@@ -148,7 +163,7 @@ Stages with standard patterns (skip research-stage):
 
 **Key Findings:**
 - Summarize, don't duplicate full documents
-- Link to detailed docs (STACK.md, FEATURES.md, etc.)
+- Link to detailed docs (STACK.md, FEATURES.md, UX.md, etc.)
 - Focus on what matters for track decisions
 
 **Implications for Track:**

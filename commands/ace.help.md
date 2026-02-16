@@ -25,12 +25,13 @@ Output ONLY the reference content below. Do NOT add:
 
 1. `/ace.start` - Initialize project (includes research, requirements, track)
 2. `/ace.plan-stage 1` - Create detailed run for first stage
+2b. `/ace.design-stage 1` - Design UI stage (if applicable)
 3. `/ace.run-stage 1` - Execute the stage
 
 ## Core Workflow
 
 ```
-/ace.start → /ace.plan-stage → /ace.run-stage → repeat
+/ace.start → /ace.design-stage (UI) → /ace.plan-stage → /ace.run-stage → repeat
 ```
 
 ### Project Initialization
@@ -104,6 +105,27 @@ Create detailed execution run for a specific stage.
 
 Usage: `/ace.plan-stage 1`
 Result: Creates `.ace/stages/01-foundation/01-01-run.md`
+
+### Design
+
+**`/ace.design-stage [stage] [--skip-ux-interview]`**
+Run the full design pipeline for a UI stage.
+
+- Creates design system (stylekit) and screen prototypes
+- Handles UX interview, design interview, Phase 1 (stylekit), Phase 2 (screens)
+- Produces `.ace/design/` artifacts for downstream planning
+- Use before `/ace.plan-stage` for UI stages
+
+Usage: `/ace.design-stage 3`
+
+**`/ace.restyle <stage>`**
+Redesign a stage's visuals without re-planning.
+
+- Requires existing design artifacts from a prior `/ace.design-stage` run
+- Choose to keep existing stylekit (redo screens only) or full redo (new stylekit + screens)
+- Preserves architecture plans (run.md files) -- only design changes
+
+Usage: `/ace.restyle 3`
 
 ### Execution
 
@@ -406,6 +428,28 @@ Example config:
 /ace.plan-stage 1       # Create runs for first stage
 /clear
 /ace.run-stage 1        # Execute all runs in stage
+```
+
+For projects with UI stages, add `/ace.design-stage` before `/ace.plan-stage`:
+
+```
+/ace.start              # Unified flow
+/clear
+/ace.design-stage 1     # Design pipeline for UI stages
+/clear
+/ace.plan-stage 1       # Plan implementation
+/clear
+/ace.run-stage 1        # Execute
+```
+
+**Designing a UI stage:**
+
+```
+/ace.design-stage 2     # Run design pipeline (UX + visual design)
+/clear
+/ace.plan-stage 2       # Plan implementation using design artifacts
+/clear
+/ace.run-stage 2        # Execute
 ```
 
 **Resuming work after a break:**

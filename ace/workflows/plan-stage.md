@@ -209,8 +209,8 @@ Write research findings to: {stage_dir}/{stage}-research.md
 
 ```
 Task(
-  prompt="First, read ~/.claude/agents/ace-stage-scout.md for your role and instructions.\n\n" + research_prompt,
-  subagent_type="general-purpose",
+  prompt=research_prompt,
+  subagent_type="ace-stage-scout",
   model="{scout_model}",
   description="Research Stage {stage}"
 )
@@ -852,8 +852,6 @@ Note: `stylekit_content` and `component_names` are NOT passed in Phase 1 (they d
 Phase 1 designer spawn template:
 
 ```
-First, read ./.claude/agents/ace-designer.md for your role and instructions.
-
 <design_context>
 
 **Project Name:** {PROJECT_NAME}
@@ -953,7 +951,7 @@ Spawn:
 ```
 Task(
   prompt=designer_prompt,
-  subagent_type="general-purpose",
+  subagent_type="ace-designer",
   model="{designer_model}",
   description="Design Stage {stage} - Phase 1 (stylekit)"
 )
@@ -966,8 +964,6 @@ Parse designer return: `## DESIGN COMPLETE` or `## DESIGN REVISION`. Verify `**P
 Reviewer spawn template:
 
 ```
-First, read ./.claude/agents/ace-design-reviewer.md for your role and instructions.
-
 <review_context>
 
 **Mode:** full
@@ -988,7 +984,7 @@ Return REVIEW PASSED or ISSUES FOUND with actionable feedback.
 ```
 Task(
   prompt=reviewer_prompt,
-  subagent_type="general-purpose",
+  subagent_type="ace-design-reviewer",
   model="{reviewer_model}",
   description="Review design Phase 1 (stylekit) for Stage {stage}"
 )
@@ -1168,8 +1164,6 @@ If `EXISTING_SCREENS` is empty, the designer creates all screens as new. If popu
 Phase 2 designer spawn template:
 
 ```
-First, read ./.claude/agents/ace-designer.md for your role and instructions.
-
 <design_context>
 
 **Project Name:** {PROJECT_NAME}
@@ -1245,7 +1239,7 @@ Spawn:
 ```
 Task(
   prompt=designer_prompt,
-  subagent_type="general-purpose",
+  subagent_type="ace-designer",
   model="{designer_model}",
   description="Design Stage {stage} - Phase 2 (screens)"
 )
@@ -1256,8 +1250,6 @@ Parse designer return: `## DESIGN COMPLETE` or `## DESIGN REVISION`. Verify `**P
 #### Phase 2 -- Spawn Reviewer
 
 ```
-First, read ./.claude/agents/ace-design-reviewer.md for your role and instructions.
-
 <review_context>
 
 **Mode:** {design_mode}
@@ -1278,7 +1270,7 @@ Return REVIEW PASSED or ISSUES FOUND with actionable feedback.
 ```
 Task(
   prompt=reviewer_prompt,
-  subagent_type="general-purpose",
+  subagent_type="ace-design-reviewer",
   model="{reviewer_model}",
   description="Review design Phase 2 (screens) for Stage {stage}"
 )
@@ -1780,8 +1772,8 @@ Before returning ARCHITECTING COMPLETE:
 
 ```
 Task(
-  prompt="First, read ~/.claude/agents/ace-architect.md for your role and instructions.\n\n" + filled_prompt,
-  subagent_type="general-purpose",
+  prompt=filled_prompt,
+  subagent_type="ace-architect",
   model="{architect_model}",
   description="Plan Stage {stage}"
 )
@@ -1931,8 +1923,8 @@ Return what changed.
 
 ```
 Task(
-  prompt="First, read ~/.claude/agents/ace-architect.md for your role and instructions.\n\n" + revision_prompt,
-  subagent_type="general-purpose",
+  prompt=revision_prompt,
+  subagent_type="ace-architect",
   model="{architect_model}",
   description="Revise Stage {stage} runs"
 )

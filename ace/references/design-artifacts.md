@@ -74,8 +74,132 @@ Each screen spec is a YAML file defining one full page:
 | `responsive` | map | Desktop-first. `mobile` section describes mobile differences: layout type changes, per-section column/layout overrides, `hidden` flag | No |
 | `interactions` | array | Trigger/action pairs describing user interactions | No |
 | `developer-notes` | array | Implementation hints as string array | No |
+| `viewport` | map | Optional viewport override for this screen. Same schema as stylekit viewport section. Absent = inherit from stylekit. Present = override completely (not merged). | No |
 
 **Section children vs single component:** A section uses either a `children` array (multiple components) or a single `component` reference with optional `variant` and `props`.
+
+## Stylekit Viewport Schema
+
+The optional `viewport` section in stylekit.yaml defines the target canvas for non-desktop projects. When absent, all viewport-dependent behavior is skipped -- the designer, reviewer, and implementation guide treat the absence of this section as `type: desktop` with full-width responsive behavior (the current default).
+
+```yaml
+viewport:
+  type: mobile          # mobile | desktop | tablet | fixed | wearable | tv | print
+  width: 390
+  height: 844
+  frame: iphone-15      # triggers device chrome wrapper in prototypes
+  orientation: portrait  # portrait | landscape
+  shape: rectangular     # rectangular | circular (wearables)
+  direction: ltr         # ltr | rtl
+```
+
+| Field | Type | Description | Required |
+|-------|------|-------------|----------|
+| `type` | enum | `desktop`, `mobile`, `tablet`, `fixed`, `wearable`, `tv`, `print` | Yes |
+| `width` | number | Canvas width in pixels (irrelevant for desktop) | No (desktop skips) |
+| `height` | number | Canvas height in pixels (irrelevant for desktop) | No (desktop skips) |
+| `frame` | string | Device frame identifier (e.g., `iphone-15`, `pixel-8`). Triggers device chrome wrapper. `none` for no frame. | No |
+| `orientation` | enum | `portrait` or `landscape` | No (defaults to `portrait`) |
+| `shape` | enum | `rectangular` or `circular` (wearables) | No (defaults to `rectangular`) |
+| `direction` | enum | `ltr` or `rtl` | No (defaults to `ltr`) |
+
+## Viewport Type Behavior
+
+Each viewport type maps to specific canvas behavior in screen prototypes:
+
+| Type | Canvas Behavior | Frame Available | Common Dimensions |
+|------|----------------|-----------------|-------------------|
+| `desktop` | Full-width responsive (current behavior) | No | N/A |
+| `mobile` | Fixed-width centered div | Yes (device chrome) | 375-430px width |
+| `tablet` | Fixed-width centered div | Yes (device chrome) | 768-1024px width |
+| `fixed` | Exact dimensions, no scaling | Optional border | Any WxH |
+| `wearable` | Small constrained canvas | Optional circular clip | 170-267px |
+| `tv` | Large canvas, oversized targets | No | 1920x1080 |
+| `print` | Fixed A4/Letter ratio | Page break markers | 210x297mm (A4) |
+
+## Device Viewport Reference Table
+
+Common device dimensions for the designer to reference. The `ID` column value is used in the `frame` field of the viewport schema. Dimensions are CSS pixels, not physical pixels.
+
+| ID | Device | Width | Height | Frame |
+|----|--------|-------|--------|-------|
+| `iphone-se` | iPhone SE | 375 | 667 | `iphone-se` |
+| `iphone-14` | iPhone 14 | 390 | 844 | `iphone-14` |
+| `iphone-15-pro` | iPhone 15 Pro | 393 | 852 | `iphone-15-pro` |
+| `iphone-15-pro-max` | iPhone 15 Pro Max | 430 | 932 | `iphone-15-pro-max` |
+| `pixel-8` | Google Pixel 8 | 412 | 892 | `pixel-8` |
+| `galaxy-s24` | Samsung Galaxy S24 | 360 | 780 | `galaxy-s24` |
+| `ipad-mini` | iPad mini | 768 | 1024 | `ipad-mini` |
+| `ipad-pro-11` | iPad Pro 11" | 834 | 1194 | `ipad-pro-11` |
+| `ipad-pro-13` | iPad Pro 13" | 1024 | 1366 | `ipad-pro-13` |
+| `watch-41mm` | Apple Watch 41mm | 176 | 215 | `watch-41mm` |
+| `watch-ultra` | Apple Watch Ultra | 205 | 251 | `watch-ultra` |
+| `galaxy-watch` | Samsung Galaxy Watch | 170 | 170 | `galaxy-watch` |
+| `tv-1080p` | TV 1080p | 1920 | 1080 | none |
+| `letter-page` | US Letter | 816 | 1056 | none |
+
+## Viewport Wrapper Pattern
+
+Screen prototypes constrain their content when a non-desktop viewport exists. The stylekit preview (`stylekit-preview.html`) is ALWAYS full-width regardless of viewport settings. The preview is a documentation artifact, not a screen prototype. Only screen prototypes at `.ace/design/screens/` use viewport wrapping.
+
+**Viewport cascade:** Screen prototypes inherit viewport from `stylekit.yaml`. If a screen spec YAML has its own `viewport` field, the screen spec viewport overrides the stylekit viewport for that screen only. Absent viewport in screen spec = inherit from stylekit. Present viewport = complete override (not merge).
+
+**Background page pattern (shared by all constrained viewports):**
+
+```html
+<body class="font-body bg-neutral-200 text-neutral-900 antialiased min-h-screen flex items-center justify-center">
+  <!-- Device container centered on gray background -->
+  <div class="relative" style="width: {width}px;">
+    <!-- Device frame (optional) -->
+    {frame_html}
+    <!-- Content area -->
+    <div class="bg-neutral-50 overflow-hidden" style="width: {width}px; height: {height}px; overflow-y: auto;">
+      {page_content}
+    </div>
+  </div>
+</body>
+```
+
+The body background changes from `bg-neutral-50` (the default full-width page bg) to `bg-neutral-200` (a contrasting surface) so the viewport container is visually distinct from the page. The content area uses `bg-neutral-50` to match the normal page background.
+
+**iPhone frame pattern (mobile devices):**
+
+```html
+<div class="rounded-[2.5rem] border-[3px] border-neutral-800 shadow-xl overflow-hidden relative">
+  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[120px] h-[30px] bg-neutral-800 rounded-b-2xl z-10"></div>
+  <div class="bg-neutral-50" style="width: {width}px; height: {height}px; overflow-y: auto; padding-top: 44px;">
+    {page_content}
+  </div>
+</div>
+```
+
+**Circular frame pattern (wearables):**
+
+```html
+<div class="rounded-full border-[4px] border-neutral-700 shadow-xl overflow-hidden">
+  <div class="bg-neutral-900" style="width: {width}px; height: {height}px; clip-path: circle(50%);">
+    {page_content}
+  </div>
+</div>
+```
+
+**Fixed dimension pattern (no frame):**
+
+```html
+<div class="border border-neutral-300 shadow-lg overflow-hidden">
+  <div class="bg-neutral-50" style="width: {width}px; height: {height}px; overflow-y: auto;">
+    {page_content}
+  </div>
+</div>
+```
+
+**RTL support pattern:**
+
+```html
+<html lang="{language}" dir="rtl" class="scroll-smooth">
+```
+
+When `direction: rtl`, the `<html>` tag gains `dir="rtl"`. All Tailwind layout utilities auto-flip. No additional CSS changes needed.
 
 ## Content Zone Hints
 

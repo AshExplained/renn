@@ -25,13 +25,14 @@ Output ONLY the reference content below. Do NOT add:
 
 1. `/ace.start` - Initialize project (includes research, requirements, track)
 2. `/ace.plan-stage 1` - Create detailed run for first stage
-2b. `/ace.design-stage 1` - Design UI stage (if applicable)
+2b. `/ace.design-system 1` - Create design system for UI stage (if applicable)
+2c. `/ace.design-screens 1` - Create screen prototypes (if applicable)
 3. `/ace.run-stage 1` - Execute the stage
 
 ## Core Workflow
 
 ```
-/ace.start → /ace.design-stage (UI) → /ace.plan-stage → /ace.run-stage → repeat
+/ace.start → /ace.design-system (UI) → /ace.design-screens (UI) → /ace.plan-stage → /ace.run-stage → repeat
 ```
 
 ### Project Initialization
@@ -107,6 +108,16 @@ Usage: `/ace.plan-stage 1`
 Result: Creates `.ace/stages/01-foundation/01-01-run.md`
 
 ### Design
+
+**`/ace.design-system <stage> [--skip-ux-interview]`**
+Create the design system (stylekit + components) for a UI stage.
+
+- Runs Phase 1 of the design pipeline: UX interview, design interview, stylekit creation
+- Produces `.ace/design/stylekit.yaml`, `stylekit.css`, `stylekit-preview.html`, and `components/`
+- Stops after Phase 1 approval -- does NOT create screen prototypes
+- Use before `/ace.design-screens` for UI stages
+
+Usage: `/ace.design-system 3`
 
 **`/ace.design-stage [stage] [--skip-ux-interview]`**
 Run the full design pipeline for a UI stage.
@@ -430,12 +441,14 @@ Example config:
 /ace.run-stage 1        # Execute all runs in stage
 ```
 
-For projects with UI stages, add `/ace.design-stage` before `/ace.plan-stage`:
+For projects with UI stages, add design commands before `/ace.plan-stage`:
 
 ```
 /ace.start              # Unified flow
 /clear
-/ace.design-stage 1     # Design pipeline for UI stages
+/ace.design-system 1    # Create design system for UI stages
+/clear
+/ace.design-screens 1   # Create screen prototypes
 /clear
 /ace.plan-stage 1       # Plan implementation
 /clear
@@ -445,7 +458,9 @@ For projects with UI stages, add `/ace.design-stage` before `/ace.plan-stage`:
 **Designing a UI stage:**
 
 ```
-/ace.design-stage 2     # Run design pipeline (UX + visual design)
+/ace.design-system 2    # Create design system (stylekit + components)
+/clear
+/ace.design-screens 2   # Create screen prototypes
 /clear
 /ace.plan-stage 2       # Plan implementation using design artifacts
 /clear

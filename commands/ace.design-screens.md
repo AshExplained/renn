@@ -13,7 +13,7 @@ allowed-tools:
 ---
 
 <objective>
-Create screen prototypes for a UI stage using the existing design system. Runs Phase 2 of the design pipeline only: validates stylekit.yaml exists, loads UX brief and research from disk, runs screen creation + reviewer + approval + commit, generates implementation guide and commits it. Requires a prior `/ace.design-system N` run. Stops after completion and directs user to `/ace.plan-stage N`.
+Create screen prototypes for a UI stage using the existing design system. Runs Phase 2 of the design pipeline only: validates stylekit.yaml exists, loads UX brief and research from disk, runs screen creation + reviewer + approval + commit, generates implementation guide and commits it. Requires a prior `/ace.design-system` run. Stops after completion and directs user to `/ace.plan-stage N`.
 
 Context budget: ~15% orchestrator, fresh 200k per subagent.
 </objective>
@@ -34,7 +34,7 @@ Normalize stage input in step 2 before any directory lookups.
 
 This command adds `--phase-2-only --skip-ux-interview` semantics to the arguments before the workflow processes them. The `--phase-2-only` flag causes the workflow to:
 
-- Validate stylekit.yaml exists (ERROR if missing: "Run /ace.design-system N first")
+- Validate stylekit.yaml exists (ERROR if missing: "Run /ace.design-system first")
 - Skip research, UX interview, UX synthesis, design interview, Phase 1
 - Read UX brief from disk (persisted by prior /ace.design-system run)
 - Read research from disk (if exists from prior research)

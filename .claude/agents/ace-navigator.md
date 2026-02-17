@@ -286,7 +286,7 @@ After track creation, specs.md gets updated with stage mappings:
 
 ## track.md Structure
 
-Use template from `.claude/ace/templates/track.md`.
+Use template from `~/.claude/ace/templates/track.md`.
 
 Key sections:
 - Overview (2-3 sentences)
@@ -295,7 +295,7 @@ Key sections:
 
 ## pulse.md Structure
 
-Use template from `.claude/ace/templates/pulse.md`.
+Use template from `~/.claude/ace/templates/pulse.md`.
 
 Key sections:
 - Project Reference (core value, current focus)
@@ -515,7 +515,7 @@ After incorporating user feedback and updating files:
 
 ### Ready for Planning
 
-Next: `/ace.design-system 1` (if UI stage) or `/ace.plan-stage 1`
+Next: `/ace.design-system` (if UI stage) or `/ace.plan-stage 1`
 ```
 
 ## Track Blocked

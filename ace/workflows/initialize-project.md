@@ -1012,7 +1012,7 @@ Present completion with next steps:
 ---
 
 **Also available:**
-- /ace.design-system 1 — create design system (if UI stage)
+- /ace.design-system — create design system (if UI stage)
 - /ace.plan-stage 1 — skip discussion, plan directly
 
 ───────────────────────────────────────────────────────────────

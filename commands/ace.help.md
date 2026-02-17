@@ -25,7 +25,7 @@ Output ONLY the reference content below. Do NOT add:
 
 1. `/ace.start` - Initialize project (includes research, requirements, track)
 2. `/ace.plan-stage 1` - Create detailed run for first stage
-2b. `/ace.design-system 1` - Create design system for UI stage (if applicable)
+2b. `/ace.design-system` - Create design system for UI stages (if applicable)
 2c. `/ace.design-screens 1` - Create screen prototypes (if applicable)
 3. `/ace.run-stage 1` - Execute the stage
 
@@ -109,15 +109,15 @@ Result: Creates `.ace/stages/01-foundation/01-01-run.md`
 
 ### Design
 
-**`/ace.design-system <stage> [--skip-ux-interview]`**
-Create the design system (stylekit + components) for a UI stage.
+**`/ace.design-system [--skip-ux-interview]`**
+Create the project-wide design system (stylekit + components) for all UI stages.
 
 - Runs Phase 1 of the design pipeline: UX interview, design interview, stylekit creation
 - Produces `.ace/design/stylekit.yaml`, `stylekit.css`, `stylekit-preview.html`, and `components/`
 - Stops after Phase 1 approval -- does NOT create screen prototypes
 - Use before `/ace.design-screens` for UI stages
 
-Usage: `/ace.design-system 3`
+Usage: `/ace.design-system`
 
 **`/ace.design-screens <stage>`**
 Create screen prototypes using the existing design system.
@@ -134,7 +134,7 @@ Usage: `/ace.design-screens 3`
 Redesign a stage's visuals without re-planning.
 
 - Requires existing design artifacts from a prior `/ace.design-system` run
-- Choose to keep existing stylekit (redo screens only) or full redo (new stylekit + screens)
+- Keeps existing stylekit, creates new screen prototypes
 - Preserves architecture plans (run.md files) -- only design changes
 
 Usage: `/ace.restyle 3`
@@ -447,7 +447,7 @@ For projects with UI stages, add design commands before `/ace.plan-stage`:
 ```
 /ace.start              # Unified flow
 /clear
-/ace.design-system 1    # Create design system for UI stages
+/ace.design-system      # Create design system for all UI stages
 /clear
 /ace.design-screens 1   # Create screen prototypes
 /clear
@@ -459,7 +459,7 @@ For projects with UI stages, add design commands before `/ace.plan-stage`:
 **Designing a UI stage:**
 
 ```
-/ace.design-system 2    # Create design system (stylekit + components)
+/ace.design-system      # Create design system for all UI stages
 /clear
 /ace.design-screens 2   # Create screen prototypes
 /clear

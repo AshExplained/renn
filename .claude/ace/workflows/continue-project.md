@@ -11,7 +11,7 @@ Instantly restore full project context so "Where were we?" has an immediate, com
 </purpose>
 
 <required_reading>
-@.claude/ace/references/continuation-format.md
+@~/.claude/ace/references/continuation-format.md
 </required_reading>
 
 <process>
@@ -235,7 +235,7 @@ Based on user selection, route to appropriate workflow:
   ---
 
   **Also available:**
-  - /ace.design-system [N] — create design system (if UI stage)
+  - /ace.design-system — create design system (if UI stage)
   - /ace.discuss-stage [N] — gather context first
   - /ace.research-stage [N] — investigate unknowns
 

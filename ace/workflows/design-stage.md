@@ -677,7 +677,7 @@ ls .ace/codebase/DESIGN.md 2>/dev/null
 
 If `PHASE_2_ONLY=true`:
 - Check `ls .ace/design/stylekit.yaml 2>/dev/null`
-- If stylekit.yaml does NOT exist: **ERROR** -- Display: "No design system found at .ace/design/stylekit.yaml\n\nRun /ace.design-system {N} first to create the design system,\nthen run /ace.design-screens {N} to create screen prototypes." STOP.
+- If stylekit.yaml does NOT exist: **ERROR** -- Display: "No design system found at .ace/design/stylekit.yaml\n\nRun /ace.design-system first to create the design system,\nthen run /ace.design-screens {N} to create screen prototypes." STOP.
 - If stylekit.yaml exists: Set `DESIGN_MODE="screens_only"`. Skip normal mode determination. Skip Restyle Trigger. Jump directly to Phase 2.
 - Load UX brief from disk (project-level path first, stage-level fallback):
   ```bash
@@ -692,7 +692,7 @@ If `PHASE_2_ONLY=true`:
 
 If `RESTYLE_MODE=true`:
 - Check `ls .ace/design/stylekit.yaml 2>/dev/null`
-- If stylekit.yaml does NOT exist: **ERROR** -- Display: "No existing design to restyle. Run `/ace.design-system N` first." STOP.
+- If stylekit.yaml does NOT exist: **ERROR** -- Display: "No existing design to restyle. Run `/ace.design-system` first." STOP.
 - If stylekit.yaml exists: Set `DESIGN_MODE="screens_only"`. Skip the normal priority order below. Jump directly to the Restyle Trigger (PLAN-07) section.
 
 **Normal mode determination (when --restyle flag is NOT set):**

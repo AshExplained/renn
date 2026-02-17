@@ -171,7 +171,7 @@ Your STACK.md feeds into track creation. Be prescriptive:
 
 <output>
 Write to: .ace/research/stack.md
-Use template: .claude/ace/templates/research/stack.md
+Use template: ~/.claude/ace/templates/research/stack.md
 </output>
 ", subagent_type="ace-project-scout", model="{scout_model}", description="Stack research")
 
@@ -212,7 +212,7 @@ Your FEATURES.md feeds into requirements definition. Categorize clearly:
 
 <output>
 Write to: .ace/research/features.md
-Use template: .claude/ace/templates/research/features.md
+Use template: ~/.claude/ace/templates/research/features.md
 </output>
 ", subagent_type="ace-project-scout", model="{scout_model}", description="Features research")
 
@@ -254,7 +254,7 @@ Your ARCHITECTURE.md informs stage structure in track. Include:
 
 <output>
 Write to: .ace/research/architecture.md
-Use template: .claude/ace/templates/research/architecture.md
+Use template: ~/.claude/ace/templates/research/architecture.md
 </output>
 ", subagent_type="ace-project-scout", model="{scout_model}", description="Architecture research")
 
@@ -292,7 +292,7 @@ Your PITFALLS.md prevents mistakes in track/planning. For each pitfall:
 
 <output>
 Write to: .ace/research/pitfalls.md
-Use template: .claude/ace/templates/research/pitfalls.md
+Use template: ~/.claude/ace/templates/research/pitfalls.md
 </output>
 ", subagent_type="ace-project-scout", model="{scout_model}", description="Pitfalls research")
 
@@ -349,7 +349,7 @@ Structure matters — use the template headings exactly.
 
 <output>
 Write to: .ace/research/UX.md
-Use template: .claude/ace/templates/research/ux.md
+Use template: ~/.claude/ace/templates/research/ux.md
 </output>
 ", subagent_type="ace-project-scout", model="{scout_model}", description="UX/DX research")
 ```
@@ -373,7 +373,7 @@ Read these files:
 
 <output>
 Write to: .ace/research/recap.md
-Use template: .claude/ace/templates/research/recap.md
+Use template: ~/.claude/ace/templates/research/recap.md
 Commit after writing.
 </output>
 ", subagent_type="ace-synthesizer", model="{synthesizer_model}", description="Synthesize research")
@@ -708,7 +708,7 @@ Present completion with next steps:
 ---
 
 **Also available:**
-- `/ace.design-system [N]` — create design system (if UI stage)
+- `/ace.design-system` — create design system (if UI stage)
 - `/ace.plan-stage [N]` — skip discussion, plan directly
 
 ───────────────────────────────────────────────────────────────

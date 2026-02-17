@@ -43,11 +43,22 @@ Store resolved models for use in Task calls below.
 <step name="parse_arguments">
 Extract from $ARGUMENTS:
 
-- Stage number (integer or decimal like `2.1`)
+- Stage number (integer or decimal like `2.1`) -- OPTIONAL in project-level mode
 - `--skip-ux-interview` flag to skip UX interview
 - `--restyle` flag to enter restyle mode (invoked by ace.restyle command)
 - `--phase-1-only` flag to stop after Phase 1 (invoked by ace.design-system command)
 - `--phase-2-only` flag to skip to Phase 2 (invoked by ace.design-screens command)
+
+**Determine mode:**
+
+If `--phase-1-only` flag is present AND no stage number is provided:
+  Set `PROJECT_LEVEL=true`
+Else:
+  Set `PROJECT_LEVEL=false`
+
+**If PROJECT_LEVEL=true:** Skip stage number parsing, normalization, and research check. These are stage-scoped operations that do not apply in project-level mode. Continue to validate_stage.
+
+**If PROJECT_LEVEL=false:**
 
 **If no stage number:** Detect next unplanned stage from track.
 
@@ -70,6 +81,56 @@ ls .ace/stages/${STAGE}-*/*-research.md 2>/dev/null
 </step>
 
 <step name="validate_stage">
+**If PROJECT_LEVEL=true:** Skip single-stage validation. Instead, scan track.md for ALL stages and identify which are UI stages.
+
+**Project-level track scanning:**
+
+```bash
+# Extract all stage headings and goals from track.md
+# Track uses "### Stage N:" format (anchored to ### headings)
+grep -A5 "^### Stage [0-9]*:" .ace/track.md | grep -v "^\-\-$"
+```
+
+For each stage found, run the UI detection keyword algorithm (the STRONG_POSITIVE, MODERATE_POSITIVE, STRONG_NEGATIVE lists defined in detect_ui_stage step) against the stage name and goal text:
+
+```
+For each stage heading + goal:
+  stage_name = extracted stage name (e.g., "Dashboard")
+  goal_text = extracted goal text (e.g., "Main dashboard with data visualization")
+
+  Apply detect_ui_stage(stage_name, goal_text, "", ""):
+    - Count STRONG_POSITIVE keyword matches in stage_name + goal_text
+    - Count MODERATE_POSITIVE keyword matches in stage_name + goal_text
+    - Count STRONG_NEGATIVE keyword matches in stage_name + goal_text
+    - DESIGN_NEEDED or UNCERTAIN = UI stage
+    - NO_DESIGN = non-UI stage (skip)
+```
+
+Collect results:
+- `UI_STAGES` -- list of stage numbers + names + goals that are UI stages (DESIGN_NEEDED or UNCERTAIN)
+- `ALL_UI_GOALS` -- combined goal text from all UI stages
+
+Validate at least one UI stage exists:
+
+```bash
+if [ ${#UI_STAGES[@]} -eq 0 ]; then
+  echo "No UI stages found in track.md. Design pipeline requires at least one UI stage."
+  # ERROR and exit
+fi
+```
+
+Display discovered UI stages:
+
+```
+Found {N} UI stages:
+  - Stage 3: Dashboard -- Main dashboard with data visualization
+  - Stage 5: Settings -- User settings page
+
+Design system will cover all {N} UI stages.
+```
+
+**If PROJECT_LEVEL=false:**
+
 ```bash
 # Strip leading zeros for track.md lookup (track uses "Stage 1:", not "Stage 01:")
 STAGE_UNPADDED=$(echo "$STAGE" | sed 's/^0\+\([0-9]\)/\1/')

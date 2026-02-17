@@ -47,6 +47,7 @@ Extract from $ARGUMENTS:
 - `--skip-ux-interview` flag to skip UX interview
 - `--restyle` flag to enter restyle mode (invoked by ace.restyle command)
 - `--phase-1-only` flag to stop after Phase 1 (invoked by ace.design-system command)
+- `--phase-2-only` flag to skip to Phase 2 (invoked by ace.design-screens command)
 
 **If no stage number:** Detect next unplanned stage from track.
 
@@ -107,6 +108,8 @@ If intel.md exists, display: `Using stage context from: ${STAGE_DIR}/*-intel.md`
 </step>
 
 <step name="handle_research">
+**If `--phase-2-only` flag is set:** Skip handle_research entirely. Do NOT check config, do NOT check for existing research.md, do NOT offer the scout agent. Research was done during /ace.design-system. Load from disk if available: `RESEARCH_CONTENT=$(cat ${STAGE_DIR}/${STAGE}-research.md 2>/dev/null || echo "")`. If the file does not exist, set `RESEARCH_CONTENT=""` (empty string). Continue to detect_ui_stage.
+
 Check config for research setting:
 
 ```bash
@@ -237,6 +240,8 @@ Task(
 </step>
 
 <step name="detect_ui_stage">
+**If `--phase-2-only` flag is set:** Skip UI detection entirely. The user explicitly invoked `ace.design-screens` which is a design command -- UI stage is guaranteed. Set `UI_STAGE=true`. Do NOT run keyword scoring, do NOT present the UNCERTAIN checkpoint:decision. Continue directly to handle_ux_interview (which will also be skipped by --skip-ux-interview).
+
 Run UI detection ONCE. Both handle_ux_interview and handle_design use this result.
 
 ### UI Detection
@@ -520,6 +525,15 @@ If a recap references screen specs and no `--force` flag: Display "Using existin
 ls .ace/design/stylekit.yaml 2>/dev/null
 ls .ace/codebase/DESIGN.md 2>/dev/null
 ```
+
+**Phase 2 only mode override (when --phase-2-only flag is set):**
+
+If `PHASE_2_ONLY=true`:
+- Check `ls .ace/design/stylekit.yaml 2>/dev/null`
+- If stylekit.yaml does NOT exist: **ERROR** -- Display: "No design system found at .ace/design/stylekit.yaml\n\nRun /ace.design-system {N} first to create the design system,\nthen run /ace.design-screens {N} to create screen prototypes." STOP.
+- If stylekit.yaml exists: Set `DESIGN_MODE="screens_only"`. Skip normal mode determination. Skip Restyle Trigger. Jump directly to Phase 2.
+- Load UX brief from disk: `UX_BRIEF=$(cat ${STAGE_DIR}/${STAGE}-ux-brief.md 2>/dev/null)`
+- Load research from disk (if not already loaded): `RESEARCH_CONTENT=$(cat ${STAGE_DIR}/${STAGE}-research.md 2>/dev/null)` (belt-and-suspenders with handle_research skip)
 
 **Restyle mode override (when --restyle flag is set):**
 
@@ -1472,14 +1486,10 @@ Behavior:
 ```bash
 if [ "$COMMIT_PLANNING_DOCS" = "true" ]; then
   git add .ace/design/screens/
-  if [ -f ".ace/design/implementation-guide.md" ]; then
-    git add .ace/design/implementation-guide.md
-  fi
   git commit -m "docs(${STAGE}): approve Phase 2 screen prototypes
 
 Phase 2 (screens) approved for Stage ${STAGE}: ${STAGE_NAME}
-- Screen specs and prototypes committed
-- Implementation guide included"
+- Screen specs and prototypes committed"
 else
   echo "Skipping Phase 2 design commit (commit_docs: false)"
 fi
@@ -1639,6 +1649,23 @@ fi
 ```
 
 Display: `Implementation guide generated at .ace/design/implementation-guide.md`
+</step>
+
+<step name="commit_implementation_guide">
+**Trigger:** `generate_implementation_guide` step completed and `.ace/design/implementation-guide.md` exists on disk.
+
+```bash
+if [ "$COMMIT_PLANNING_DOCS" = "true" ] && [ -f ".ace/design/implementation-guide.md" ]; then
+  git add .ace/design/implementation-guide.md
+  git commit -m "docs(${STAGE}): generate implementation guide
+
+Implementation guide for Stage ${STAGE}: ${STAGE_NAME}
+- CSS framework translation mappings
+- Token system bridging: prototype -> project"
+fi
+```
+
+This commit runs for ALL invocation modes (design-stage, design-screens), fixing the bug where the implementation guide was never committed on single-design-stage projects.
 </step>
 
 <step name="present_final_status">

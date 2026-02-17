@@ -119,6 +119,17 @@ Create the design system (stylekit + components) for a UI stage.
 
 Usage: `/ace.design-system 3`
 
+**`/ace.design-screens <stage>`**
+Create screen prototypes using the existing design system.
+
+- Runs Phase 2 of the design pipeline: screen creation, reviewer, approval gate
+- Requires `.ace/design/stylekit.yaml` from a prior `/ace.design-system` run
+- Generates implementation guide and commits it after screen approval
+- Produces `.ace/design/screens/` specs and prototypes
+- Use after `/ace.design-system` and before `/ace.plan-stage`
+
+Usage: `/ace.design-screens 3`
+
 **`/ace.design-stage [stage] [--skip-ux-interview]`**
 Run the full design pipeline for a UI stage.
 

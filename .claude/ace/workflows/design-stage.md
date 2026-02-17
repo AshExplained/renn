@@ -1,7 +1,7 @@
 <purpose>
-Run the full design pipeline for a UI stage independently of plan-stage.
+Run the full design pipeline for a UI stage or an entire project independently of plan-stage.
 
-Use this workflow when a stage involves visual UI work and needs design artifacts (stylekit, screen prototypes, implementation guide) before architecture planning. Handles UI detection, UX interview, UX synthesis, design interview, Phase 1 (stylekit), Phase 2 (screens), implementation guide generation, and design artifact commits.
+Dual-mode: operates in stage-level mode (single stage, invoked by design-screens or restyle) or project-level mode (all UI stages, invoked by design-system without a stage number). Use this workflow when a stage involves visual UI work and needs design artifacts (stylekit, screen prototypes, implementation guide) before architecture planning. Handles UI detection, UX interview, UX synthesis, design interview, Phase 1 (stylekit), Phase 2 (screens), implementation guide generation, and design artifact commits.
 </purpose>
 
 <core_principle>
@@ -43,11 +43,22 @@ Store resolved models for use in Task calls below.
 <step name="parse_arguments">
 Extract from $ARGUMENTS:
 
-- Stage number (integer or decimal like `2.1`)
+- Stage number (integer or decimal like `2.1`) -- OPTIONAL in project-level mode
 - `--skip-ux-interview` flag to skip UX interview
 - `--restyle` flag to enter restyle mode (invoked by ace.restyle command)
 - `--phase-1-only` flag to stop after Phase 1 (invoked by ace.design-system command)
 - `--phase-2-only` flag to skip to Phase 2 (invoked by ace.design-screens command)
+
+**Determine mode:**
+
+If `--phase-1-only` flag is present AND no stage number is provided:
+  Set `PROJECT_LEVEL=true`
+Else:
+  Set `PROJECT_LEVEL=false`
+
+**If PROJECT_LEVEL=true:** Skip stage number parsing, normalization, and research check. These are stage-scoped operations that do not apply in project-level mode. Continue to validate_stage.
+
+**If PROJECT_LEVEL=false:**
 
 **If no stage number:** Detect next unplanned stage from track.
 
@@ -70,6 +81,56 @@ ls .ace/stages/${STAGE}-*/*-research.md 2>/dev/null
 </step>
 
 <step name="validate_stage">
+**If PROJECT_LEVEL=true:** Skip single-stage validation. Instead, scan track.md for ALL stages and identify which are UI stages.
+
+**Project-level track scanning:**
+
+```bash
+# Extract all stage headings and goals from track.md
+# Track uses "### Stage N:" format (anchored to ### headings)
+grep -A5 "^### Stage [0-9]*:" .ace/track.md | grep -v "^\-\-$"
+```
+
+For each stage found, run the UI detection keyword algorithm (the STRONG_POSITIVE, MODERATE_POSITIVE, STRONG_NEGATIVE lists defined in detect_ui_stage step) against the stage name and goal text:
+
+```
+For each stage heading + goal:
+  stage_name = extracted stage name (e.g., "Dashboard")
+  goal_text = extracted goal text (e.g., "Main dashboard with data visualization")
+
+  Apply detect_ui_stage(stage_name, goal_text, "", ""):
+    - Count STRONG_POSITIVE keyword matches in stage_name + goal_text
+    - Count MODERATE_POSITIVE keyword matches in stage_name + goal_text
+    - Count STRONG_NEGATIVE keyword matches in stage_name + goal_text
+    - DESIGN_NEEDED or UNCERTAIN = UI stage
+    - NO_DESIGN = non-UI stage (skip)
+```
+
+Collect results:
+- `UI_STAGES` -- list of stage numbers + names + goals that are UI stages (DESIGN_NEEDED or UNCERTAIN)
+- `ALL_UI_GOALS` -- combined goal text from all UI stages
+
+Validate at least one UI stage exists:
+
+```bash
+if [ ${#UI_STAGES[@]} -eq 0 ]; then
+  echo "No UI stages found in track.md. Design pipeline requires at least one UI stage."
+  # ERROR and exit
+fi
+```
+
+Display discovered UI stages:
+
+```
+Found {N} UI stages:
+  - Stage 3: Dashboard -- Main dashboard with data visualization
+  - Stage 5: Settings -- User settings page
+
+Design system will cover all {N} UI stages.
+```
+
+**If PROJECT_LEVEL=false:**
+
 ```bash
 # Strip leading zeros for track.md lookup (track uses "Stage 1:", not "Stage 01:")
 STAGE_UNPADDED=$(echo "$STAGE" | sed 's/^0\+\([0-9]\)/\1/')
@@ -80,6 +141,27 @@ grep -A5 "^### Stage ${STAGE_UNPADDED}:" .ace/track.md 2>/dev/null
 </step>
 
 <step name="ensure_stage_directory">
+**If PROJECT_LEVEL=true:** Skip stage directory creation. Set project-level variable defaults instead.
+
+```bash
+# No stage directory in project-level mode
+STAGE_DIR=""  # Not used in project-level mode
+INTEL_CONTENT=""  # No per-stage intel exists for project-level
+STAGE_NAME="design-system"  # For display purposes
+STAGE="project"  # For commit messages
+COMMIT_PREFIX="design"  # For commit messages (used by handle_design)
+COMMIT_MSG_SCOPE="project design system"  # For commit message body text
+
+# Project-level variables are still extracted from brief.md (they are project-scoped already)
+PROJECT_NAME=$(head -1 .ace/brief.md 2>/dev/null | sed 's/^# //')
+PLATFORM=$(grep -m1 '^\*\*Platform:\*\*' .ace/brief.md 2>/dev/null | sed 's/\*\*Platform:\*\* //')
+VIEWPORT_RAW=$(grep -m1 '^\*\*Viewport:\*\*' .ace/brief.md 2>/dev/null | sed 's/\*\*Viewport:\*\* //')
+```
+
+Display: `Using project-level mode (no stage directory). Designing for all UI stages.`
+
+**If PROJECT_LEVEL=false:**
+
 ```bash
 # STAGE is already normalized (08, 02.1, etc.) from parse_arguments
 STAGE_DIR=$(ls -d .ace/stages/${STAGE}-* 2>/dev/null | head -1)
@@ -91,6 +173,10 @@ if [ -z "$STAGE_DIR" ]; then
   mkdir -p ".ace/stages/${STAGE}-${STAGE_NAME}"
   STAGE_DIR=".ace/stages/${STAGE}-${STAGE_NAME}"
 fi
+
+# Set COMMIT_PREFIX for stage-level mode (symmetry with project-level)
+COMMIT_PREFIX="${STAGE}"
+COMMIT_MSG_SCOPE="Stage ${STAGE}: ${STAGE_NAME}"
 
 # Load intel.md immediately - this informs ALL downstream agents
 INTEL_CONTENT=$(cat "${STAGE_DIR}"/*-intel.md 2>/dev/null)
@@ -112,6 +198,10 @@ If intel.md exists, display: `Using stage context from: ${STAGE_DIR}/*-intel.md`
 </step>
 
 <step name="handle_research">
+**If PROJECT_LEVEL=true:** Skip handle_research entirely. Research is stage-scoped; project-level design relies on UX.md (project-level UX research) and the design interview for design preferences. Set `RESEARCH_CONTENT=""`. Continue to detect_ui_stage.
+
+**If PROJECT_LEVEL=false:**
+
 **If `--phase-2-only` flag is set:** Skip handle_research entirely. Do NOT check config, do NOT check for existing research.md, do NOT offer the scout agent. Research was done during /ace.design-system. Load from disk if available: `RESEARCH_CONTENT=$(cat ${STAGE_DIR}/${STAGE}-research.md 2>/dev/null || echo "")`. If the file does not exist, set `RESEARCH_CONTENT=""` (empty string). Continue to detect_ui_stage.
 
 Check config for research setting:
@@ -246,6 +336,10 @@ Task(
 <step name="detect_ui_stage">
 **If `--phase-2-only` flag is set:** Skip UI detection entirely. The user explicitly invoked `ace.design-screens` which is a design command -- UI stage is guaranteed. Set `UI_STAGE=true`. Do NOT run keyword scoring, do NOT present the UNCERTAIN checkpoint:decision. Continue directly to handle_ux_interview (which will also be skipped by --skip-ux-interview).
 
+**If PROJECT_LEVEL=true:** Skip UI detection keyword scoring. The validate_stage step already scanned all stages from track.md and confirmed at least one UI stage exists. Set `UI_STAGE=true`. The `UI_STAGES` list and `ALL_UI_GOALS` from validate_stage are available for downstream steps (handle_ux_interview and handle_design). Continue to handle_ux_interview.
+
+**If PROJECT_LEVEL=false:**
+
 Run UI detection ONCE. Both handle_ux_interview and handle_design use this result.
 
 ### UI Detection
@@ -344,13 +438,29 @@ if [ -z "$UX_CONTENT" ]; then
   UX_QUESTIONS_ASKED=0
 fi
 
-RESEARCH_UX_SECTION=""
-if [ -f "${STAGE_DIR}"/*-research.md ]; then
-  RESEARCH_UX_SECTION=$(sed -n '/## Stage UX Patterns/,/^## [^S]/p' "${STAGE_DIR}"/*-research.md 2>/dev/null)
+# Load stage-specific UX research section
+if [ "$PROJECT_LEVEL" = "true" ]; then
+  # No per-stage research.md in project-level mode (research was skipped)
+  RESEARCH_UX_SECTION=""
+else
+  RESEARCH_UX_SECTION=""
+  if [ -f "${STAGE_DIR}"/*-research.md ]; then
+    RESEARCH_UX_SECTION=$(sed -n '/## Stage UX Patterns/,/^## [^S]/p' "${STAGE_DIR}"/*-research.md 2>/dev/null)
+  fi
 fi
 ```
 
 **Display banner:**
+
+**If PROJECT_LEVEL=true:**
+
+```
+ACE > UX INTERVIEW FOR PROJECT
+
+Before visual design, let's discuss how users should experience this project across all UI stages.
+```
+
+**If PROJECT_LEVEL=false:**
 
 ```
 ACE > UX INTERVIEW FOR STAGE {X}
@@ -360,15 +470,15 @@ Before visual design, let's discuss how users should experience this stage.
 
 **Generate 4-6 questions dynamically from UX.md findings (UXIN-04):**
 
-Read UX.md content and extract questions from these categories:
+Read UX.md content and extract questions from these categories. **If PROJECT_LEVEL=true:** generate questions spanning ALL UI stages (using `ALL_UI_GOALS` and `UI_STAGES` from validate_stage) instead of a single stage's features. The question categories remain the same -- only the scope of features considered broadens to cover all UI stages. **If PROJECT_LEVEL=false:** generate questions for the single stage as before.
 
-1. **Critical Flows (1-2 questions):** For each critical flow with LOW or MEDIUM friction tolerance in UX.md, generate a question about how that flow should behave in this stage. Use third-person framing (UXIN-05):
+1. **Critical Flows (1-2 questions):** For each critical flow with LOW or MEDIUM friction tolerance in UX.md, generate a question about how that flow should behave in this stage (or across all UI stages in project-level mode). Use third-person framing (UXIN-05):
    - "When a user reaches [flow_name] for the first time, should the experience prioritize [option A] or [option B]?"
 
-2. **Proven Patterns (1-2 questions):** For proven patterns from UX.md that apply to this stage's features, ask whether to adopt the pattern. Direct framing acceptable for preference questions:
+2. **Proven Patterns (1-2 questions):** For proven patterns from UX.md that apply to this stage's features (or all UI stages' features in project-level mode), ask whether to adopt the pattern. Direct framing acceptable for preference questions:
    - "Research shows [pattern] works well in [domain]. Should this stage use [pattern implementation]?"
 
-3. **Anti-Pattern Awareness (0-1 questions):** If UX.md identifies anti-patterns relevant to this stage, generate one awareness question. Third-person framing:
+3. **Anti-Pattern Awareness (0-1 questions):** If UX.md identifies anti-patterns relevant to this stage (or any UI stage in project-level mode), generate one awareness question. Third-person framing:
    - "UX research flagged [anti_pattern] as common in [domain]. When a user encounters [scenario], how should we handle it?"
 
 4. **Emotional Design (1 question):** Generate one emotional calibration question from UX.md emotional design goals. Direct framing:
@@ -419,12 +529,30 @@ Read:
 - `RESEARCH_UX_SECTION` (stage-specific UX patterns from research.md)
 - `UX_INTERVIEW_ANSWERS` (user decisions from UX interview)
 
-Produce `UX_BRIEF` by combining all three sources into concrete design implications:
+Produce `UX_BRIEF` by combining all three sources into concrete design implications.
+
+**Brief heading differs by mode:**
+- **If PROJECT_LEVEL=true:** `## UX Direction for {PROJECT_NAME}`
+- **If PROJECT_LEVEL=false:** `## UX Direction for Stage {X}: {Name}`
+
+**If PROJECT_LEVEL=true:** Include a `### UI Stages Covered` section after the heading, listing all UI stages from `UI_STAGES`:
+
+```markdown
+### UI Stages Covered
+- Stage 3: Dashboard -- Main dashboard with data visualization
+- Stage 5: Settings -- User settings page
+```
 
 ```xml
 <ux_brief>
 
-## UX Direction for Stage {X}: {Name}
+## UX Direction for {PROJECT_NAME or "Stage {X}: {Name}"}
+
+{IF PROJECT_LEVEL=true:}
+### UI Stages Covered
+- {list each UI stage from UI_STAGES with number, name, and goal}
+
+{END IF}
 
 ### Interaction Model
 - [Concrete decisions from interview answers, e.g., "Inline form validation with debounced checks"]
@@ -462,14 +590,31 @@ Produce `UX_BRIEF` by combining all three sources into concrete design implicati
 
 **Persist UX_BRIEF to file (EXTR-02):**
 
+**If PROJECT_LEVEL=true:**
+
+```bash
+mkdir -p .ace/design/
+```
+
+Write the UX_BRIEF content to `.ace/design/ux-brief.md` as plain markdown. The file contains the synthesized UX brief sections WITHOUT XML tags -- just the markdown content between `<ux_brief>` and `</ux_brief>`.
+
+Display: `UX brief synthesized and saved to .ace/design/ux-brief.md. Proceeding to design...`
+
+**If PROJECT_LEVEL=false:**
+
 Write the UX_BRIEF content to `${STAGE_DIR}/${STAGE}-ux-brief.md` as plain markdown. The file contains the synthesized UX brief sections WITHOUT XML tags -- just the markdown content between `<ux_brief>` and `</ux_brief>`.
 
 This file survives `/clear` and is loaded by plan-stage in its read_context_files step.
 
-The file format:
+Display: `UX brief synthesized and saved to ${STAGE_DIR}/${STAGE}-ux-brief.md. Proceeding to design...`
+
+**File format (both modes):**
 
 ```markdown
-## UX Direction for Stage {X}: {Name}
+## UX Direction for {PROJECT_NAME or "Stage {X}: {Name}"}
+
+### UI Stages Covered (project-level only)
+- ...
 
 ### Interaction Model
 - ...
@@ -489,8 +634,6 @@ The file format:
 ### Research References
 - ...
 ```
-
-Display: `UX brief synthesized and saved to ${STAGE_DIR}/${STAGE}-ux-brief.md. Proceeding to design...`
 
 **Store:** `UX_BRIEF` variable for handle_design and designer context.
 </step>
@@ -536,7 +679,13 @@ If `PHASE_2_ONLY=true`:
 - Check `ls .ace/design/stylekit.yaml 2>/dev/null`
 - If stylekit.yaml does NOT exist: **ERROR** -- Display: "No design system found at .ace/design/stylekit.yaml\n\nRun /ace.design-system {N} first to create the design system,\nthen run /ace.design-screens {N} to create screen prototypes." STOP.
 - If stylekit.yaml exists: Set `DESIGN_MODE="screens_only"`. Skip normal mode determination. Skip Restyle Trigger. Jump directly to Phase 2.
-- Load UX brief from disk: `UX_BRIEF=$(cat ${STAGE_DIR}/${STAGE}-ux-brief.md 2>/dev/null)`
+- Load UX brief from disk (project-level path first, stage-level fallback):
+  ```bash
+  UX_BRIEF=$(cat .ace/design/ux-brief.md 2>/dev/null)
+  if [ -z "$UX_BRIEF" ]; then
+    UX_BRIEF=$(cat ${STAGE_DIR}/${STAGE}-ux-brief.md 2>/dev/null)
+  fi
+  ```
 - Load research from disk (if not already loaded): `RESEARCH_CONTENT=$(cat ${STAGE_DIR}/${STAGE}-research.md 2>/dev/null)` (belt-and-suspenders with handle_research skip)
 
 **Restyle mode override (when --restyle flag is set):**
@@ -688,6 +837,16 @@ If `restyle`: Set `DESIGN_MODE="full"`. Designer receives existing stylekit as r
 **If `DESIGN_MODE="full"`:** Run the progressive design interview.
 
 Display banner:
+
+**If PROJECT_LEVEL=true:**
+
+```
+ACE > PROJECT DESIGN -- DESIGN INTERVIEW
+
+Before creating your project design system, let me understand your vision.
+```
+
+**If PROJECT_LEVEL=false:**
 
 ```
 ACE > DESIGNING STAGE {X} -- DESIGN INTERVIEW
@@ -938,8 +1097,17 @@ Phase 1 designer spawn template:
 **Project Name:** {PROJECT_NAME}
 **Mode:** {DESIGN_MODE}
 **Phase:** stylekit
+
+{IF PROJECT_LEVEL=true:}
+**Scope:** All UI stages
+**UI Stages:**
+{for each stage in UI_STAGES: "- Stage {N}: {name} -- {goal}"}
+{END IF}
+
+{IF PROJECT_LEVEL=false:}
 **Stage:** {stage_name}
 **Goal:** {stage_goal}
+{END IF}
 
 {DESIGN_PREFERENCES}
 
@@ -1028,6 +1196,19 @@ Return ## DESIGN REVISION (not ## DESIGN COMPLETE) to signal this is a revision.
 
 Display banner before spawning:
 
+**If PROJECT_LEVEL=true:**
+
+```
+ACE > PROJECT DESIGN -- PHASE 1: DESIGN SYSTEM
+{IF DESIGN_MODE == "translate":}
+Spawning designer (mode: translate, strategy: {TRANSLATE_STRATEGY}, phase: stylekit)...
+{ELSE:}
+Spawning designer (mode: full, phase: stylekit)...
+{END IF}
+```
+
+**If PROJECT_LEVEL=false:**
+
 ```
 ACE > DESIGNING STAGE {X} -- PHASE 1: DESIGN SYSTEM
 {IF DESIGN_MODE == "translate":}
@@ -1038,6 +1219,19 @@ Spawning designer (mode: full, phase: stylekit)...
 ```
 
 Spawn:
+
+**If PROJECT_LEVEL=true:**
+
+```
+Task(
+  prompt=designer_prompt,
+  subagent_type="ace-designer",
+  model="{designer_model}",
+  description="Design Project - Phase 1 (stylekit)"
+)
+```
+
+**If PROJECT_LEVEL=false:**
 
 ```
 Task(
@@ -1071,6 +1265,19 @@ Return REVIEW PASSED or ISSUES FOUND with actionable feedback.
 
 </review_context>
 ```
+
+**If PROJECT_LEVEL=true:**
+
+```
+Task(
+  prompt=reviewer_prompt,
+  subagent_type="ace-design-reviewer",
+  model="{reviewer_model}",
+  description="Review design Phase 1 (stylekit) for project"
+)
+```
+
+**If PROJECT_LEVEL=false:**
 
 ```
 Task(
@@ -1127,6 +1334,22 @@ done
 
 **Step 2 -- Present checkpoint:human-verify:**
 
+**If PROJECT_LEVEL=true:**
+
+```
+what-built: "Design system for project"
+how-to-verify:
+  1. Review design system preview in browser (auto-opened):
+     - .ace/design/stylekit-preview.html (colors, typography, spacing, components)
+  2. Check that color palette matches your brand vision
+  3. Verify typography feels right for your project
+  4. Review component styling (buttons, cards, inputs, etc.)
+  Note: This project-level design system will be used across all UI stages.
+resume-signal: Type "approved" or describe what to change (e.g., "make primary color darker", "switch to a serif font")
+```
+
+**If PROJECT_LEVEL=false:**
+
 ```
 what-built: "Design system for Stage {N}: {stage_name}"
 how-to-verify:
@@ -1155,6 +1378,24 @@ If user provides feedback:
 #### Phase 1 -- Escalation
 
 Present `checkpoint:decision`:
+
+**If PROJECT_LEVEL=true:**
+
+```
+Design system has reached the revision limit.
+
+Current state: {summary of latest designer output}
+{IF reviewer issues exist:} Reviewer concerns: {summary of latest issues}
+
+Options:
+  Accept - Use current design system as-is
+  Restart - Start over with a completely new design direction
+  Skip - Skip design for this project (no design system will be created)
+
+Select: accept, restart, or skip
+```
+
+**If PROJECT_LEVEL=false:**
 
 ```
 Design system has reached the revision limit.
@@ -1187,9 +1428,9 @@ if [ "$COMMIT_PLANNING_DOCS" = "true" ]; then
   git add .ace/design/stylekit.css
   git add .ace/design/stylekit-preview.html
   git add .ace/design/components/
-  git commit -m "docs(${STAGE}): approve Phase 1 design system
+  git commit -m "docs(${COMMIT_PREFIX}): approve Phase 1 design system
 
-Phase 1 (stylekit) approved for Stage ${STAGE}: ${STAGE_NAME}
+Phase 1 (stylekit) approved for ${COMMIT_MSG_SCOPE}
 - Design tokens: stylekit.yaml + stylekit.css
 - Component inventory committed
 - Preview: stylekit-preview.html"
@@ -1270,8 +1511,17 @@ Phase 2 designer spawn template:
 **Project Name:** {PROJECT_NAME}
 **Mode:** {design_mode}
 **Phase:** screens
+
+{IF PROJECT_LEVEL=true:}
+**Scope:** All UI stages
+**UI Stages:**
+{for each stage in UI_STAGES: "- Stage {N}: {name} -- {goal}"}
+{END IF}
+
+{IF PROJECT_LEVEL=false:}
 **Stage:** {stage_name}
 **Goal:** {stage_goal}
+{END IF}
 
 **Research:**
 {research_content}
@@ -1329,6 +1579,16 @@ Return ## DESIGN REVISION (not ## DESIGN COMPLETE) to signal this is a revision.
 
 Display banner:
 
+**If PROJECT_LEVEL=true:**
+
+```
+ACE > PROJECT DESIGN -- PHASE 2: SCREEN PROTOTYPES
+
+Spawning designer (mode: {design_mode}, phase: screens)...
+```
+
+**If PROJECT_LEVEL=false:**
+
 ```
 ACE > DESIGNING STAGE {X} -- PHASE 2: SCREEN PROTOTYPES
 
@@ -1336,6 +1596,19 @@ Spawning designer (mode: {design_mode}, phase: screens)...
 ```
 
 Spawn:
+
+**If PROJECT_LEVEL=true:**
+
+```
+Task(
+  prompt=designer_prompt,
+  subagent_type="ace-designer",
+  model="{designer_model}",
+  description="Design Project - Phase 2 (screens)"
+)
+```
+
+**If PROJECT_LEVEL=false:**
 
 ```
 Task(
@@ -1367,6 +1640,19 @@ Return REVIEW PASSED or ISSUES FOUND with actionable feedback.
 
 </review_context>
 ```
+
+**If PROJECT_LEVEL=true:**
+
+```
+Task(
+  prompt=reviewer_prompt,
+  subagent_type="ace-design-reviewer",
+  model="{reviewer_model}",
+  description="Review design Phase 2 (screens) for project"
+)
+```
+
+**If PROJECT_LEVEL=false:**
 
 ```
 Task(
@@ -1436,6 +1722,25 @@ done
 
 **Step 2 -- Present checkpoint:human-verify:**
 
+**If PROJECT_LEVEL=true:**
+
+```
+what-built: "Screen prototypes for project"
+how-to-verify:
+  1. Review screen prototypes in browser (auto-opened):
+     {For each [NEW] screen from designer return:}
+     - .ace/design/screens/{screen-name}.html [NEW] -- {description}
+     {For each [MODIFIED] screen from designer return:}
+     - .ace/design/screens/{screen-name}.html [MODIFIED] -- {modification summary}
+  2. Check that layouts match your vision for each screen
+  3. Verify components are used consistently across screens
+  4. Review responsive behavior if applicable
+  Note: The design system (colors, fonts, spacing) was approved in the previous phase. Screen feedback should be about layout and content, not colors/fonts.
+resume-signal: Type "approved" or describe what to change
+```
+
+**If PROJECT_LEVEL=false:**
+
 ```
 what-built: "Screen prototypes for Stage {N}: {stage_name}"
 how-to-verify:
@@ -1470,6 +1775,24 @@ If user provides feedback:
 
 Present `checkpoint:decision`:
 
+**If PROJECT_LEVEL=true:**
+
+```
+Screen prototypes have reached the revision limit.
+
+Current state: {summary of latest designer output}
+{IF reviewer issues exist:} Reviewer concerns: {summary of latest issues}
+
+Options:
+  Accept - Use current screen prototypes as-is (proceed to implementation guide)
+  Restart - Start over with new screen layouts (design system stays locked)
+  Skip - Skip screen design (stylekit exists but no screen specs for this project)
+
+Select: accept, restart, or skip
+```
+
+**If PROJECT_LEVEL=false:**
+
 ```
 Screen prototypes have reached the revision limit.
 
@@ -1502,9 +1825,9 @@ Behavior:
 ```bash
 if [ "$COMMIT_PLANNING_DOCS" = "true" ]; then
   git add .ace/design/screens/
-  git commit -m "docs(${STAGE}): approve Phase 2 screen prototypes
+  git commit -m "docs(${COMMIT_PREFIX}): approve Phase 2 screen prototypes
 
-Phase 2 (screens) approved for Stage ${STAGE}: ${STAGE_NAME}
+Phase 2 (screens) approved for ${COMMIT_MSG_SCOPE}
 - Screen specs and prototypes committed"
 else
   echo "Skipping Phase 2 design commit (commit_docs: false)"
@@ -1683,9 +2006,9 @@ Display: `Implementation guide generated at .ace/design/implementation-guide.md`
 ```bash
 if [ "$COMMIT_PLANNING_DOCS" = "true" ] && [ -f ".ace/design/implementation-guide.md" ]; then
   git add .ace/design/implementation-guide.md
-  git commit -m "docs(${STAGE}): generate implementation guide
+  git commit -m "docs(${COMMIT_PREFIX}): generate implementation guide
 
-Implementation guide for Stage ${STAGE}: ${STAGE_NAME}
+Implementation guide for ${COMMIT_MSG_SCOPE}
 - CSS framework translation mappings
 - Token system bridging: prototype -> project"
 fi
@@ -1699,7 +2022,24 @@ Route to the command's `<offer_next>` section.
 
 Display the design-specific completion banner with actual artifact paths:
 
-**If `HAS_DESIGN=true`:**
+**If `HAS_DESIGN=true` AND `PROJECT_LEVEL=true`:**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ACE ► PROJECT DESIGN COMPLETE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Design artifacts:
+  Stylekit:     .ace/design/stylekit.yaml
+  CSS:          .ace/design/stylekit.css
+  Preview:      .ace/design/stylekit-preview.html
+  Components:   .ace/design/components/
+  Guide:        .ace/design/implementation-guide.md
+
+Design system ready. Run /ace.design-screens {N} for each UI stage, then /ace.plan-stage {N}.
+```
+
+**If `HAS_DESIGN=true` AND `PROJECT_LEVEL=false`:**
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1717,7 +2057,19 @@ Design artifacts:
 Ready for /ace.plan-stage {X} to create executable runs.
 ```
 
-**If `HAS_DESIGN=false`:**
+**If `HAS_DESIGN=false` AND `PROJECT_LEVEL=true`:**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ACE ► PROJECT DESIGN SKIPPED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Design was skipped for this project.
+
+You can still run /ace.plan-stage {N} for each stage -- they will proceed without design artifacts.
+```
+
+**If `HAS_DESIGN=false` AND `PROJECT_LEVEL=false`:**
 
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

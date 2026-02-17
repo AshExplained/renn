@@ -287,7 +287,8 @@ PADDED_STAGE=$(printf "%02d" ${STAGE})
 STAGE_DIR=$(ls -d .ace/stages/${PADDED_STAGE}-* .ace/stages/${STAGE}-* 2>/dev/null | head -1)
 if [ -z "$STAGE_DIR" ]; then
   # Create from track name (lowercase, hyphens)
-  STAGE_NAME=$(grep "Stage ${STAGE}:" .ace/track.md | sed 's/.*Stage [0-9]*: //' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+  # Anchor to ### headings to avoid matching list items (which contain markdown ** and descriptions)
+  STAGE_NAME=$(grep "^### Stage ${STAGE}:" .ace/track.md | head -1 | sed 's/^### Stage [0-9]*: //' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
   mkdir -p ".ace/stages/${PADDED_STAGE}-${STAGE_NAME}"
   STAGE_DIR=".ace/stages/${PADDED_STAGE}-${STAGE_NAME}"
 fi

@@ -334,6 +334,10 @@ Task(
 <step name="detect_ui_stage">
 **If `--phase-2-only` flag is set:** Skip UI detection entirely. The user explicitly invoked `ace.design-screens` which is a design command -- UI stage is guaranteed. Set `UI_STAGE=true`. Do NOT run keyword scoring, do NOT present the UNCERTAIN checkpoint:decision. Continue directly to handle_ux_interview (which will also be skipped by --skip-ux-interview).
 
+**If PROJECT_LEVEL=true:** Skip UI detection keyword scoring. The validate_stage step already scanned all stages from track.md and confirmed at least one UI stage exists. Set `UI_STAGE=true`. The `UI_STAGES` list and `ALL_UI_GOALS` from validate_stage are available for downstream steps (handle_ux_interview and handle_design). Continue to handle_ux_interview.
+
+**If PROJECT_LEVEL=false:**
+
 Run UI detection ONCE. Both handle_ux_interview and handle_design use this result.
 
 ### UI Detection

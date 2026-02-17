@@ -97,6 +97,10 @@ INTEL_CONTENT=$(cat "${STAGE_DIR}"/*-intel.md 2>/dev/null)
 
 # Extract project name from brief.md heading (used in designer spawn)
 PROJECT_NAME=$(head -1 .ace/brief.md 2>/dev/null | sed 's/^# //')
+
+# Extract viewport context from brief.md (used in Phase 1 designer spawn)
+PLATFORM=$(grep -m1 '^\*\*Platform:\*\*' .ace/brief.md 2>/dev/null | sed 's/\*\*Platform:\*\* //')
+VIEWPORT_RAW=$(grep -m1 '^\*\*Viewport:\*\*' .ace/brief.md 2>/dev/null | sed 's/\*\*Viewport:\*\* //')
 ```
 
 **CRITICAL:** Store `INTEL_CONTENT` now. It must be passed to:
@@ -903,7 +907,7 @@ The design workflow runs in two phases with an approval gate between them. Each 
 
 #### Phase 1 -- Assemble Designer Context and Spawn
 
-9 context variables (plus `phase`):
+11 context variables (plus `phase`):
 
 | Variable | Source |
 |----------|--------|
@@ -921,6 +925,8 @@ The design workflow runs in two phases with an approval gate between them. Each 
 | `design_extension_preferences` | DESIGN_EXTENSION_PREFERENCES (only when TRANSLATE_STRATEGY="extend") |
 | `ux_brief` | UX_BRIEF (from ux_synthesis step, if non-empty) |
 | `project_name` | PROJECT_NAME (from brief.md heading) |
+| `platform` | PLATFORM (from brief.md Context section) |
+| `viewport_raw` | VIEWPORT_RAW (from brief.md Context section) |
 
 Note: `stylekit_content` and `component_names` are NOT passed in Phase 1 (they don't exist yet).
 
@@ -945,6 +951,16 @@ Phase 1 designer spawn template:
 This ux_brief provides concrete UX direction based on research and user interview answers.
 Use it to inform spacing/density decisions, component selection, and interaction patterns.
 The ux_brief is INFORMATIONAL -- it supplements design preferences but does not override them.
+
+{END IF}
+
+{IF PLATFORM is not "web" AND VIEWPORT_RAW is non-empty:}
+
+**Viewport Context (from brief.md):**
+**Platform:** {PLATFORM}
+**Target Viewport:** {VIEWPORT_RAW}
+
+Use this viewport metadata to populate the stylekit.yaml viewport section (step 3b) and apply viewport wrapping to screen prototypes (step 2b). Parse the target viewport string to extract width, height, frame ID, and other viewport schema fields.
 
 {END IF}
 

@@ -141,6 +141,26 @@ grep -A5 "^### Stage ${STAGE_UNPADDED}:" .ace/track.md 2>/dev/null
 </step>
 
 <step name="ensure_stage_directory">
+**If PROJECT_LEVEL=true:** Skip stage directory creation. Set project-level variable defaults instead.
+
+```bash
+# No stage directory in project-level mode
+STAGE_DIR=""  # Not used in project-level mode
+INTEL_CONTENT=""  # No per-stage intel exists for project-level
+STAGE_NAME="design-system"  # For display purposes
+STAGE="project"  # For commit messages
+COMMIT_PREFIX="design"  # For commit messages (used by handle_design)
+
+# Project-level variables are still extracted from brief.md (they are project-scoped already)
+PROJECT_NAME=$(head -1 .ace/brief.md 2>/dev/null | sed 's/^# //')
+PLATFORM=$(grep -m1 '^\*\*Platform:\*\*' .ace/brief.md 2>/dev/null | sed 's/\*\*Platform:\*\* //')
+VIEWPORT_RAW=$(grep -m1 '^\*\*Viewport:\*\*' .ace/brief.md 2>/dev/null | sed 's/\*\*Viewport:\*\* //')
+```
+
+Display: `Using project-level mode (no stage directory). Designing for all UI stages.`
+
+**If PROJECT_LEVEL=false:**
+
 ```bash
 # STAGE is already normalized (08, 02.1, etc.) from parse_arguments
 STAGE_DIR=$(ls -d .ace/stages/${STAGE}-* 2>/dev/null | head -1)
@@ -152,6 +172,9 @@ if [ -z "$STAGE_DIR" ]; then
   mkdir -p ".ace/stages/${STAGE}-${STAGE_NAME}"
   STAGE_DIR=".ace/stages/${STAGE}-${STAGE_NAME}"
 fi
+
+# Set COMMIT_PREFIX for stage-level mode (symmetry with project-level)
+COMMIT_PREFIX="${STAGE}"
 
 # Load intel.md immediately - this informs ALL downstream agents
 INTEL_CONTENT=$(cat "${STAGE_DIR}"/*-intel.md 2>/dev/null)
@@ -173,6 +196,10 @@ If intel.md exists, display: `Using stage context from: ${STAGE_DIR}/*-intel.md`
 </step>
 
 <step name="handle_research">
+**If PROJECT_LEVEL=true:** Skip handle_research entirely. Research is stage-scoped; project-level design relies on UX.md (project-level UX research) and the design interview for design preferences. Set `RESEARCH_CONTENT=""`. Continue to detect_ui_stage.
+
+**If PROJECT_LEVEL=false:**
+
 **If `--phase-2-only` flag is set:** Skip handle_research entirely. Do NOT check config, do NOT check for existing research.md, do NOT offer the scout agent. Research was done during /ace.design-system. Load from disk if available: `RESEARCH_CONTENT=$(cat ${STAGE_DIR}/${STAGE}-research.md 2>/dev/null || echo "")`. If the file does not exist, set `RESEARCH_CONTENT=""` (empty string). Continue to detect_ui_stage.
 
 Check config for research setting:

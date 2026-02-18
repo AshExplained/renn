@@ -279,6 +279,30 @@ Run the same [UI] tag check on the stage heading (see above).
 ---
 ```
 
+**If UI stage + stylekit but no screens:**
+
+```
+---
+
+## ▶ Next Up
+
+**Stage {N}: {Name}** — {Goal from track.md}
+
+`/ace.discuss-stage {stage}` — gather context and clarify approach
+
+<sub>`/clear` first → fresh context window</sub>
+
+---
+
+**Then:** `/ace.design-screens {stage}` — create screen prototypes before planning
+
+**Also available:**
+- `/ace.plan-stage {stage}` — skip discussion and design, Claude designs inline
+- `/ace.list-stage-assumptions {stage}` — see Claude's assumptions
+
+---
+```
+
 **If non-UI stage or design artifacts already present:**
 
 ```

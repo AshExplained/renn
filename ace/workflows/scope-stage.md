@@ -197,30 +197,32 @@ We'll clarify HOW to implement this.
 
 **Do NOT include a "skip" or "you decide" option.** User ran this command to discuss — give them real choices.
 
+**Plain-language rule:** Describe behaviors, not name concepts. The user may not be technical. Instead of jargon, use familiar references ("like Instagram", "like Google search results") or describe what the user would see/do.
+
 **Examples by domain:**
 
 For "Post Feed" (visual feature):
 ```
-☐ Layout style — Cards vs list vs timeline? Information density?
-☐ Loading behavior — Infinite scroll or pagination? Pull to refresh?
-☐ Content ordering — Chronological, algorithmic, or user choice?
-☐ Post metadata — What info per post? Timestamps, reactions, author?
+☐ How posts look — Show each post as a card, a scrolling list, or a grid? How much detail per post?
+☐ How more posts load — Keep loading as you scroll down (like Instagram), or page-by-page with Next/Previous (like Google)?
+☐ What order posts appear — Newest first, smart sorting, or let the user pick?
+☐ What shows on each post — Time posted, likes, author name? What details matter?
 ```
 
 For "Database backup CLI" (command-line tool):
 ```
-☐ Output format — JSON, table, or plain text? Verbosity levels?
-☐ Flag design — Short flags, long flags, or both? Required vs optional?
-☐ Progress reporting — Silent, progress bar, or verbose logging?
-☐ Error recovery — Fail fast, retry, or prompt for action?
+☐ What the output looks like — Structured data, a table, or plain text? How much detail?
+☐ How commands are typed — Short shortcuts (-v), full names (--verbose), or both? Which ones are required?
+☐ What happens during long tasks — Run silently, show a progress bar, or log every step?
+☐ What happens when something fails — Stop immediately, try again, or ask what to do?
 ```
 
 For "Organize photo library" (organization task):
 ```
-☐ Grouping criteria — By date, location, faces, or events?
-☐ Duplicate handling — Keep best, keep all, or prompt each time?
-☐ Naming convention — Original names, dates, or descriptive?
-☐ Folder structure — Flat, nested by year, or by category?
+☐ How photos are grouped — By date taken, location, people, or events?
+☐ What happens with duplicates — Keep the best one, keep all copies, or ask each time?
+☐ How files are named — Keep original names, rename by date, or add descriptions?
+☐ How folders are arranged — All in one folder, nested by year, or by category?
 ```
 
 Continue to discuss_areas with selected areas.

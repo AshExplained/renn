@@ -360,22 +360,24 @@ Before planning, let's discuss the developer experience for this stage.
 
 **Generate 3-5 questions dynamically from UX.md DX findings:**
 
-Read DX_CONTENT and generate questions from these categories:
+Read DX_CONTENT and generate questions from these categories.
+
+**Plain-language rule:** Even though the user is likely a developer, prefer concrete descriptions over pattern names. Say "show a helpful suggestion with the error" instead of "actionable error messages." Describe the experience, not the design principle.
 
 1. **Proven DX Patterns (1-2 questions):** From the "Proven DX Patterns" table, generate questions about which patterns to adopt for this stage's specific functionality.
-   - Template: "DX research found [pattern] works well for [evidence]. Should this stage use [pattern]?"
+   - Template: "Similar tools do [concrete behavior]. Should this work the same way?"
    - Options: 2-3 concrete implementations + "Let Claude decide (Research suggests: [recommendation])"
 
 2. **Anti-Patterns (0-1 questions):** From the "Anti-Patterns" table, generate an awareness question if a relevant anti-pattern exists.
-   - Template: "DX research flagged [anti-pattern] as common in [domain]. When a developer encounters [scenario], how should we handle it?"
+   - Template: "A common frustration with [domain] tools is [description of bad experience]. When that happens here, how should we handle it?"
    - Options: 2-3 alternatives + "Let Claude decide"
 
 3. **Critical DX Flows (1-2 questions):** From the "Critical Flows" table, generate questions about high-friction flows in this stage.
-   - Template: "When a developer [flow description], should the experience prioritize [option A] or [option B]?"
+   - Template: "When a developer [flow description], should it [option A] or [option B]?"
    - Options: 2-3 DX approaches + "Let Claude decide"
 
 4. **Emotional Design (1 question):** From the "Emotional Design Goals" section, generate one calibration question.
-   - Template: "DX research targets '[emotion]' as the primary developer feeling. For this stage, which approach better achieves that?"
+   - Template: "We want developers to feel [emotion] when using this. Which approach gets closer to that?"
    - Options: 2-3 concrete approaches + "Let Claude decide"
 
 **Question format (same AskUserQuestion conventions as UX interview):**

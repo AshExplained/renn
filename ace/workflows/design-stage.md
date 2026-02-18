@@ -472,22 +472,24 @@ Before visual design, let's discuss how users should experience this stage.
 
 Read UX.md content and extract questions from these categories. **If PROJECT_LEVEL=true:** generate questions spanning ALL UI stages (using `ALL_UI_GOALS` and `UI_STAGES` from validate_stage) instead of a single stage's features. The question categories remain the same -- only the scope of features considered broadens to cover all UI stages. **If PROJECT_LEVEL=false:** generate questions for the single stage as before.
 
+**Plain-language rule:** The user may not be technical. Describe what the user would see or do — never assume they know UX terminology. Replace jargon with behavior descriptions or familiar app references. For example, say "show options one step at a time" instead of "progressive disclosure."
+
 1. **Critical Flows (1-2 questions):** For each critical flow with LOW or MEDIUM friction tolerance in UX.md, generate a question about how that flow should behave in this stage (or across all UI stages in project-level mode). Use third-person framing (UXIN-05):
-   - "When a user reaches [flow_name] for the first time, should the experience prioritize [option A] or [option B]?"
+   - "When someone [does X] for the first time, should it feel more like [familiar example A] or [familiar example B]?"
 
-2. **Proven Patterns (1-2 questions):** For proven patterns from UX.md that apply to this stage's features (or all UI stages' features in project-level mode), ask whether to adopt the pattern. Direct framing acceptable for preference questions:
-   - "Research shows [pattern] works well in [domain]. Should this stage use [pattern implementation]?"
+2. **Proven Patterns (1-2 questions):** For proven patterns from UX.md that apply to this stage's features (or all UI stages' features in project-level mode), ask whether to adopt the pattern. Describe what the pattern looks like, not what it's called:
+   - "Similar apps let users [behavior description]. Should this work the same way?"
 
-3. **Anti-Pattern Awareness (0-1 questions):** If UX.md identifies anti-patterns relevant to this stage (or any UI stage in project-level mode), generate one awareness question. Third-person framing:
-   - "UX research flagged [anti_pattern] as common in [domain]. When a user encounters [scenario], how should we handle it?"
+3. **Anti-Pattern Awareness (0-1 questions):** If UX.md identifies anti-patterns relevant to this stage (or any UI stage in project-level mode), generate one awareness question. Describe the bad experience, not the pattern name:
+   - "A common frustration in [domain] apps is [description of bad experience]. When that happens here, how should we handle it?"
 
 4. **Emotional Design (1 question):** Generate one emotional calibration question from UX.md emotional design goals. Direct framing:
-   - "UX research targets '[emotion]' as the primary user feeling. For this stage, which approach better achieves that?"
+   - "We want people to feel [emotion] when using this. Which approach gets closer to that?"
 
 **Question format (UXIN-02, UXIN-03):**
 
 Every question presented via AskUserQuestion:
-- 2-4 concrete options informed by UX.md findings
+- 2-4 concrete options informed by UX.md findings — describe what the user sees, not the pattern name
 - EVERY question includes a "Let Claude decide" option with research-backed default: "(Research suggests: [UX.md recommendation])"
 - Third-person framing for interaction/flow questions (UXIN-05); direct framing for preference/calibration questions
 - Track `UX_QUESTIONS_ASKED` count (target 4-6)
@@ -858,17 +860,21 @@ Read available project context to generate design-relevant gray areas:
 3. Read research.md (if exists) for technical context
 4. Read intel.md (if exists) for existing decisions
 
-Generate 3-5 gray areas SPECIFIC to this project. These are design decisions that would change the outcome and the user should weigh in on. Examples:
+Generate 3-5 gray areas SPECIFIC to this project. These are design decisions that would change the outcome and the user should weigh in on.
+
+**Plain-language rule:** The user may not be technical. Describe what they'd see or experience — not design terminology. Use familiar app references where helpful.
+
+Examples:
 
 For a "personal dashboard" project:
-- "Visual density" -- Dense data tables vs. spacious cards?
-- "Brand personality" -- Professional tool feel vs. friendly personal app?
-- "Interaction patterns" -- Drag-and-drop? Inline editing? Modal workflows?
+- "How packed the screen feels" -- Lots of data in tight rows, or spacious cards with breathing room?
+- "The overall vibe" -- Feels like a serious work tool, or a friendly personal app?
+- "How you interact with things" -- Drag things around? Edit right on the page? Or click to open a separate panel?
 
 For a "documentation site" project:
-- "Content hierarchy" -- Hero-focused or content-first?
-- "Visual identity" -- Technical/precise or approachable/warm?
-- "Navigation density" -- Mega menu? Simple top nav? Sidebar?
+- "What you see first" -- A big welcome section, or straight into the content?
+- "The personality" -- Precise and technical, or warm and approachable?
+- "How you find things" -- A big menu with everything visible, a simple top bar, or a sidebar?
 
 NOT generic: "UI layout", "Color scheme", "Typography choices" -- these are categories, not gray areas.
 
@@ -876,12 +882,12 @@ NOT generic: "UI layout", "Color scheme", "Typography choices" -- these are cate
 
 | Core Question | Natural Fit Examples |
 |---------------|---------------------|
-| Visual style (professional/minimal/warm/bold) | Brand personality, Visual identity |
-| Color direction (warm/cool/neutral/vibrant) | Brand personality, Visual identity |
-| Typography (serif/sans/mono pairing) | Content presentation, Reading experience |
-| Layout density (spacious/comfortable/dense) | Content density, Information architecture |
-| Dark mode (dark-default/toggle/light-only) | Can be its own area or fit under Technical preferences |
-| Responsive (desktop-first/fully-responsive/desktop-only) | Can be its own area or fit under Device strategy |
+| Overall feel (professional/modern/warm/bold) | The overall vibe, Visual identity |
+| Color mood (warm/cool/neutral/bright) | The overall vibe, Visual identity |
+| Font style (clean modern/classic book/code-style) | How content reads, Reading experience |
+| How packed the screen feels (spacious/balanced/dense) | How packed the screen feels, Content density |
+| Dark or light (dark-default/toggle/light-only) | Can be its own area or fit under Look and feel |
+| Screen sizes (desktop-first/all-sizes/desktop-only) | Can be its own area or fit under Device strategy |
 
 Track which core questions are mapped to which gray areas.
 
@@ -911,6 +917,7 @@ For each selected area, in order:
    - For mixed questions (layout density, dark mode, responsive): recommend a specific option
    - Each subsequent question informed by previous answers in this area
    - After the core question(s), ask 1-2 project-specific follow-up questions for the gray area
+   - **Plain-language rule:** Describe what the user would see, not design terminology. Say "rounded friendly buttons vs sharp clean edges" not "border-radius values"
 
 3. After 3-4 questions for the area, offer: "More questions about [area], or move to next?"
    - If "More questions": ask 2-3 more, then check again
@@ -938,12 +945,12 @@ If REMAINING is not empty, present: "A few more design essentials:"
 
 For each remaining core question, use AskUserQuestion with the standard options:
 
-- **Visual style:** Professional/minimal, Clean/modern, Warm/editorial, Bold/expressive, Let Claude decide
-- **Color direction:** Warm tones, Cool tones, Neutral/monochrome, Vibrant/saturated, Let Claude decide (Recommended)
-- **Typography:** Sans-serif (modern), Serif (editorial), Mono (technical), Mixed pairing, Let Claude decide (Recommended)
-- **Layout density:** Spacious (lots of whitespace), Comfortable (balanced), Dense (information-heavy), Let Claude decide (Recommended)
-- **Dark mode:** Dark by default, Light with dark toggle, Light only, Let Claude decide
-- **Responsive:** Desktop-first (responsive down), Fully responsive (mobile-first), Desktop only, Let Claude decide
+- **Overall feel:** Professional and minimal, Clean and modern, Warm and inviting, Bold and expressive, Let Claude decide
+- **Color mood:** Warm tones (earthy, sunset), Cool tones (ocean, sky), Neutral (grays, black & white), Bright and colorful, Let Claude decide (Recommended)
+- **Font style:** Clean modern fonts (like most apps), Classic book-style fonts (like newspapers), Code-style fonts (like a terminal), A mix of styles, Let Claude decide (Recommended)
+- **How packed the screen feels:** Lots of breathing room, Balanced (not too sparse, not too tight), Information-dense (show as much as possible), Let Claude decide (Recommended)
+- **Dark or light:** Dark background by default, Light with a dark mode toggle, Light only, Let Claude decide
+- **Screen sizes:** Starts on desktop, adapts to phones, Works on all screen sizes equally, Desktop only, Let Claude decide
 
 #### Step 5: Pexels API Key Collection
 

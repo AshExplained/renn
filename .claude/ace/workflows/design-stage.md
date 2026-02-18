@@ -91,23 +91,18 @@ ls .ace/stages/${STAGE}-*/*-research.md 2>/dev/null
 grep -A5 "^### Stage [0-9]*:" .ace/track.md | grep -v "^\-\-$"
 ```
 
-For each stage found, run the UI detection keyword algorithm (the STRONG_POSITIVE, MODERATE_POSITIVE, STRONG_NEGATIVE lists defined in detect_ui_stage step) against the stage name and goal text:
+For each stage heading found, check if it contains a [UI] tag:
 
 ```
-For each stage heading + goal:
-  stage_name = extracted stage name (e.g., "Dashboard")
-  goal_text = extracted goal text (e.g., "Main dashboard with data visualization")
-
-  Apply detect_ui_stage(stage_name, goal_text, "", ""):
-    - Count STRONG_POSITIVE keyword matches in stage_name + goal_text
-    - Count MODERATE_POSITIVE keyword matches in stage_name + goal_text
-    - Count STRONG_NEGATIVE keyword matches in stage_name + goal_text
-    - DESIGN_NEEDED or UNCERTAIN = UI stage
-    - NO_DESIGN = non-UI stage (skip)
+For each stage heading:
+  If heading contains [UI] (e.g., "### Stage 5: Dashboard [UI]") -> this is a UI stage
+  Otherwise -> not a UI stage (skip)
 ```
+
+No keyword scoring. The [UI] tag is authoritative.
 
 Collect results:
-- `UI_STAGES` -- list of stage numbers + names + goals that are UI stages (DESIGN_NEEDED or UNCERTAIN)
+- `UI_STAGES` -- list of stage numbers + names + goals that have [UI] tag in their heading
 - `ALL_UI_GOALS` -- combined goal text from all UI stages
 
 Validate at least one UI stage exists:
@@ -169,7 +164,7 @@ if [ -z "$STAGE_DIR" ]; then
   # Create stage directory from track name
   # Anchor to ### headings to avoid matching list items (which contain markdown ** and descriptions)
   STAGE_UNPADDED=$(echo "$STAGE" | sed 's/^0\+\([0-9]\)/\1/')
-  STAGE_NAME=$(grep "^### Stage ${STAGE_UNPADDED}:" .ace/track.md | head -1 | sed 's/^### Stage [0-9]*: //' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+  STAGE_NAME=$(grep "^### Stage ${STAGE_UNPADDED}:" .ace/track.md | head -1 | sed 's/^### Stage [0-9]*: //' | sed 's/ \[UI\]$//' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
   mkdir -p ".ace/stages/${STAGE}-${STAGE_NAME}"
   STAGE_DIR=".ace/stages/${STAGE}-${STAGE_NAME}"
 fi
@@ -334,91 +329,30 @@ Task(
 </step>
 
 <step name="detect_ui_stage">
-**If `--phase-2-only` flag is set:** Skip UI detection entirely. The user explicitly invoked `ace.design-screens` which is a design command -- UI stage is guaranteed. Set `UI_STAGE=true`. Do NOT run keyword scoring, do NOT present the UNCERTAIN checkpoint:decision. Continue directly to handle_ux_interview (which will also be skipped by --skip-ux-interview).
+**If `--phase-2-only` flag is set:** Skip UI detection entirely. The user explicitly invoked `ace.design-screens` which is a design command -- UI stage is guaranteed. Set `UI_STAGE=true`. Continue directly to handle_ux_interview (which will also be skipped by --skip-ux-interview).
 
-**If PROJECT_LEVEL=true:** Skip UI detection keyword scoring. The validate_stage step already scanned all stages from track.md and confirmed at least one UI stage exists. Set `UI_STAGE=true`. The `UI_STAGES` list and `ALL_UI_GOALS` from validate_stage are available for downstream steps (handle_ux_interview and handle_design). Continue to handle_ux_interview.
+**If PROJECT_LEVEL=true:** Skip UI detection. The validate_stage step already scanned all stages from track.md for [UI] tags and confirmed at least one UI stage exists. Set `UI_STAGE=true`. The `UI_STAGES` list and `ALL_UI_GOALS` from validate_stage are available for downstream steps (handle_ux_interview and handle_design). Continue to handle_ux_interview.
 
 **If PROJECT_LEVEL=false:**
 
-Run UI detection ONCE. Both handle_ux_interview and handle_design use this result.
-
 ### UI Detection
 
-Define the three keyword lists:
+Check the stage heading from track.md:
 
-```
-STRONG_POSITIVE = [ui, frontend, dashboard, interface, page, screen, layout, form,
-                   component, widget, view, display, navigation, sidebar, header,
-                   footer, modal, dialog, login, signup, register, onboarding,
-                   checkout, wizard, portal, gallery, carousel, menu, toolbar,
-                   toast, notification, badge, avatar, card, table, grid]
-
-MODERATE_POSITIVE = [visual, render, prototype, style, theme, responsive, landing,
-                     home, profile, settings, account, billing, search, filter,
-                     admin, panel]
-
-STRONG_NEGATIVE = [api, backend, cli, migration, database, schema, middleware,
-                   config, devops, deploy, test, refactor, security, performance]
+```bash
+STAGE_HEADING=$(grep "^### Stage ${STAGE_UNPADDED}:" .ace/track.md | head -1)
 ```
 
-Detection algorithm:
+If the heading contains `[UI]` -> set `UI_STAGE=true`.
+If the heading does NOT contain `[UI]` -> this is not a UI stage. **ERROR and exit.** Display:
 
 ```
-function detect_ui_stage(stage_name, goal_text, intel_content, specs_content):
-  strong_pos = 0
-  strong_neg = 0
-  moderate   = 0
-
-  for keyword in STRONG_POSITIVE:
-    if keyword in lower(stage_name): strong_pos++
-    if keyword in lower(goal_text):  strong_pos++
-  for keyword in MODERATE_POSITIVE:
-    if keyword in lower(stage_name): moderate++
-    if keyword in lower(goal_text):  moderate++
-  for keyword in STRONG_NEGATIVE:
-    if keyword in lower(stage_name): strong_neg++
-    if keyword in lower(goal_text):  strong_neg++
-
-  if intel_content and has_visual_mentions(intel_content): strong_pos++
-  if specs_content and has_ui_requirements(specs_content): strong_pos++
-
-  if strong_pos > 0 and strong_neg == 0: return DESIGN_NEEDED
-  if strong_pos > 0 and strong_neg > 0:  return UNCERTAIN
-  if moderate > 0:                        return UNCERTAIN
-  return NO_DESIGN
-```
-
-`has_visual_mentions()` scans intel for layout/screen/style/component terms. `has_ui_requirements()` scans specs for component/screen/UI/layout/visual/prototype terms.
-
-### Routing by Detection Result
-
-- `NO_DESIGN`: **ERROR and exit.** Display:
-
-```
-Stage {N} is not a UI stage. Design pipeline is for UI stages only.
+Stage {N} is not a UI stage (no [UI] tag in track.md heading). Design pipeline is for UI stages only.
 
 Use /ace.plan-stage {N} directly.
 ```
 
-- `UNCERTAIN`: Present a `checkpoint:decision`:
-
-```
-This stage may need UX research and design. Include design pipeline?
-
-Context:
-  Stage: {stage_name}
-  Goal: {goal text from track.md}
-  Signals found: {list of matched keywords and sources}
-
-Options:
-  Yes - Run UX interview + design phase
-  No  - Skip design, proceed to plan-stage instead
-```
-
-User selects No -> **ERROR and exit.** Display: `Stage {N} does not need design. Use /ace.plan-stage {N} directly.`
-User selects Yes -> set `UI_STAGE=true`.
-
-- `DESIGN_NEEDED`: Set `UI_STAGE=true`.
+No keyword matching. No UNCERTAIN state. The [UI] tag is authoritative.
 
 Store `UI_STAGE` for use by handle_ux_interview and handle_design.
 </step>

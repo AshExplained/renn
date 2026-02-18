@@ -86,7 +86,7 @@ if [ -z "$STAGE_DIR" ]; then
   # Create stage directory from track name
   # Anchor to ### headings to avoid matching list items (which contain markdown ** and descriptions)
   STAGE_UNPADDED=$(echo "$STAGE" | sed 's/^0\+\([0-9]\)/\1/')
-  STAGE_NAME=$(grep "^### Stage ${STAGE_UNPADDED}:" .ace/track.md | head -1 | sed 's/^### Stage [0-9]*: //' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+  STAGE_NAME=$(grep "^### Stage ${STAGE_UNPADDED}:" .ace/track.md | head -1 | sed 's/^### Stage [0-9]*: //' | sed 's/ \[UI\]$//' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
   mkdir -p ".ace/stages/${STAGE}-${STAGE_NAME}"
   STAGE_DIR=".ace/stages/${STAGE}-${STAGE_NAME}"
 fi
@@ -232,75 +232,16 @@ Task(
 <step name="handle_ui_stage_redirect">
 **If `--gaps` flag:** Set `UI_STAGE=false`. Skip to check_existing_runs.
 
-Run UI detection using the SAME keyword algorithm as design-system:
+Check the stage heading from track.md for a [UI] tag:
 
-```
-STRONG_POSITIVE = [ui, frontend, dashboard, interface, page, screen, layout, form,
-                   component, widget, view, display, navigation, sidebar, header,
-                   footer, modal, dialog, login, signup, register, onboarding,
-                   checkout, wizard, portal, gallery, carousel, menu, toolbar,
-                   toast, notification, badge, avatar, card, table, grid]
-
-MODERATE_POSITIVE = [visual, render, prototype, style, theme, responsive, landing,
-                     home, profile, settings, account, billing, search, filter,
-                     admin, panel]
-
-STRONG_NEGATIVE = [api, backend, cli, migration, database, schema, middleware,
-                   config, devops, deploy, test, refactor, security, performance]
+```bash
+STAGE_HEADING=$(grep "^### Stage ${STAGE_UNPADDED}:" .ace/track.md | head -1)
 ```
 
-Detection algorithm:
+If the heading contains `[UI]` -> set `UI_STAGE=true`.
+If the heading does NOT contain `[UI]` -> set `UI_STAGE=false`. Continue to check_existing_runs.
 
-```
-function detect_ui_stage(stage_name, goal_text, intel_content, specs_content):
-  strong_pos = 0
-  strong_neg = 0
-  moderate   = 0
-
-  for keyword in STRONG_POSITIVE:
-    if keyword in lower(stage_name): strong_pos++
-    if keyword in lower(goal_text):  strong_pos++
-  for keyword in MODERATE_POSITIVE:
-    if keyword in lower(stage_name): moderate++
-    if keyword in lower(goal_text):  moderate++
-  for keyword in STRONG_NEGATIVE:
-    if keyword in lower(stage_name): strong_neg++
-    if keyword in lower(goal_text):  strong_neg++
-
-  if intel_content and has_visual_mentions(intel_content): strong_pos++
-  if specs_content and has_ui_requirements(specs_content): strong_pos++
-
-  if strong_pos > 0 and strong_neg == 0: return DESIGN_NEEDED
-  if strong_pos > 0 and strong_neg > 0:  return UNCERTAIN
-  if moderate > 0:                        return UNCERTAIN
-  return NO_DESIGN
-```
-
-`has_visual_mentions()` scans intel for layout/screen/style/component terms. `has_ui_requirements()` scans specs for component/screen/UI/layout/visual/prototype terms.
-
-### Routing by Detection Result
-
-- `NO_DESIGN`: Set `UI_STAGE=false`. Continue to check_existing_runs.
-
-- `UNCERTAIN`: Present a `checkpoint:decision`:
-
-```
-This stage may need visual design. Include design pipeline?
-
-Context:
-  Stage: {stage_name}
-  Goal: {goal text from track.md}
-  Signals found: {list of matched keywords and sources}
-
-Options:
-  Yes - This is a UI stage (requires /ace.design-system first)
-  No  - Not a UI stage, proceed to architecture planning
-```
-
-User selects No -> set `UI_STAGE=false`.
-User selects Yes -> set `UI_STAGE=true`.
-
-- `DESIGN_NEEDED`: Set `UI_STAGE=true`.
+No keyword matching. No UNCERTAIN state. The [UI] tag is authoritative.
 
 ### Design Artifact Check (only when UI_STAGE=true)
 

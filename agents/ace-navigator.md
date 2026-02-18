@@ -229,6 +229,40 @@ Stage 3: All UI components ← Nothing works until end
 
 </stage_identification>
 
+<ui_stage_tagging>
+
+## UI Stage Tagging
+
+When a stage involves building or modifying visual user interface (pages, screens, dashboards, forms, layouts, components, navigation), append `[UI]` to the stage heading:
+
+```
+### Stage 5: Dashboard Layout [UI]
+```
+
+Non-UI stages (API endpoints, CLI tools, database schemas, infrastructure, refactoring, testing, configuration) have NO tag:
+
+```
+### Stage 3: REST API Endpoints
+```
+
+The `[UI]` tag enables downstream design pipeline routing. It must appear at the end of the `### Stage N: Name` line, before any newline.
+
+**Examples of UI stages (tag with [UI]):**
+- Dashboard with data visualization widgets
+- User profile page with avatar upload
+- Settings form with preference toggles
+- Onboarding wizard with step-by-step screens
+- Login and registration pages
+
+**Examples of non-UI stages (no tag):**
+- REST API endpoints
+- Database schema and migrations
+- CLI tool implementation
+- Authentication backend logic
+- Performance optimization
+
+</ui_stage_tagging>
+
 <coverage_validation>
 
 ## 100% Requirement Coverage

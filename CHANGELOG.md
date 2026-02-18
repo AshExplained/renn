@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1](https://github.com/AshExplained/ace-agentic-code-experience/compare/ace-experience-v0.4.0...ace-experience-v0.4.1) (2026-02-18)
+
+
+### Fixed
+
+* add pre-commit guard to reject staged .claude/ files ([458f689](https://github.com/AshExplained/ace-agentic-code-experience/commit/458f6897ea13f8d95cf1ceb9cd2d4928aed9e171))
+* remove tracked .claude/ files and guard against re-adding ([83df9ac](https://github.com/AshExplained/ace-agentic-code-experience/commit/83df9ace81ac03f22dbe404b719ac16ea3d399a8))
+
 ## [0.4.0](https://github.com/AshExplained/ace-agentic-code-experience/compare/ace-experience-v0.3.0...ace-experience-v0.4.0) (2026-02-18)
 
 

@@ -177,6 +177,68 @@ Check if `{stage}-intel.md` exists in stage directory.
 
 **If intel.md exists:**
 
+Before routing, check if this is a UI stage that needs design:
+
+```
+UI_KEYWORDS = [ui, frontend, dashboard, interface, page, screen, layout, form,
+               component, widget, view, display, navigation, sidebar, header,
+               footer, modal, dialog, login, signup, register, onboarding,
+               checkout, wizard, portal, gallery, carousel, menu, toolbar]
+```
+
+If ANY UI keyword in stage goal/name → check design artifacts:
+
+```bash
+HAS_STYLEKIT=$(ls .ace/design/stylekit.yaml 2>/dev/null && echo "yes")
+HAS_SCREENS=$(ls .ace/design/screens/*.yaml 2>/dev/null && echo "yes")
+```
+
+**If UI stage + no stylekit:**
+
+```
+---
+
+## ▶ Next Up
+
+**Stage {N}: {Name}** — {Goal from track.md}
+<sub>✓ Context gathered — design system needed before planning</sub>
+
+`/ace.design-system`
+
+<sub>`/clear` first → fresh context window</sub>
+
+---
+
+**Also available:**
+- `/ace.plan-stage {stage}` — skip design, Claude designs inline during execution
+
+---
+```
+
+**If UI stage + stylekit but no screens:**
+
+```
+---
+
+## ▶ Next Up
+
+**Stage {N}: {Name}** — {Goal from track.md}
+<sub>✓ Context gathered — screen prototypes needed before planning</sub>
+
+`/ace.design-screens {stage}`
+
+<sub>`/clear` first → fresh context window</sub>
+
+---
+
+**Also available:**
+- `/ace.plan-stage {stage}` — skip screen design, Claude designs inline during execution
+
+---
+```
+
+**If non-UI stage, or UI stage with design artifacts already present:**
+
 ```
 ---
 
@@ -194,6 +256,34 @@ Check if `{stage}-intel.md` exists in stage directory.
 
 **If intel.md does NOT exist:**
 
+Run the same UI keyword check on stage goal/name (see above).
+
+**If UI stage + no stylekit:**
+
+```
+---
+
+## ▶ Next Up
+
+**Stage {N}: {Name}** — {Goal from track.md}
+
+`/ace.discuss-stage {stage}` — gather context and clarify approach
+
+<sub>`/clear` first → fresh context window</sub>
+
+---
+
+**Then:** `/ace.design-system` — create design system before planning
+
+**Also available:**
+- `/ace.plan-stage {stage}` — skip discussion and design, Claude designs inline
+- `/ace.list-stage-assumptions {stage}` — see Claude's assumptions
+
+---
+```
+
+**If non-UI stage or design artifacts already present:**
+
 ```
 ---
 
@@ -208,7 +298,6 @@ Check if `{stage}-intel.md` exists in stage directory.
 ---
 
 **Also available:**
-- `/ace.design-system` — create design system (if UI stage)
 - `/ace.plan-stage {stage}` — skip discussion, plan directly
 - `/ace.list-stage-assumptions {stage}` — see Claude's assumptions
 
@@ -265,6 +354,61 @@ State: "Current stage is {X}. Milestone has {N} stages (highest: {Y})."
 **Route C: Stage complete, more stages remain**
 
 Read track.md to get the next stage's name and goal.
+Run the same UI keyword check on the NEXT stage's goal/name.
+
+**If next stage is UI + no stylekit:**
+
+```
+---
+
+## ✓ Stage {Z} Complete
+
+## ▶ Next Up
+
+**Stage {Z+1}: {Name}** — {Goal from track.md}
+
+`/ace.discuss-stage {Z+1}` — gather context and clarify approach
+
+<sub>`/clear` first → fresh context window</sub>
+
+---
+
+**Then:** `/ace.design-system` — create design system before planning
+
+**Also available:**
+- `/ace.plan-stage {Z+1}` — skip discussion and design, Claude designs inline
+- `/ace.audit {Z}` — user acceptance test before continuing
+
+---
+```
+
+**If next stage is UI + stylekit exists but no screens:**
+
+```
+---
+
+## ✓ Stage {Z} Complete
+
+## ▶ Next Up
+
+**Stage {Z+1}: {Name}** — {Goal from track.md}
+
+`/ace.discuss-stage {Z+1}` — gather context and clarify approach
+
+<sub>`/clear` first → fresh context window</sub>
+
+---
+
+**Then:** `/ace.design-screens {Z+1}` — create screen prototypes before planning
+
+**Also available:**
+- `/ace.plan-stage {Z+1}` — skip discussion and design, Claude designs inline
+- `/ace.audit {Z}` — user acceptance test before continuing
+
+---
+```
+
+**If next stage is non-UI, or design artifacts already present:**
 
 ```
 ---
@@ -282,7 +426,6 @@ Read track.md to get the next stage's name and goal.
 ---
 
 **Also available:**
-- `/ace.design-system` — create design system (if UI stage)
 - `/ace.plan-stage {Z+1}` — skip discussion, plan directly
 - `/ace.audit {Z}` — user acceptance test before continuing
 

@@ -356,7 +356,9 @@ Write file.
 </step>
 
 <step name="confirm_creation">
-Present summary and next steps:
+Present summary and next steps.
+
+**First, show what was captured:**
 
 ```
 Created: .ace/stages/${PADDED_STAGE}-${SLUG}/${PADDED_STAGE}-intel.md
@@ -372,7 +374,81 @@ Created: .ace/stages/${PADDED_STAGE}-${SLUG}/${PADDED_STAGE}-intel.md
 [If deferred ideas exist:]
 ## Noted for Later
 - [Deferred idea] — future stage
+```
 
+**Then, detect if design is needed before routing:**
+
+Check if the stage goal (from track.md) contains UI keywords:
+
+```
+UI_KEYWORDS = [ui, frontend, dashboard, interface, page, screen, layout, form,
+               component, widget, view, display, navigation, sidebar, header,
+               footer, modal, dialog, login, signup, register, onboarding,
+               checkout, wizard, portal, gallery, carousel, menu, toolbar]
+```
+
+If ANY UI keyword appears in the stage goal or stage name → `IS_UI_STAGE=true`.
+
+If `IS_UI_STAGE=true`, check design artifacts:
+
+```bash
+HAS_STYLEKIT=$(ls .ace/design/stylekit.yaml 2>/dev/null && echo "yes")
+HAS_SCREENS=$(ls .ace/design/screens/*.yaml 2>/dev/null && echo "yes")
+```
+
+**Route based on detection:**
+
+**If IS_UI_STAGE=true AND no stylekit:**
+
+```
+---
+
+## ▶ Next Up
+
+**Stage ${STAGE}: [Name]** — [Goal from track.md]
+
+This is a UI stage — create the design system first:
+
+`/ace.design-system`
+
+<sub>`/clear` first → fresh context window</sub>
+
+---
+
+**Also available:**
+- `/ace.plan-stage ${STAGE}` — skip design, Claude designs inline during execution
+- Review/edit intel.md before continuing
+
+---
+```
+
+**If IS_UI_STAGE=true AND stylekit exists but no screens:**
+
+```
+---
+
+## ▶ Next Up
+
+**Stage ${STAGE}: [Name]** — [Goal from track.md]
+
+Design system exists. Create screen prototypes for this stage:
+
+`/ace.design-screens ${STAGE}`
+
+<sub>`/clear` first → fresh context window</sub>
+
+---
+
+**Also available:**
+- `/ace.plan-stage ${STAGE}` — skip screen design, Claude designs inline during execution
+- Review/edit intel.md before continuing
+
+---
+```
+
+**If IS_UI_STAGE=true AND both stylekit and screens exist, OR IS_UI_STAGE=false:**
+
+```
 ---
 
 ## ▶ Next Up

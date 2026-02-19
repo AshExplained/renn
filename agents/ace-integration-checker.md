@@ -841,6 +841,31 @@ flows:
       steps_missing: ["Fetch", "State", "Display"]
 ```
 
+**Security findings:**
+
+```yaml
+security:
+  auth_gaps:
+    - route: "/api/admin/users"
+      framework: "nextjs-app-router"
+      reason: "No auth check in handler"
+  dependency_vulns:
+    - package: "lodash"
+      severity: "Critical"
+      advisory: "Prototype Pollution"
+  secrets:
+    - type: "tracked_file"
+      path: ".env.production"
+  headers_missing: ["CSP", "HSTS"]
+  cors_issues:
+    - type: "wildcard_with_credentials"
+      file: "src/middleware.ts"
+  supply_chain:
+    - type: "unpinned_action"
+      workflow: ".github/workflows/ci.yml"
+      line: "uses: actions/checkout@v4"
+```
+
 </verification_process>
 
 <output>
@@ -865,6 +890,18 @@ Return structured report to milestone auditor:
 
 **Protected:** {N} sensitive areas check auth
 **Unprotected:** {N} sensitive areas missing auth
+
+### Security Sweep
+
+**Auth Completeness:** {N} routes protected, {M} unprotected
+**Dependencies:** {N} Critical, {M} High, {K} Medium vulnerabilities
+**Secrets:** {status -- clean | N issues found}
+**Headers:** {N}/5 security headers configured
+**CORS:** {status -- safe | N issues found}
+**Supply Chain:** lockfile {committed|missing}, Actions {pinned|N unpinned}
+
+**Security Blockers:** {count}
+**Security Warnings:** {count}
 
 ### E2E Flows
 

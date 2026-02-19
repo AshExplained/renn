@@ -628,6 +628,70 @@ Route based on response:
 Status: Shipping to {target} ({completed}/{total} steps)
 ```
 
+---
+
+**Sub-step 3c: Dynamic authentication gate**
+
+When an auto item fails, check the command output for authentication error patterns BEFORE falling through to generic error recovery. Auth errors are checked first because they have a specific recovery path (authenticate then retry).
+
+Detect auth error patterns in command output or error messages:
+- "Not authenticated", "Not logged in"
+- "Unauthorized", "401", "403"
+- "Please run {tool} login", "Please login"
+- "Missing API key", "Invalid API key", "Invalid credentials"
+- "Authentication required", "EAUTHUNKNOWN"
+
+**If auth error detected:**
+
+Present auth gate via AskUserQuestion:
+
+- header: "Authentication Required"
+- question: "{tool} requires authentication.\n\n{auth instructions based on error message -- e.g., 'Run `vercel login` in your terminal and complete browser authentication'}\n\nAuthenticate and confirm when done."
+- options:
+  - "Done" (description: "I've authenticated")
+  - "Abort" (description: "Stop shipping")
+
+Route based on response:
+
+- **"Done":** Verify authentication if possible (e.g., `vercel whoami`, `npm whoami`, `gh auth status`). Then retry the original auto item from the beginning of its execution logic. If retry succeeds, mark the item complete with checkbox and timestamp. If retry fails with a DIFFERENT error (not auth), fall through to sub-step 3d (error recovery).
+
+- **"Abort":** Go to sub-step 3f (abort handling)
+
+**Secrets safety (GAP-03):**
+- Credentials are ALWAYS handled via gates, NEVER auto-executed
+- NEVER retry with cached credentials
+- NEVER auto-handle secrets or API keys
+- If an auto item's error suggests providing an API key inline, create a gate instead of trying to auto-provide it
+
+---
+
+**Sub-step 3d: Error recovery**
+
+When an auto item fails with a non-authentication error (sub-step 3c did not match):
+
+Present the failure via AskUserQuestion with full error details:
+
+- header: "Step {N} Failed"
+- question: "{description} failed.\n\nCommand: {what was attempted}\nError: {full error output}\n\nHow would you like to proceed?"
+- options:
+  - "Retry" (description: "Try this step again")
+  - "Skip" (description: "Mark as skipped and continue")
+  - "Abort" (description: "Stop the ship workflow")
+
+Route based on response:
+
+- **"Retry":** Re-execute the same auto item from the beginning of its execution logic (sub-step 3b auto path). The retry loop has no limit -- the user decides when to stop via Skip or Abort.
+
+- **"Skip":** Mark the item as checked with "(skipped)" annotation, continue to next item:
+  ```bash
+  sed -i "s/^- \[ \] ${ITEM_NUM}\./- [x] ${ITEM_NUM}./" .ace/ship-plan.md
+  sed -i "/^\- \[x\] ${ITEM_NUM}\./s/$/ (skipped)/" .ace/ship-plan.md
+  ```
+
+- **"Abort":** Go to sub-step 3f (abort handling)
+
+**Error output:** Show verbose error output on failure (unlike success which shows concise output). The user needs full context to decide between retry, skip, and abort.
+
 </step>
 
 </process>

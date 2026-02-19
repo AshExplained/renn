@@ -199,6 +199,228 @@ check_auth_protection() {
 }
 ```
 
+## Step 4.5: Cross-Stage Security Sweep
+
+Milestone-scope security checks that per-run audits miss. These verify cross-cutting security properties across the entire codebase, using bash commands and pattern matching (not LLM-based code reasoning -- that is the auditor's Step 7.6).
+
+@~/.claude/ace/references/security-checklist.md
+
+### 4.5.1 Auth Route Completeness (INTG-02)
+
+Expand Step 4's React-component auth patterns to cover ALL route types in the codebase. Detect the framework in use and apply appropriate checks.
+
+**Detect frameworks present:**
+
+```bash
+detect_frameworks() {
+  local frameworks=""
+  if [ -d "src/app/api" ] || [ -d "app/api" ]; then frameworks="$frameworks nextjs-app-router"; fi
+  if [ -d "src/pages/api" ] || [ -d "pages/api" ]; then frameworks="$frameworks nextjs-pages-router"; fi
+  if grep -rq '"use server"' src/ --include="*.ts" --include="*.tsx" 2>/dev/null; then frameworks="$frameworks server-actions"; fi
+  if [ -f "middleware.ts" ] || [ -f "middleware.js" ] || [ -f "src/middleware.ts" ] || [ -f "src/middleware.js" ]; then frameworks="$frameworks nextjs-middleware"; fi
+  if grep -qE '"express"|"fastify"' package.json 2>/dev/null; then frameworks="$frameworks express-or-fastify"; fi
+  echo "$frameworks"
+}
+```
+
+**For each detected framework, check auth coverage:**
+
+**Next.js App Router -- API route handlers without auth:**
+
+```bash
+check_nextjs_app_router_auth() {
+  local api_dirs=""
+  [ -d "src/app/api" ] && api_dirs="src/app/api"
+  [ -d "app/api" ] && api_dirs="$api_dirs app/api"
+  [ -z "$api_dirs" ] && return
+
+  echo "=== Next.js App Router Auth Check ==="
+  for dir in $api_dirs; do
+    find "$dir" -name "route.ts" -o -name "route.js" 2>/dev/null | while read route; do
+      has_auth=$(grep -E "getSession|getServerSession|auth\(|requireAuth|verifyToken|currentUser|cookies\(\)" "$route" 2>/dev/null)
+      if [ -z "$has_auth" ]; then
+        path=$(echo "$route" | sed "s|.*app/api||" | sed "s|/route\.[jt]s||")
+        echo "UNPROTECTED: /api$path ($route) -- verify if intentionally public"
+      fi
+    done
+  done
+}
+```
+
+**Next.js Pages Router -- API handlers without auth:**
+
+```bash
+check_nextjs_pages_router_auth() {
+  local api_dirs=""
+  [ -d "src/pages/api" ] && api_dirs="src/pages/api"
+  [ -d "pages/api" ] && api_dirs="$api_dirs pages/api"
+  [ -z "$api_dirs" ] && return
+
+  echo "=== Next.js Pages Router Auth Check ==="
+  for dir in $api_dirs; do
+    find "$dir" -name "*.ts" -o -name "*.js" 2>/dev/null | while read route; do
+      has_auth=$(grep -E "getSession\(req\)|getToken\(req\)|getServerSession|auth\(|requireAuth" "$route" 2>/dev/null)
+      if [ -z "$has_auth" ]; then
+        path=$(echo "$route" | sed "s|.*pages/api||" | sed "s|\.[jt]s||")
+        echo "UNPROTECTED: /api$path ($route) -- verify if intentionally public"
+      fi
+    done
+  done
+}
+```
+
+**Server Actions -- exported functions without auth:**
+
+```bash
+check_server_actions_auth() {
+  local action_files=$(grep -rl '"use server"' src/ --include="*.ts" --include="*.tsx" 2>/dev/null)
+  [ -z "$action_files" ] && return
+
+  echo "=== Server Actions Auth Check ==="
+  echo "$action_files" | while read action; do
+    has_auth=$(grep -E "getSession|getServerSession|auth\(|currentUser" "$action" 2>/dev/null)
+    if [ -z "$has_auth" ]; then
+      echo "UNPROTECTED SERVER ACTION: $action"
+    fi
+  done
+}
+```
+
+**Middleware chains -- auth enforcement for protected paths:**
+
+```bash
+check_middleware_auth() {
+  local mw_file=""
+  [ -f "middleware.ts" ] && mw_file="middleware.ts"
+  [ -f "middleware.js" ] && mw_file="middleware.js"
+  [ -f "src/middleware.ts" ] && mw_file="src/middleware.ts"
+  [ -f "src/middleware.js" ] && mw_file="src/middleware.js"
+  [ -z "$mw_file" ] && return
+
+  echo "=== Middleware Auth Check ==="
+  has_auth=$(grep -E "auth|session|token|verify|getSession|withAuth" "$mw_file" 2>/dev/null)
+  if [ -z "$has_auth" ]; then
+    echo "WARNING: $mw_file exists but contains no auth logic"
+  fi
+
+  # Check for protected path patterns
+  has_matcher=$(grep -E "matcher|config" "$mw_file" 2>/dev/null)
+  if [ -n "$has_auth" ] && [ -z "$has_matcher" ]; then
+    echo "WARNING: $mw_file has auth logic but no matcher config -- may not cover protected paths"
+  fi
+}
+```
+
+**Express/Fastify routes -- handlers without auth middleware:**
+
+```bash
+check_express_fastify_auth() {
+  grep -qE '"express"|"fastify"' package.json 2>/dev/null || return
+
+  echo "=== Express/Fastify Auth Check ==="
+  # Find route definitions missing auth middleware in the handler chain
+  grep -rnE "app\.(get|post|put|delete|patch)\s*\(|router\.(get|post|put|delete|patch)\s*\(" src/ \
+    --include="*.ts" --include="*.js" 2>/dev/null | \
+    grep -v "requireAuth\|isAuthenticated\|authMiddleware\|passport\.authenticate\|verifyToken\|jwt" | \
+    grep -v "/auth/\|/login\|/register\|/signup\|/health\|/public\|/webhook" | \
+    while read line; do
+      echo "UNPROTECTED: $line -- verify if intentionally public"
+    done
+}
+```
+
+**Known public route exclusions:** Routes matching these patterns are intentionally public and should not be flagged as unprotected: `/auth/login`, `/auth/register`, `/auth/signup`, `/auth/callback`, `/health`, `/public/*`, `/webhook/*`, `/api/auth/*`. Flag other unprotected routes as "UNPROTECTED (verify if intentionally public)" rather than assuming a Blocker.
+
+**Severity:** Blocker for any route that handles user data, admin operations, or state mutations without auth protection. Flag routes as "verify intentional" when they could be legitimately public (e.g., public API endpoints). Skip this sub-check entirely if no relevant framework is detected.
+
+### 4.5.2 Secrets Detection (INTG-04)
+
+Scan the repository for leaked credentials, missing gitignore coverage, and hardcoded secrets in source files.
+
+**Check .gitignore coverage for secret file patterns:**
+
+```bash
+check_gitignore_coverage() {
+  if [ ! -f ".gitignore" ]; then
+    echo "WARNING: No .gitignore file found"
+    return
+  fi
+
+  echo "=== Gitignore Coverage Check ==="
+  local missing=()
+  for pattern in ".env" "*.pem" "*.key" "credentials.json" "serviceAccountKey.json" "*.p12"; do
+    if ! grep -q "$pattern" .gitignore 2>/dev/null; then
+      missing+=("$pattern")
+    fi
+  done
+
+  if [ ${#missing[@]} -gt 0 ]; then
+    echo "WARNING: .gitignore missing patterns for: ${missing[*]}"
+  else
+    echo "PASS: .gitignore covers standard secret file patterns"
+  fi
+}
+```
+
+**Scan for secrets tracked by git:**
+
+```bash
+check_tracked_secrets() {
+  echo "=== Tracked Secrets Check ==="
+  local tracked=$(git ls-files 2>/dev/null | grep -iE '\.env$|\.env\.|\.pem$|\.key$|credentials\.json|serviceAccount|private.key' || true)
+
+  if [ -n "$tracked" ]; then
+    echo "BLOCKER: Secret files tracked by git:"
+    echo "$tracked"
+  else
+    echo "PASS: No secret files tracked by git"
+  fi
+}
+```
+
+**Scan for hardcoded secrets in source files:**
+
+```bash
+check_hardcoded_secrets() {
+  echo "=== Hardcoded Secrets Check ==="
+  local src_dir="src/"
+  [ ! -d "$src_dir" ] && src_dir="."
+
+  # Check for hardcoded credential patterns (exclude env references and test files)
+  local hardcoded=$(grep -rnE "(password|api_key|apikey|secret|token)\s*[:=]\s*[\"'][^\s\"']{8,}" "$src_dir" \
+    --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" -i 2>/dev/null | \
+    grep -v "process\.env\|import\.meta\.env\|env\.\|\.env\|example\|test\|mock\|placeholder\|schema\|type\|interface\|spec\." || true)
+
+  if [ -n "$hardcoded" ]; then
+    echo "BLOCKER: Possible hardcoded credentials found:"
+    echo "$hardcoded"
+  else
+    echo "PASS: No hardcoded credentials detected in source"
+  fi
+
+  # Check for private keys in source
+  local private_keys=$(grep -rn "PRIVATE KEY\|BEGIN RSA\|BEGIN EC" "$src_dir" \
+    --include="*.ts" --include="*.js" --include="*.pem" --include="*.key" 2>/dev/null || true)
+
+  if [ -n "$private_keys" ]; then
+    echo "BLOCKER: Private key material found in source:"
+    echo "$private_keys"
+  fi
+
+  # Check for connection strings with embedded credentials
+  local conn_strings=$(grep -rnE "(postgresql|mysql|mongodb|redis)://[^:]+:[^@]+@" "$src_dir" \
+    --include="*.ts" --include="*.js" 2>/dev/null | \
+    grep -v "process\.env\|env\.\|example\|test\|localhost" || true)
+
+  if [ -n "$conn_strings" ]; then
+    echo "BLOCKER: Connection strings with embedded credentials:"
+    echo "$conn_strings"
+  fi
+}
+```
+
+**Severity:** Blocker for tracked secret files and hardcoded credentials in source. Warning for missing .gitignore patterns. Skip git-related checks gracefully if not in a git repository.
+
 ## Step 5: Verify E2E Flows
 
 Derive flows from milestone goals and trace through codebase.

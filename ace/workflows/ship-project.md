@@ -5,7 +5,7 @@ Ship the project to a deployment target in 3 phases:
 2. **RESEARCH & PLAN** -- Investigate target requirements, generate deployment checklist (Stage 39)
 3. **WALK CHECKLIST** -- Execute auto items, gate on human items, track progress (Stage 40)
 
-Phase 1 is fully implemented. Phases 2 and 3 are expansion points for future stages.
+Phases 1 and 2 are fully implemented. Phase 3 is an expansion point for Stage 40.
 </purpose>
 
 <core_principle>
@@ -279,22 +279,140 @@ Run /ace.ship again after Stage 39 is complete to continue.
 
 <step name="phase_2_research_plan">
 
-**EXPANSION POINT -- Implemented in Stage 39**
+Phase 2 reads the declared target, researches deployment requirements via ace-stage-scout, and generates a deployment checklist.
 
-This phase will:
-- Read `.ace/ship-target.md` for the declared target
-- Spawn ace-stage-scout with a shipping-specific research prompt for the chosen platform
-- Research the platform's deployment requirements (CLI tools, config files, environment variables, build steps)
-- Generate a deployment checklist at `.ace/ship-plan.md`
-- Classify each checklist item as `auto` (Claude executes) or `gate` (user action required)
-- Handle credentials/secrets as gates (never auto-handled)
+---
 
-For now, this phase is not yet implemented. If reached (e.g., via "Resume" from detect_existing_ship), display:
+**Sub-step 2a: Read target and validate**
+
+Read `.ace/ship-target.md` to extract target, stack, and status:
+
+```bash
+TARGET=$(grep -m1 '^\*\*Target:\*\*' .ace/ship-target.md | sed 's/\*\*Target:\*\* //')
+STACK=$(grep -m1 '^\*\*Stack detected:\*\*' .ace/ship-target.md | sed 's/\*\*Stack detected:\*\* //')
+STATUS=$(grep -m1 '^\*\*Status:\*\*' .ace/ship-target.md | sed 's/\*\*Status:\*\* //')
+```
+
+**Status routing:**
+
+- **If STATUS is `plan-ready`:** `.ace/ship-plan.md` already exists. Skip Phase 2 entirely and continue to Phase 3.
+- **If STATUS is not `awaiting-plan` and not `plan-ready`:** Warn "Unexpected status '{STATUS}' in ship-target.md, continuing anyway." and proceed.
+- **If TARGET is empty:** Error "No target found in ship-target.md. Run /ace.ship again to declare a target." and stop execution.
+
+---
+
+**Sub-step 2b: Gather context for research prompt**
+
+```bash
+PROJECT_NAME=$(head -1 .ace/brief.md 2>/dev/null | sed 's/^# //')
+WHAT_THIS_IS=$(sed -n '/## What This Is/,/^##/p' .ace/brief.md 2>/dev/null | head -5 | tail -4)
+PLATFORM_TYPE=$(grep -m1 '^\*\*Platform:\*\*' .ace/brief.md 2>/dev/null | sed 's/\*\*Platform:\*\* //')
+MODEL_PROFILE=$(cat .ace/config.json 2>/dev/null | grep -o '"horsepower"[[:space:]]*:[[:space:]]*"[^"]*"' | grep -o '"[^"]*"$' | tr -d '"' || echo "balanced")
+```
+
+Resolve scout model from horsepower profile:
+
+| horsepower | scout model |
+|------------|-------------|
+| max | opus |
+| balanced | sonnet |
+| eco | haiku |
+
+---
+
+**Sub-step 2c: Spawn ace-stage-scout**
+
+Construct a shipping-specific research prompt with XML sections:
+
+```markdown
+<objective>
+Research how to deploy a {stack} project to {target}.
+
+Answer: "What are the exact steps to ship this project to {target}?"
+</objective>
+
+<project_context>
+**Project:** {project_name}
+**Description:** {what_this_is}
+**Stack:** {stack}
+**Target:** {target}
+**Platform type:** {platform_type}
+</project_context>
+
+<research_focus>
+Research the following for deploying to {target}:
+
+1. **Prerequisites** -- CLI tools needed, account requirements, authentication steps
+2. **Project configuration** -- Config files needed, build settings, framework-specific adapters
+3. **Environment variables** -- What secrets and config values the platform requires
+4. **Build and deploy** -- Exact CLI commands for build, deploy, and promote to production
+5. **DNS/Domain** -- Custom domain configuration (if applicable, otherwise skip)
+6. **Post-deploy verification** -- How to programmatically and visually confirm deployment succeeded
+7. **Common gotchas** -- Platform-specific pitfalls for {stack} projects
+
+For every step, note whether it can be done via CLI/API or requires human action (browser-required, credential retrieval, etc.). Prefer CLI commands over dashboard instructions.
+</research_focus>
+
+<output>
+Write findings to: .ace/ship-research.md
+
+Structure as numbered deployment steps with:
+- Step name and description
+- CLI command (if automatable) or human instruction (if not)
+- Verification method
+- Common failure modes
+</output>
+```
+
+Spawn the scout:
 
 ```
-Phase 2 (Research & Plan) will be implemented in Stage 39.
-Run /ace.ship again after Stage 39 is complete to continue.
+Task(
+  prompt=research_prompt,
+  subagent_type="ace-stage-scout",
+  model="{scout_model}",
+  description="Research shipping to {target}"
+)
 ```
+
+---
+
+**Sub-step 2d: Handle scout return**
+
+**If scout returns `## RESEARCH COMPLETE`:**
+
+Display: "Research complete. Converting to deployment checklist..."
+
+Continue to checklist conversion below.
+
+**If scout returns `## RESEARCH BLOCKED`:**
+
+Display the blocker message from the scout's return. Then offer recovery options using AskUserQuestion:
+
+- header: "Research Blocked"
+- question: "The scout could not complete research for {target}. How would you like to proceed?"
+- options:
+  - "Retry research" (description: "Spawn the scout again with the same prompt")
+  - "Enter plan manually" (description: "Create .ace/ship-plan.md yourself and resume")
+  - "Abort" (description: "Stop the ship workflow")
+
+**If "Retry research":** Return to sub-step 2c and spawn the scout again.
+
+**If "Enter plan manually":** Display instructions for the expected ship-plan.md format, then stop. User creates the file and runs /ace.ship again (detect_existing_ship will find it).
+
+**If "Abort":** Stop the workflow with message "Ship workflow aborted. Run /ace.ship to start again."
+
+---
+
+**Sub-step 2e: Convert research to checklist**
+
+[Implemented in Run 02]
+
+---
+
+**Sub-step 2f: Update status and continue**
+
+[Implemented in Run 02]
 
 </step>
 
@@ -312,7 +430,7 @@ This phase will:
 - Handle failures with retry/skip/abort options
 - Provide error recovery guidance
 
-For now, this phase is not yet implemented. It is unreachable since Phase 2 (which creates ship-plan.md) is also not yet implemented.
+For now, this phase is not yet implemented. Phase 2 creates `.ace/ship-plan.md`, so this step is reachable after Phase 2 completes.
 
 </step>
 
@@ -326,5 +444,6 @@ For now, this phase is not yet implemented. It is unreachable since Phase 2 (whi
 - [ ] User selected target via AskUserQuestion
 - [ ] Target persisted to .ace/ship-target.md with status awaiting-plan
 - [ ] .ace/ship-plan.md is NOT created by Phase 1
-- [ ] Phases 2-3 are clearly marked as expansion points
+- [ ] Phase 2 spawns scout, handles research return, and generates checklist
+- [ ] Phase 3 is clearly marked as expansion point for Stage 40
 </success_criteria>

@@ -3,9 +3,9 @@
 Comprehensive security reference for ACE-managed projects. Consumed by ace-auditor (Step 7.6) and ace-integration-checker (Step 4.5) via @-reference.
 
 <overview>
-This checklist contains 39 items organized across 10 groups. Each item includes a severity classification, provenance markers tracing to OWASP/CWE/API standards, vulnerable and secure code examples, and grep-based detection patterns.
+This checklist contains 41 items organized across 10 groups. Each item includes a severity classification, provenance markers tracing to OWASP/CWE/API standards, vulnerable and secure code examples, and grep-based detection patterns.
 
-**10 Groups (39 items total):**
+**10 Groups (41 items total):**
 
 | # | Group | Items | Primary Sources |
 |---|-------|-------|-----------------|
@@ -13,14 +13,14 @@ This checklist contains 39 items organized across 10 groups. Each item includes 
 | 2 | Injection & Input Validation | 5 | OWASP-A05, CWE-79, CWE-89 |
 | 3 | Authentication & Session Management | 4 | OWASP-A07, API-02 |
 | 4 | Cryptographic Failures | 3 | OWASP-A04, CWE-327 |
-| 5 | Security Misconfiguration | 4 | OWASP-A02, API-08 |
+| 5 | Security Misconfiguration | 6 | OWASP-A02, OWASP-A05, OWASP-A09, API-08 |
 | 6 | API Security | 4 | API-03, API-04, API-06 |
 | 7 | Supply Chain & Dependencies | 3 | OWASP-A03, OWASP-A08 |
 | 8 | LLM & AI-Specific Security | 5 | LLM-01 through LLM-10 |
 | 9 | Cloud & Infrastructure Security | 3 | OWASP-A02 |
 | 10 | Framework-Specific Pitfalls | 3 | Framework CVEs |
 
-Groups 1-5 absorb the 10 code-reviewer security categories (auth, authz, input validation, XSS, SQLi, CSRF, crypto, error handling, logging, dependencies) so this checklist is the single source of truth.
+Groups 1-5 absorb 10 security categories from the user-level code-reviewer agent (auth, authz, input validation, XSS, SQLi, CSRF, crypto, error handling, logging, dependencies) so this checklist is the single source of truth.
 </overview>
 
 ## Severity Classification
@@ -1066,6 +1066,192 @@ grep -rnE "express\.static\(['\"]\.['\"]\)|express\.static\(process\.cwd\(\)\)" 
 grep -q "^\.env" .gitignore 2>/dev/null || echo ".env not in .gitignore"
 # Flag: debug/test endpoints
 grep -rnE "(debug|test|internal|admin).*route\|app\.(get|post).*/(debug|test|internal)" src/ --include="*.ts" --include="*.js"
+```
+
+---
+
+### Item 5.5: Cross-Site Request Forgery (CSRF)
+
+**Provenance:** OWASP-A05, CWE-352
+**Severity:** Blocker
+**Verification:** static
+
+State-changing requests (POST, PUT, DELETE) accepted without CSRF verification. Attackers craft malicious pages that submit forged requests using the victim's authenticated session, performing actions (password change, fund transfer, data deletion) without the user's knowledge.
+
+**Vulnerable:**
+```typescript
+// Express form handler -- no CSRF token validation
+import express from "express";
+const app = express();
+app.use(express.urlencoded({ extended: true }));
+
+app.post("/account/change-email", async (req, res) => {
+  const session = await getSession(req);
+  if (!session?.user) return res.status(401).json({ error: "Unauthorized" });
+  // No CSRF token check -- attacker's page can submit this form
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { email: req.body.email },
+  });
+  res.json({ success: true });
+});
+```
+
+**Secure:**
+```typescript
+// Pattern 1: SameSite cookie + double-submit CSRF token
+import crypto from "crypto";
+
+function generateCsrfToken(): string {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+function csrfProtection(req: express.Request, res: express.Response, next: express.NextFunction) {
+  if (["POST", "PUT", "DELETE", "PATCH"].includes(req.method)) {
+    const cookieToken = req.cookies["csrf-token"];
+    const headerToken = req.headers["x-csrf-token"] || req.body._csrf;
+    if (!cookieToken || cookieToken !== headerToken) {
+      return res.status(403).json({ error: "CSRF token mismatch" });
+    }
+  }
+  next();
+}
+
+app.use(csrfProtection);
+
+app.post("/account/change-email", async (req, res) => {
+  const session = await getSession(req);
+  if (!session?.user) return res.status(401).json({ error: "Unauthorized" });
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { email: req.body.email },
+  });
+  res.json({ success: true });
+});
+
+// Pattern 2: Next.js Server Actions (built-in CSRF protection via Origin header)
+// Server Actions automatically verify the Origin header matches the host,
+// preventing cross-origin form submissions without additional middleware.
+"use server";
+export async function changeEmail(formData: FormData) {
+  const session = await getSession();
+  if (!session?.user) throw new Error("Unauthorized");
+  const email = z.string().email().parse(formData.get("email"));
+  await prisma.user.update({ where: { id: session.user.id }, data: { email } });
+}
+```
+
+**Detection:**
+```bash
+# Flag: POST/PUT/DELETE handlers without CSRF middleware or token check
+grep -rlE "app\.(post|put|delete|patch)\s*\(" src/ --include="*.ts" --include="*.js" | xargs grep -L "csrf\|CSRF\|csrfProtection\|csurf"
+# Flag: forms without hidden CSRF token fields
+grep -rnE "<form[^>]*method=['\"]post['\"]" src/ --include="*.tsx" --include="*.html" | xargs grep -L "csrf\|_csrf\|csrfToken"
+# Flag: cookie settings missing sameSite attribute
+grep -rnE "\.cookie\(|setCookie\(" src/ --include="*.ts" --include="*.js" | grep -v "sameSite\|SameSite"
+```
+
+---
+
+### Item 5.6: Insufficient Security Logging
+
+**Provenance:** OWASP-A09, CWE-778
+**Severity:** Warning
+**Verification:** static
+
+Application does not log security-relevant events (failed logins, authorization failures, input validation errors, admin actions). Attackers operate undetected because there is no audit trail. When incidents occur, forensic investigation is impossible because no records exist of who accessed what and when.
+
+**Vulnerable:**
+```typescript
+// Login endpoint -- returns 401 on failure but logs nothing
+app.post("/api/login", async (req, res) => {
+  const { email, password } = req.body;
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+    return res.status(401).json({ error: "Invalid credentials" });
+    // No log: who tried to login, from where, how many times
+  }
+  const token = await createToken(user);
+  res.json({ token });
+  // No log: successful login event
+});
+
+// Admin action with no audit trail
+app.delete("/api/users/:id", requireAdmin, async (req, res) => {
+  await prisma.user.delete({ where: { id: req.params.id } });
+  res.json({ success: true });
+  // No log: which admin deleted which user
+});
+```
+
+**Secure:**
+```typescript
+// Structured security event logging (PII-safe: log user ID, not email/password)
+interface SecurityEvent {
+  event: string;
+  timestamp: string;
+  userId?: string;
+  ip: string;
+  action: string;
+  result: "success" | "failure";
+  metadata?: Record<string, unknown>;
+}
+
+function logSecurityEvent(event: SecurityEvent): void {
+  console.error(JSON.stringify(event));
+}
+
+app.post("/api/login", async (req, res) => {
+  const { email, password } = req.body;
+  const ip = req.ip ?? "unknown";
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+    logSecurityEvent({
+      event: "auth.login_failed",
+      timestamp: new Date().toISOString(),
+      ip,
+      action: "login",
+      result: "failure",
+      metadata: { reason: "invalid_credentials" },
+    });
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
+  logSecurityEvent({
+    event: "auth.login_success",
+    timestamp: new Date().toISOString(),
+    userId: user.id,
+    ip,
+    action: "login",
+    result: "success",
+  });
+  const token = await createToken(user);
+  res.json({ token });
+});
+
+// Admin action with audit trail
+app.delete("/api/users/:id", requireAdmin, async (req, res) => {
+  logSecurityEvent({
+    event: "admin.user_deleted",
+    timestamp: new Date().toISOString(),
+    userId: req.user.id,
+    ip: req.ip ?? "unknown",
+    action: "delete_user",
+    result: "success",
+    metadata: { targetUserId: req.params.id },
+  });
+  await prisma.user.delete({ where: { id: req.params.id } });
+  res.json({ success: true });
+});
+```
+
+**Detection:**
+```bash
+# Flag: auth/login handlers without logging
+grep -rlE "login|authenticate|sign.?in" src/ --include="*.ts" --include="*.js" | xargs grep -L "console\.\(log\|error\|warn\)\|logger\.\|log\.\|pino\|winston"
+# Flag: catch blocks that swallow errors silently
+grep -rnE "catch\s*\(" src/ --include="*.ts" --include="*.js" -A3 | grep -B1 "res\.\(json\|send\|status\)" | grep -v "console\.\|logger\.\|log\."
+# Flag: admin/delete/update routes without audit logging
+grep -rlE "delete|admin|destroy|remove" src/ --include="*.ts" --include="*.js" | xargs grep -lE "app\.(delete|post|put)" | xargs grep -L "console\.\(log\|error\)\|logger\.\|log\.\|audit"
 ```
 
 ---

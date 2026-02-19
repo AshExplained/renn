@@ -265,7 +265,7 @@ Write the chosen target to `.ace/ship-target.md`:
 **Status:** awaiting-plan
 ```
 
-This file is small and intentional. It exists so Phase 2 (Stage 39) can read the target without re-asking the user.
+This file is small and intentional. It exists so Phase 2 can read the target without re-asking the user.
 
 Do NOT create `.ace/ship-plan.md` -- that is Phase 2's responsibility.
 
@@ -276,8 +276,7 @@ Do NOT create `.ace/ship-plan.md` -- that is Phase 2's responsibility.
 ```
 Target declared: [chosen platform]
 
-Phase 2 (Research & Plan) will be implemented in Stage 39.
-Run /ace.ship again after Stage 39 is complete to continue.
+Continuing to Phase 2 (Research & Plan)...
 ```
 
 </step>
@@ -486,7 +485,7 @@ Gate items always include the `Instructions:` sub-bullet. Auto items do not need
 Update ship-target.md status:
 
 ```bash
-sed -i 's/Status: awaiting-plan/Status: plan-ready/' .ace/ship-target.md
+sed -i 's/^\*\*Status:\*\* awaiting-plan/\*\*Status:\*\* plan-ready/' .ace/ship-target.md
 ```
 
 Count auto and gate items:

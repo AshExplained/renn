@@ -29,5 +29,5 @@ node_modules/
 
 # Internal tooling
 .internal/
-.ace
+.renn
 .claude/

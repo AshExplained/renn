@@ -735,6 +735,19 @@ After all items in watch-plan.md are processed (no unchecked items remain):
    These steps were skipped and may need manual attention.
    ```
 
+   Display next action:
+   ```
+   ---
+
+   ## What's Next
+
+   Ready to plan the next iteration? Start a new milestone:
+
+   `/ace.new-milestone` -- define what to build next, research, plan, and create a new track
+
+   <sub>`/clear` first -- fresh context window</sub>
+   ```
+
 **Critical details:**
 - Status field transitions: `ready` -> `in-progress` -> `paused-at-N` / `complete` / `aborted`
 - "Come back later" and "Abort" both STOP execution -- they do not continue the loop
@@ -780,4 +793,5 @@ Phase 3 (Walk Checklist):
 - [ ] watch-plan.md Status transitions: ready -> in-progress -> complete/paused/aborted
 - [ ] watch-scope.md updated to monitored on completion
 - [ ] pulse.md reflects monitoring progress at section boundaries
+- [ ] Completion summary suggests /ace.new-milestone as the next action (WATCH-12)
 </success_criteria>

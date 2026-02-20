@@ -3,6 +3,7 @@ name: Release Please
 on:
   push:
     branches: [main]
+  workflow_dispatch: # Manual trigger for OIDC verification
 
 permissions:
   contents: write
@@ -47,6 +48,6 @@ jobs:
         run: npm run build:hooks
 
       # No NODE_AUTH_TOKEN needed — uses OIDC Trusted Publishing
-      # configured at npmjs.com/settings/ashexplained
+      # configured at npmjs.com for AshExplained/renn
       - name: Publish to npm
         run: npm publish --provenance --access public

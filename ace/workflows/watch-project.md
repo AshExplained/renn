@@ -433,16 +433,315 @@ Then proceed to `phase_3_walk_checklist`.
 
 <step name="phase_3_walk_checklist">
 
-**Phase 3: Walk Checklist** (implemented in Stage 43)
+Phase 3 walks the monitoring checklist item by item -- executing auto items, presenting gate items for user action, and tracking progress with checkboxes and timestamps.
 
-This phase will:
-1. Read .ace/watch-plan.md
-2. Walk checklist items: auto-execute or present gates
-3. Track progress with checkboxes and timestamps
-4. Handle error recovery (retry/skip/abort)
-5. Update pulse.md with monitoring progress
+This phase MUST execute in the main context (NOT a Task() subagent) because it uses AskUserQuestion for gate presentation.
 
-Display: "Phase 3 (Walk Checklist) will be available after Stage 43."
+---
+
+**Sub-step 3a: Initialize execution**
+
+Read watch-plan.md and prepare for execution:
+
+```bash
+# Verify plan exists and read metadata
+SCOPE=$(grep -m1 '^\*\*Monitoring scope:\*\*' .ace/watch-plan.md | sed 's/\*\*Monitoring scope:\*\* //')
+STATUS=$(grep -m1 '^\*\*Status:\*\*' .ace/watch-plan.md | sed 's/\*\*Status:\*\* //')
+
+# Read project name for display
+PROJECT_NAME=$(head -1 .ace/brief.md 2>/dev/null | sed 's/^# //')
+
+# Count items
+TOTAL=$(grep -c '^\- \[.\] [0-9]' .ace/watch-plan.md)
+COMPLETED=$(grep -c '^\- \[x\] [0-9]' .ace/watch-plan.md)
+REMAINING=$((TOTAL - COMPLETED))
+```
+
+**If STATUS contains `paused-at`:**
+Display: "Resuming from where you left off ({COMPLETED}/{TOTAL} complete)..."
+
+**If REMAINING is 0:**
+Display: "All items already complete!" and skip to sub-step 3g (completion summary).
+
+Update status to in-progress:
+
+```bash
+sed -i 's/^\*\*Status:\*\* .*/\*\*Status:\*\* in-progress/' .ace/watch-plan.md
+```
+
+Display execution header:
+
+```
+## Setting up monitoring
+
+{COMPLETED}/{TOTAL} steps complete, {REMAINING} remaining.
+Starting execution...
+```
+
+---
+
+**Sub-step 3b: Walk checklist items**
+
+For each unchecked item in watch-plan.md (in order):
+
+```bash
+# Extract unchecked items from watch-plan.md
+grep -n '^\- \[ \] [0-9]' .ace/watch-plan.md
+```
+
+Read each item line to extract:
+- Item number (N)
+- Type tag (`[auto]` or `[gate]`)
+- Description (text after the tag)
+- For gate items: Instructions sub-bullet (next line starting with `  - Instructions:`)
+
+**If `[auto]`:**
+
+1. Display: "Step {N}: {description}"
+2. Interpret the description and execute the appropriate CLI commands or file operations
+   - Do NOT hardcode tool-specific execution logic -- Claude interprets auto item descriptions at runtime
+   - Show concise output for successful execution
+3. If execution succeeds:
+   - Display: "Step {N} complete"
+   - Update checkbox and timestamp in watch-plan.md using sed:
+     ```bash
+     TIMESTAMP=$(date +%H:%M)
+     sed -i "s/^- \[ \] ${ITEM_NUM}\./- [x] ${ITEM_NUM}./" .ace/watch-plan.md
+     sed -i "/^\- \[x\] ${ITEM_NUM}\./s/$/ (completed ${TIMESTAMP})/" .ace/watch-plan.md
+     ```
+   - If the auto item modified project files (SDK install, config file creation, code changes), stage and commit with a descriptive message:
+     ```bash
+     git add {modified files}
+     git commit -m "feat: {description of monitoring change}"
+     ```
+4. If execution fails:
+   - Check if the error is an authentication error -> go to sub-step 3c (dynamic auth gate)
+   - Otherwise -> go to sub-step 3d (error recovery)
+
+**If `[gate]`:**
+
+Present to user via AskUserQuestion:
+
+- header: "Step {N}: {description}"
+- question: "{Instructions text}\n\nComplete this step and confirm."
+- options:
+  - "Done" (description: "I've completed this step")
+  - "Skip" (description: "Skip this step and continue")
+  - "Come back later" (description: "Save progress and exit -- for long waits like account verification")
+  - "Abort" (description: "Stop the monitoring setup entirely")
+
+Route based on response:
+
+- **"Done":** Update checkbox and timestamp in watch-plan.md, continue to next item:
+  ```bash
+  TIMESTAMP=$(date +%H:%M)
+  sed -i "s/^- \[ \] ${ITEM_NUM}\./- [x] ${ITEM_NUM}./" .ace/watch-plan.md
+  sed -i "/^\- \[x\] ${ITEM_NUM}\./s/$/ (completed ${TIMESTAMP})/" .ace/watch-plan.md
+  ```
+
+- **"Skip":** Mark as checked with "(skipped)" annotation, continue to next item:
+  ```bash
+  sed -i "s/^- \[ \] ${ITEM_NUM}\./- [x] ${ITEM_NUM}./" .ace/watch-plan.md
+  sed -i "/^\- \[x\] ${ITEM_NUM}\./s/$/ (skipped)/" .ace/watch-plan.md
+  ```
+
+- **"Come back later":** Go to sub-step 3e (pause and save position)
+
+- **"Abort":** Go to sub-step 3f (abort handling)
+
+**After processing each item:** Update pulse.md at section boundaries (when crossing from Prerequisites to SDK Integration, to Platform Configuration, to Verification) with:
+```
+Status: Setting up monitoring ({completed}/{total} steps)
+Last activity: {date} -- Completed monitoring step {N}: {description}
+```
+
+---
+
+**Sub-step 3c: Dynamic authentication gate**
+
+When an auto item fails, check the command output for authentication error patterns BEFORE falling through to generic error recovery. Auth errors are checked first because they have a specific recovery path (authenticate then retry).
+
+Detect auth error patterns in command output or error messages:
+- "Not authenticated", "Not logged in"
+- "Unauthorized", "401", "403"
+- "Please run {tool} login", "Please login"
+- "Missing API key", "Invalid API key", "Invalid credentials"
+- "Authentication required", "EAUTHUNKNOWN"
+
+**If auth error detected:**
+
+Present auth gate via AskUserQuestion:
+
+- header: "Authentication Required"
+- question: "{tool} requires authentication.\n\n{auth instructions based on error message -- e.g., 'Run `vercel login` in your terminal and complete browser authentication'}\n\nAuthenticate and confirm when done."
+- options:
+  - "Done" (description: "I've authenticated")
+  - "Abort" (description: "Stop monitoring setup")
+
+Route based on response:
+
+- **"Done":** Verify authentication if possible (e.g., `vercel whoami`, `npm whoami`, `gh auth status`). Then retry the original auto item from the beginning of its execution logic. If retry succeeds, mark the item complete with checkbox and timestamp. If retry fails with a DIFFERENT error (not auth), fall through to sub-step 3d (error recovery).
+
+- **"Abort":** Go to sub-step 3f (abort handling)
+
+**Secrets safety:**
+- Credentials are ALWAYS handled via gates, NEVER auto-executed
+- NEVER retry with cached credentials
+- NEVER auto-handle secrets or API keys
+- If an auto item's error suggests providing an API key inline, create a gate instead of trying to auto-provide it
+
+---
+
+**Sub-step 3d: Error recovery**
+
+When an auto item fails with a non-authentication error (sub-step 3c did not match):
+
+Present the failure via AskUserQuestion with full error details:
+
+- header: "Step {N} Failed"
+- question: "{description} failed.\n\nCommand: {what was attempted}\nError: {full error output}\n\nHow would you like to proceed?"
+- options:
+  - "Retry" (description: "Try this step again")
+  - "Skip" (description: "Mark as skipped and continue")
+  - "Abort" (description: "Stop the monitoring setup")
+
+Route based on response:
+
+- **"Retry":** Re-execute the same auto item from the beginning of its execution logic (sub-step 3b auto path). The retry loop has no limit -- the user decides when to stop via Skip or Abort.
+
+- **"Skip":** Mark the item as checked with "(skipped)" annotation, continue to next item:
+  ```bash
+  sed -i "s/^- \[ \] ${ITEM_NUM}\./- [x] ${ITEM_NUM}./" .ace/watch-plan.md
+  sed -i "/^\- \[x\] ${ITEM_NUM}\./s/$/ (skipped)/" .ace/watch-plan.md
+  ```
+
+- **"Abort":** Go to sub-step 3f (abort handling)
+
+**Error output:** Show verbose error output on failure (unlike success which shows concise output). The user needs full context to decide between retry, skip, and abort.
+
+---
+
+**Sub-step 3e: Come back later (async gate)**
+
+When user selects "Come back later" on a gate item (for long-running operations like account verification, DNS propagation, external integration setup):
+
+1. Update watch-plan.md Status from `in-progress` to `paused-at-{N}` where N is the current item number:
+   ```bash
+   sed -i "s/^\*\*Status:\*\* in-progress/\*\*Status:\*\* paused-at-${ITEM_NUM}/" .ace/watch-plan.md
+   ```
+
+2. Update pulse.md Session Continuity:
+   ```
+   Last activity: {date} -- Monitoring setup paused at step {N} of {TOTAL}
+   Resume file: .ace/watch-plan.md
+   Next action: Run /ace.watch to resume monitoring setup
+   ```
+
+3. Display exit message:
+   ```
+   Progress saved at step {N} of {TOTAL}.
+   {COMPLETED} steps complete, {REMAINING} remaining.
+
+   Run /ace.watch to resume from step {N}.
+   ```
+
+4. Stop execution (return from the workflow -- do NOT continue to the next item)
+
+**Resume mechanism:** No new code needed. The existing `detect_existing_watch` step already handles resume: watch-plan.md exists -> user picks "Resume" -> Phase 3 starts -> sub-step 3a reads watch-plan.md -> finds first unchecked item -> continues from there.
+
+---
+
+**Sub-step 3f: Abort**
+
+When user selects "Abort" from a gate item or error recovery:
+
+1. Update watch-plan.md Status to `aborted`:
+   ```bash
+   sed -i 's/^\*\*Status:\*\* in-progress/\*\*Status:\*\* aborted/' .ace/watch-plan.md
+   ```
+
+2. Update pulse.md with abort status:
+   ```
+   Last activity: {date} -- Monitoring setup aborted at step {N}
+   ```
+
+3. Display abort message:
+   ```
+   Monitoring setup aborted at step {N}.
+   {COMPLETED}/{TOTAL} steps were completed.
+
+   Run /ace.watch to resume or restart.
+   ```
+
+4. Stop execution
+
+---
+
+**Sub-step 3g: Completion summary**
+
+After all items in watch-plan.md are processed (no unchecked items remain):
+
+1. Count results:
+   ```bash
+   COMPLETED=$(grep -c '^\- \[x\] [0-9]' .ace/watch-plan.md)
+   SKIPPED=$(grep -c '(skipped)' .ace/watch-plan.md)
+   TOTAL=$(grep -c '^\- \[.\] [0-9]' .ace/watch-plan.md)
+   ```
+
+2. Verify no unchecked items remain before declaring complete:
+   ```bash
+   UNCHECKED=$(grep -c '^\- \[ \] [0-9]' .ace/watch-plan.md)
+   if [ "$UNCHECKED" -gt 0 ]; then
+     echo "ERROR: ${UNCHECKED} unchecked items remain -- do not declare complete"
+     # Return to sub-step 3b to continue processing
+   fi
+   ```
+
+3. Update watch-plan.md Status to `complete`:
+   ```bash
+   sed -i 's/^\*\*Status:\*\* in-progress/\*\*Status:\*\* complete/' .ace/watch-plan.md
+   ```
+
+4. Update watch-scope.md Status to `monitored`:
+   ```bash
+   sed -i 's/^\*\*Status:\*\* plan-ready/\*\*Status:\*\* monitored/' .ace/watch-scope.md
+   ```
+
+5. Update pulse.md to reflect monitoring completion -- revert to standard format and note monitoring set up:
+   ```
+   Last activity: {date} -- Set up monitoring for {project_name} ({monitoring_scope})
+   ```
+
+6. Display completion summary:
+   ```
+   ## Monitoring Setup Complete!
+
+   **Project:** {project_name}
+   **Platform:** {platform}
+   **Monitoring scope:** {monitoring_scope}
+   **Steps:** {COMPLETED} completed, {SKIPPED} skipped
+
+   ### What's Monitoring
+
+   {List key tools set up, extracted from completed checklist items}
+   ```
+
+   If skipped items exist, list them:
+   ```
+   ### Skipped Steps
+
+   {For each item with "(skipped)" annotation, list the item number and description}
+
+   These steps were skipped and may need manual attention.
+   ```
+
+**Critical details:**
+- Status field transitions: `ready` -> `in-progress` -> `paused-at-N` / `complete` / `aborted`
+- "Come back later" and "Abort" both STOP execution -- they do not continue the loop
+- The completion summary ONLY runs when no unchecked items remain (verified with grep before declaring complete)
+- watch-scope.md Status update to `monitored` only happens on completion, not on pause or abort
+- pulse.md format during monitoring: `Status: Setting up monitoring ({N}/{total} steps)`, reverted on completion/abort
+- Auto items that modify project files are committed individually with descriptive messages
 
 </step>
 

@@ -748,6 +748,7 @@ After all items in watch-plan.md are processed (no unchecked items remain):
 </process>
 
 <success_criteria>
+Phase 1 (Ask):
 - [ ] Re-watch detection works when .ace/watch-plan.md exists (resume/start-fresh/add-more)
 - [ ] Re-watch detection handles scope-only state (Phase 1 done, Phase 2 pending)
 - [ ] Project context extracted from brief.md and ship-target.md when available
@@ -756,9 +757,27 @@ After all items in watch-plan.md are processed (no unchecked items remain):
 - [ ] Scope persisted to .ace/watch-scope.md with project metadata
 - [ ] .ace/watch-plan.md is NOT created by Phase 1
 - [ ] No monitoring tool names appear in Phase 1
-- [ ] Phase 2 spawns ace-stage-scout with monitoring-specific research prompt
-- [ ] Phase 2 converts research to numbered checklist with auto/gate classification
-- [ ] Phase 2 writes .ace/watch-plan.md with project metadata and checklist
-- [ ] Phase 2 updates watch-scope.md status from awaiting-plan to plan-ready
-- [ ] Phase 3 stub clearly describes checklist walking scope
+
+Phase 2 (Research & Plan):
+- [ ] ace-stage-scout spawned with monitoring-specific research prompt
+- [ ] Scout research converted to numbered checklist with auto/gate classification
+- [ ] .ace/watch-plan.md created with project metadata, scope, and checklist items
+- [ ] watch-scope.md status updated from awaiting-plan to plan-ready
+- [ ] Auto items prefer CLI commands over dashboard instructions
+- [ ] Add-more mode excludes existing tools from research
+
+Phase 3 (Walk Checklist):
+- [ ] Phase 3 walks checklist items with auto-execution and gate presentation
+- [ ] Auto items interpreted and executed by Claude at runtime
+- [ ] Auto items that modify project files are committed individually
+- [ ] Gate items presented via AskUserQuestion with Done/Skip/Come back later/Abort
+- [ ] Auth errors in auto items create dynamic authentication gates before retry
+- [ ] Failed auto items offer retry/skip/abort recovery
+- [ ] Checkbox updates use sed with HH:MM timestamps
+- [ ] Skipped items use `- [x]` with "(skipped)" annotation
+- [ ] Async gates save position for resume via "Come back later"
+- [ ] Completion summary with monitoring-specific details (tools, scope, platform)
+- [ ] watch-plan.md Status transitions: ready -> in-progress -> complete/paused/aborted
+- [ ] watch-scope.md updated to monitored on completion
+- [ ] pulse.md reflects monitoring progress at section boundaries
 </success_criteria>

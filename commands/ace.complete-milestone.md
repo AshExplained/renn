@@ -2,7 +2,7 @@
 type: prompt
 name: ace.complete-milestone
 description: Archive completed milestone and prepare for next version
-argument-hint: <version>
+argument-hint: <milestone-id>
 allowed-tools:
   - Read
   - Write
@@ -10,10 +10,10 @@ allowed-tools:
 ---
 
 <objective>
-Mark milestone {{version}} complete, archive to milestones/, and update track.md and specs.md.
+Mark milestone {{milestone-id}} complete, archive to milestones/, and update track.md and specs.md.
 
-Purpose: Create historical record of shipped version, archive milestone artifacts (track + specs), and prepare for next milestone.
-Output: Milestone archived (track + specs), brief.md evolved, git tagged.
+Purpose: Create historical record of shipped milestone, archive milestone artifacts (track + specs), and prepare for next milestone.
+Output: Milestone archived (track + specs), brief.md evolved, local git tag created.
 </objective>
 
 <execution_context>
@@ -39,7 +39,7 @@ $ARGUMENTS
 
 0. **Check for audit:**
 
-   - Look for `.ace/v{{version}}-MILESTONE-AUDIT.md`
+   - Look for `.ace/{{milestone-id}}-MILESTONE-AUDIT.md`
    - If missing or stale: recommend `/ace.audit-milestone` first
    - If audit status is `gaps_found`: recommend `/ace.plan-milestone-gaps` first
    - If audit status is `passed`: proceed to step 1
@@ -47,16 +47,16 @@ $ARGUMENTS
    ```markdown
    ## Pre-flight Check
 
-   {If no v{{version}}-MILESTONE-AUDIT.md:}
-   ⚠ No milestone audit found. Run `/ace.audit-milestone` first to verify
+   {If no {{milestone-id}}-MILESTONE-AUDIT.md:}
+   No milestone audit found. Run `/ace.audit-milestone` first to verify
    specs coverage, cross-stage integration, and E2E flows.
 
    {If audit has gaps:}
-   ⚠ Milestone audit found gaps. Run `/ace.plan-milestone-gaps` to create
+   Milestone audit found gaps. Run `/ace.plan-milestone-gaps` to create
    stages that close the gaps, or proceed anyway to accept as tech debt.
 
    {If audit passed:}
-   ✓ Milestone audit passed. Proceeding with completion.
+   Milestone audit passed. Proceeding with completion.
    ```
 
 1. **Verify readiness:**
@@ -80,46 +80,46 @@ $ARGUMENTS
 
 4. **Archive milestone:**
 
-   - Create `.ace/milestones/v{{version}}-track.md`
+   - Create `.ace/milestones/{{milestone-id}}-track.md`
    - Extract full stage details from track.md
    - Fill milestone-archive.md template
    - Update track.md to one-line summary with link
 
 5. **Archive specs:**
 
-   - Create `.ace/milestones/v{{version}}-specs.md`
+   - Create `.ace/milestones/{{milestone-id}}-specs.md`
    - Mark all v1 specs as complete (checkboxes checked)
    - Note spec outcomes (validated, adjusted, dropped)
    - Delete `.ace/specs.md` (fresh one created for next milestone)
 
 6. **Update brief.md:**
 
-   - Add "Current State" section with shipped version
-   - Add "Next Milestone Goals" section
-   - Archive previous content in `<details>` (if v1.1+)
+   - Full evolution review (What This Is, Core Value, Specs audit, Context, Key Decisions, Constraints)
+   - Move shipped specs to Validated
+   - Update "Last updated" footer
 
-7. **Commit and tag:**
+7. **Tag and commit:**
 
-   - Stage: milestones.md, brief.md, track.md, pulse.md, archive files
-   - Commit: `chore: archive v{{version}} milestone`
-   - Tag: `git tag -a v{{version}} -m "[milestone summary]"`
-   - Ask about pushing tag
+   - Create local tag: `{{milestone-id}}-[slug]` (e.g., M11-watch-command)
+   - Ask about pushing tag to remote
+   - Commit archive files (if commit_docs=true)
 
 8. **Offer next steps:**
-   - `/ace.ship` — ship the completed milestone to a deployment target
-   - `/ace.new-milestone` — start next milestone (questioning → research → specs → track)
+   - `/ace.ship` -- ship the completed milestone to a deployment target
+   - `/ace.new-milestone` -- start next milestone (questioning -> research -> specs -> track)
 
 </process>
 
 <success_criteria>
 
-- Milestone archived to `.ace/milestones/v{{version}}-track.md`
-- Specs archived to `.ace/milestones/v{{version}}-specs.md`
+- Milestone archived to `.ace/milestones/{{milestone-id}}-track.md`
+- Specs archived to `.ace/milestones/{{milestone-id}}-specs.md`
 - `.ace/specs.md` deleted (fresh for next milestone)
 - track.md collapsed to one-line entry
 - brief.md updated with current state
-- Git tag v{{version}} created
-- Commit successful
+- Local git tag created (`{{milestone-id}}-[slug]`)
+- User asked about pushing tag to remote
+- Commit successful (if commit_docs=true)
 - User knows next steps (including need for fresh specs)
   </success_criteria>
 
@@ -132,4 +132,5 @@ $ARGUMENTS
 - **One-line summary:** Collapsed milestone in track.md should be single line with link
 - **Context efficiency:** Archive keeps track.md and specs.md constant size per milestone
 - **Fresh specs:** Next milestone starts with `/ace.new-milestone` which includes specs definition
+- **M-format tags only:** Never create semver tags -- version tags belong to the project's version manager, not ACE
   </critical_rules>

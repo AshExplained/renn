@@ -1,14 +1,14 @@
 {
-  "name": "ace-experience",
+  "name": "renn",
   "version": "0.5.1",
-  "description": "A stage-driven, context-engineered agentic code execution system for Claude Code, OpenCode, and Gemini.",
+  "description": "Grow ideas into shipped software",
   "bin": {
-    "ace-experience": "bin/install.js"
+    "renn": "bin/install.js"
   },
   "files": [
     "bin",
     "commands",
-    "ace",
+    "renn",
     "agents",
     "hooks/dist"
   ],
@@ -26,11 +26,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AshExplained/ace-agentic-code-experience.git"
+    "url": "https://github.com/AshExplained/renn.git"
   },
-  "homepage": "https://github.com/AshExplained/ace-agentic-code-experience",
+  "homepage": "https://github.com/AshExplained/renn",
   "bugs": {
-    "url": "https://github.com/AshExplained/ace-agentic-code-experience/issues"
+    "url": "https://github.com/AshExplained/renn/issues"
   },
   "engines": {
     "node": ">=16.7.0"
@@ -59,16 +59,16 @@
     "agents/*.md": [
       "node scripts/validate-markdown.js"
     ],
-    "ace/workflows/*.md": [
+    "renn/workflows/*.md": [
       "node scripts/validate-markdown.js"
     ],
-    "ace/references/*.md": [
+    "renn/references/*.md": [
       "node scripts/validate-markdown.js"
     ],
-    "ace/templates/**/*.md": [
+    "renn/templates/**/*.md": [
       "node scripts/validate-markdown.js"
     ],
-    "hooks/ace-*.js": [
+    "hooks/renn-*.js": [
       "eslint --fix",
       "prettier --write"
     ]

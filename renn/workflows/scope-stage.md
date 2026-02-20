@@ -1,0 +1,546 @@
+<purpose>
+Extract implementation decisions that downstream agents need. Analyze the stage to identify gray areas, let the user choose what to discuss, then deep-dive each selected area until satisfied.
+
+You are a thinking partner, not an interviewer. The user is the visionary — you are the builder. Your job is to capture decisions that will guide research and planning, not to figure out implementation yourself.
+</purpose>
+
+<downstream_awareness>
+**intel.md feeds into:**
+
+1. **renn-stage-scout** — Reads intel.md to know WHAT to research
+   - "User wants card-based layout" → scout investigates card component patterns
+   - "Infinite scroll decided" → scout looks into virtualization libraries
+
+2. **renn-architect** — Reads intel.md to know WHAT decisions are locked
+   - "Pull-to-refresh on mobile" → architect includes that in task specs
+   - "Claude's Discretion: loading skeleton" → architect can decide approach
+
+**Your job:** Capture decisions clearly enough that downstream agents can act on them without asking the user again.
+
+**Not your job:** Figure out HOW to implement. That's what research and planning do with the decisions you capture.
+</downstream_awareness>
+
+<philosophy>
+**User = founder/visionary. Claude = builder.**
+
+The user knows:
+- How they imagine it working
+- What it should look/feel like
+- What's essential vs nice-to-have
+- Specific behaviors or references they have in mind
+
+The user doesn't know (and shouldn't be asked):
+- Codebase patterns (scout reads the code)
+- Technical risks (scout identifies these)
+- Implementation approach (architect figures this out)
+- Success metrics (inferred from the work)
+
+Ask about vision and implementation choices. Capture decisions for downstream agents.
+</philosophy>
+
+<scope_guardrail>
+**CRITICAL: No scope creep.**
+
+The stage boundary comes from track.md and is FIXED. Discussion clarifies HOW to implement what's scoped, never WHETHER to add new capabilities.
+
+**Allowed (clarifying ambiguity):**
+- "How should posts be displayed?" (layout, density, info shown)
+- "What happens on empty state?" (within the feature)
+- "Pull to refresh or manual?" (behavior choice)
+
+**Not allowed (scope creep):**
+- "Should we also add comments?" (new capability)
+- "What about search/filtering?" (new capability)
+- "Maybe include bookmarking?" (new capability)
+
+**The heuristic:** Does this clarify how we implement what's already in the stage, or does it add a new capability that could be its own stage?
+
+**When user suggests scope creep:**
+```
+"[Feature X] would be a new capability — that's its own stage.
+Want me to note it for the track backlog?
+
+For now, let's focus on [stage domain]."
+```
+
+Capture the idea in a "Deferred Ideas" section. Don't lose it, don't act on it.
+</scope_guardrail>
+
+<gray_area_identification>
+Gray areas are **implementation decisions the user cares about** — things that could go multiple ways and would change the result.
+
+**How to identify gray areas:**
+
+1. **Read the stage goal** from track.md
+2. **Understand the domain** — What kind of thing is being built?
+   - Something users SEE → visual presentation, interactions, states matter
+   - Something users CALL → interface contracts, responses, errors matter
+   - Something users RUN → invocation, output, behavior modes matter
+   - Something users READ → structure, tone, depth, flow matter
+   - Something being ORGANIZED → criteria, grouping, handling exceptions matter
+3. **Generate stage-specific gray areas** — Not generic categories, but concrete decisions for THIS stage
+4. **[UI] stage filter** — If the stage heading in track.md contains `[UI]`, this stage has a design pipeline that handles visual/interaction decisions separately. Generate gray areas about DATA, CONTENT, BUSINESS RULES, and BEHAVIOR only. Defer these to the design pipeline:
+   - Visual layout and presentation (how things look)
+   - Information density and spacing
+   - Loading and transition patterns
+   - Interaction patterns (hover, click, drag)
+   - Visual states (what empty/error/loading states look like)
+   - Navigation structure (sidebar vs tabs vs breadcrumbs)
+   - Color, typography, animation
+
+**Don't use generic category labels** (UI, UX, Behavior). Generate specific gray areas:
+
+```
+Stage: "User authentication"
+→ Session handling, Error responses, Multi-device policy, Recovery flow
+
+Stage: "Organize photo library"
+→ Grouping criteria, Duplicate handling, Naming convention, Folder structure
+
+Stage: "CLI for database backups"
+→ Output format, Flag design, Progress reporting, Error recovery
+
+Stage: "API documentation"
+→ Structure/navigation, Code examples depth, Versioning approach, Interactive elements
+```
+
+**The key question:** What decisions would change the outcome that the user should weigh in on?
+
+**Claude handles these (don't ask):**
+- Technical implementation details
+- Architecture patterns
+- Performance optimization
+- Scope (track defines this)
+</gray_area_identification>
+
+<process>
+
+<step name="validate_stage" priority="first">
+Stage number from argument (required).
+
+Load and validate:
+- Read `.renn/track.md`
+- Find stage entry
+- Extract: number, name, description, status
+
+**If stage not found:**
+```
+Stage [X] not found in track.
+
+Use /renn.status to see available stages.
+```
+Exit workflow.
+
+**If stage found:** Continue to analyze_stage.
+</step>
+
+<step name="check_existing">
+Check if intel.md already exists:
+
+```bash
+# Match both zero-padded (05-*) and unpadded (5-*) folders
+PADDED_STAGE=$(printf "%02d" ${STAGE})
+ls .renn/stages/${PADDED_STAGE}-*/*-intel.md .renn/stages/${STAGE}-*/*-intel.md 2>/dev/null
+```
+
+**If exists:**
+Use AskUserQuestion:
+- header: "Existing context"
+- question: "Stage [X] already has context. What do you want to do?"
+- options:
+  - "Update it" — Review and revise existing context
+  - "View it" — Show me what's there
+  - "Skip" — Use existing context as-is
+
+If "Update": Load existing, continue to analyze_stage
+If "View": Display intel.md, then offer update/skip
+If "Skip": Exit workflow
+
+**If doesn't exist:** Continue to analyze_stage.
+</step>
+
+<step name="analyze_stage">
+Analyze the stage to identify gray areas worth discussing.
+
+**Read the stage description from track.md and determine:**
+
+0. **[UI] check** — Check the ### Stage N: heading line from track.md for this stage. If the heading contains [UI] (e.g., `### Stage 5: Dashboard Layout [UI]`), suppress visual/interaction gray areas. Focus only on data, content, business rules, and behavior. The design pipeline handles visual decisions for [UI] stages.
+
+1. **Domain boundary** — What capability is this stage delivering? State it clearly.
+
+2. **Gray areas by category** — For each relevant category, identify 1-2 specific ambiguities that would change implementation.
+   - **If [UI] stage:** Only data, content, business rules, and behavioral categories. Do NOT generate layout, density, loading, interaction, or visual state gray areas -- these are deferred to the design pipeline.
+   - **If non-[UI] stage:** All categories apply (UI, UX, Behavior, Empty States, Content).
+
+3. **Skip assessment** — If no meaningful gray areas exist (pure infrastructure, clear-cut implementation), the stage may not need discussion.
+
+**Output your analysis internally, then present to user.**
+
+Example analysis for "Post Feed [UI]" stage:
+```
+Domain: Displaying posts from followed users
+Gray areas (visual/interaction deferred to design pipeline):
+- Content: What data shows on each post (author, time, reactions, preview text)
+- Behavior: What order posts appear (newest, relevance, user preference)
+- Data: What defines "followed users" (direct follows only, or include recommended)
+- Empty state behavior: What happens with no posts (redirect to explore, suggest follows)
+```
+
+Example analysis for "Post Feed" stage (no [UI] tag):
+```
+Domain: Displaying posts from followed users
+Gray areas:
+- UI: Layout style (cards vs timeline vs grid)
+- UI: Information density (full posts vs previews)
+- Behavior: Loading pattern (infinite scroll vs pagination)
+- Empty State: What shows when no posts exist
+- Content: What metadata displays (time, author, reactions count)
+```
+</step>
+
+<step name="present_gray_areas">
+Present the domain boundary and gray areas to user.
+
+**First, state the boundary:**
+```
+Stage [X]: [Name]
+Domain: [What this stage delivers — from your analysis]
+
+We'll clarify HOW to implement this.
+(New capabilities belong in other stages.)
+```
+
+**[UI] stage handling:** If this is a [UI] stage (heading contains `[UI]`), state:
+```
+This is a [UI] stage -- visual presentation and interaction patterns are handled by the design pipeline.
+Let's focus on the data and behavior decisions.
+```
+
+**Then use AskUserQuestion (multiSelect: true):**
+- header: "Discuss"
+- question: "Which areas do you want to discuss for [stage name]?"
+- options: Generate 3-4 stage-specific gray areas, each formatted as:
+  - "[Specific area]" (label) — concrete, not generic
+  - [1-2 questions this covers] (description)
+
+**Do NOT include a "skip" or "you decide" option.** User ran this command to discuss — give them real choices.
+
+**Plain-language rule:** Describe behaviors, not name concepts. The user may not be technical. Instead of jargon, use familiar references ("like Instagram", "like Google search results") or describe what the user would see/do.
+
+**Examples by domain:**
+
+For "Post Feed [UI]" (visual feature with design pipeline):
+```
+This is a [UI] stage -- visual presentation and interaction patterns are handled by the design pipeline.
+Let's focus on the data and behavior decisions.
+
+☐ What shows on each post -- Author name, time posted, like count? Full text or just a preview? Which details matter most?
+☐ How posts are sorted -- Newest first, a smart algorithm, or let the user pick? What about posts from close friends?
+☐ What counts as "my feed" -- Only people I follow, or also suggested content? How much of each?
+```
+
+For "Post Feed" (visual feature, no [UI] tag):
+```
+☐ How posts look — Show each post as a card, a scrolling list, or a grid? How much detail per post?
+☐ How more posts load — Keep loading as you scroll down (like Instagram), or page-by-page with Next/Previous (like Google)?
+☐ What order posts appear — Newest first, smart sorting, or let the user pick?
+☐ What shows on each post — Time posted, likes, author name? What details matter?
+```
+
+For "Database backup CLI" (command-line tool):
+```
+☐ What the output looks like — Structured data, a table, or plain text? How much detail?
+☐ How commands are typed — Short shortcuts (-v), full names (--verbose), or both? Which ones are required?
+☐ What happens during long tasks — Run silently, show a progress bar, or log every step?
+☐ What happens when something fails — Stop immediately, try again, or ask what to do?
+```
+
+For "Organize photo library" (organization task):
+```
+☐ How photos are grouped — By date taken, location, people, or events?
+☐ What happens with duplicates — Keep the best one, keep all copies, or ask each time?
+☐ How files are named — Keep original names, rename by date, or add descriptions?
+☐ How folders are arranged — All in one folder, nested by year, or by category?
+```
+
+Continue to discuss_areas with selected areas.
+</step>
+
+<step name="discuss_areas">
+For each selected area, conduct a focused discussion loop.
+
+**Philosophy: 4 questions, then check.**
+
+Ask 4 questions per area before offering to continue or move on. Each answer often reveals the next question.
+
+**For each area:**
+
+1. **Announce the area:**
+   ```
+   Let's talk about [Area].
+   ```
+
+2. **Ask 4 questions using AskUserQuestion:**
+   - header: "[Area]"
+   - question: Specific decision for this area
+   - options: 2-3 concrete choices (AskUserQuestion adds "Other" automatically)
+   - Include "You decide" as an option when reasonable — captures Claude discretion
+
+3. **After 4 questions, check:**
+   - header: "[Area]"
+   - question: "More questions about [area], or move to next?"
+   - options: "More questions" / "Next area"
+
+   If "More questions" → ask 4 more, then check again
+   If "Next area" → proceed to next selected area
+
+4. **After all areas complete:**
+   - header: "Done"
+   - question: "That covers [list areas]. Ready to create context?"
+   - options: "Create context" / "Revisit an area"
+
+**Question design:**
+- Options should be concrete, not abstract ("Cards" not "Option A")
+- Each answer should inform the next question
+- If user picks "Other", receive their input, reflect it back, confirm
+
+**Scope creep handling:**
+If user mentions something outside the stage domain:
+```
+"[Feature] sounds like a new capability — that belongs in its own stage.
+I'll note it as a deferred idea.
+
+Back to [current area]: [return to current question]"
+```
+
+Track deferred ideas internally.
+</step>
+
+<step name="write_context">
+Create intel.md capturing decisions made.
+
+**Find or create stage directory:**
+
+```bash
+# Match existing directory (padded or unpadded)
+PADDED_STAGE=$(printf "%02d" ${STAGE})
+STAGE_DIR=$(ls -d .renn/stages/${PADDED_STAGE}-* .renn/stages/${STAGE}-* 2>/dev/null | head -1)
+if [ -z "$STAGE_DIR" ]; then
+  # Create from track name (lowercase, hyphens)
+  # Anchor to ### headings to avoid matching list items (which contain markdown ** and descriptions)
+  STAGE_NAME=$(grep "^### Stage ${STAGE}:" .renn/track.md | head -1 | sed 's/^### Stage [0-9]*: //' | sed 's/ \[UI\]$//' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+  mkdir -p ".renn/stages/${PADDED_STAGE}-${STAGE_NAME}"
+  STAGE_DIR=".renn/stages/${PADDED_STAGE}-${STAGE_NAME}"
+fi
+```
+
+**File location:** `${STAGE_DIR}/${PADDED_STAGE}-intel.md`
+
+**Structure the content by what was discussed:**
+
+```markdown
+# Stage [X]: [Name] - Context
+
+**Gathered:** [date]
+**Status:** Ready for planning
+
+<domain>
+## Stage Boundary
+
+[Clear statement of what this stage delivers — the scope anchor]
+
+</domain>
+
+<decisions>
+## Implementation Decisions
+
+### [Category 1 that was discussed]
+- [Decision or preference captured]
+- [Another decision if applicable]
+
+### [Category 2 that was discussed]
+- [Decision or preference captured]
+
+### Claude's Discretion
+[Areas where user said "you decide" — note that Claude has flexibility here]
+
+</decisions>
+
+<specifics>
+## Specific Ideas
+
+[Any particular references, examples, or "I want it like X" moments from discussion]
+
+[If none: "No specific requirements — open to standard approaches"]
+
+</specifics>
+
+<deferred>
+## Deferred Ideas
+
+[Ideas that came up but belong in other stages. Don't lose them.]
+
+[If none: "None — discussion stayed within stage scope"]
+
+</deferred>
+
+---
+
+*Stage: XX-name*
+*Context gathered: [date]*
+```
+
+Write file.
+</step>
+
+<step name="confirm_creation">
+Present summary and next steps.
+
+**First, show what was captured:**
+
+```
+Created: .renn/stages/${PADDED_STAGE}-${SLUG}/${PADDED_STAGE}-intel.md
+
+## Decisions Captured
+
+### [Category]
+- [Key decision]
+
+### [Category]
+- [Key decision]
+
+[If deferred ideas exist:]
+## Noted for Later
+- [Deferred idea] — future stage
+```
+
+**Then, detect if design is needed before routing:**
+
+Check if the stage heading from track.md has a [UI] tag:
+
+Check the ### Stage N: heading line from track.md for this stage.
+If the heading contains [UI] (e.g., `### Stage 5: Dashboard [UI]`) -> IS_UI_STAGE=true.
+Otherwise -> IS_UI_STAGE=false.
+No keyword matching. The [UI] tag is authoritative.
+
+If `IS_UI_STAGE=true`, check design artifacts:
+
+```bash
+HAS_STYLEKIT=$(ls .renn/design/stylekit.yaml 2>/dev/null && echo "yes")
+HAS_SCREENS=$(ls .renn/design/screens/*.yaml 2>/dev/null && echo "yes")
+```
+
+**Route based on detection:**
+
+**If IS_UI_STAGE=true AND no stylekit:**
+
+```
+---
+
+## ▶ Next Up
+
+**Stage ${STAGE}: [Name]** — [Goal from track.md]
+
+This is a UI stage — create the design system first:
+
+`/renn.design-system`
+
+<sub>`/clear` first → fresh context window</sub>
+
+---
+
+**Also available:**
+- `/renn.plan-stage ${STAGE}` — skip design, Claude designs inline during execution
+- Review/edit intel.md before continuing
+
+---
+```
+
+**If IS_UI_STAGE=true AND stylekit exists but no screens:**
+
+```
+---
+
+## ▶ Next Up
+
+**Stage ${STAGE}: [Name]** — [Goal from track.md]
+
+Design system exists. Create screen prototypes for this stage:
+
+`/renn.design-screens ${STAGE}`
+
+<sub>`/clear` first → fresh context window</sub>
+
+---
+
+**Also available:**
+- `/renn.plan-stage ${STAGE}` — skip screen design, Claude designs inline during execution
+- Review/edit intel.md before continuing
+
+---
+```
+
+**If IS_UI_STAGE=true AND both stylekit and screens exist, OR IS_UI_STAGE=false:**
+
+```
+---
+
+## ▶ Next Up
+
+**Stage ${STAGE}: [Name]** — [Goal from track.md]
+
+`/renn.plan-stage ${STAGE}`
+
+<sub>`/clear` first → fresh context window</sub>
+
+---
+
+**Also available:**
+- `/renn.plan-stage ${STAGE} --skip-research` — plan without research
+- Review/edit intel.md before continuing
+
+---
+```
+</step>
+
+<step name="git_commit">
+Commit stage context:
+
+**Check planning config:**
+
+```bash
+COMMIT_PLANNING_DOCS=$(cat .renn/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
+git check-ignore -q .renn 2>/dev/null && COMMIT_PLANNING_DOCS=false
+```
+
+**If `COMMIT_PLANNING_DOCS=false`:** Skip git operations
+
+**If `COMMIT_PLANNING_DOCS=true` (default):**
+
+```bash
+git add "${STAGE_DIR}/${PADDED_STAGE}-intel.md"
+git commit -m "$(cat <<'EOF'
+docs(${PADDED_STAGE}): capture stage context
+
+Stage ${PADDED_STAGE}: ${STAGE_NAME}
+- Implementation decisions documented
+- Stage boundary established
+EOF
+)"
+```
+
+Confirm: "Committed: docs(${PADDED_STAGE}): capture stage context"
+</step>
+
+</process>
+
+<success_criteria>
+- Stage validated against track
+- Gray areas identified through intelligent analysis (not generic questions)
+- User selected which areas to discuss
+- Each selected area explored until user satisfied
+- Scope creep redirected to deferred ideas
+- intel.md captures actual decisions, not vague vision
+- Deferred ideas preserved for future stages
+- User knows next steps
+</success_criteria>

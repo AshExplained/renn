@@ -1,6 +1,6 @@
-# ACE Contributor Patterns
+# RENN Contributor Patterns
 
-Reference for creating commands, agents, workflows, templates, and references that match existing ACE conventions.
+Reference for creating commands, agents, workflows, templates, and references that match existing RENN conventions.
 
 ---
 
@@ -8,11 +8,11 @@ Reference for creating commands, agents, workflows, templates, and references th
 
 | Type | Location | Naming | Has Frontmatter |
 |------|----------|--------|-----------------|
-| Command | `commands/ace.*.md` | `ace.kebab-case.md` | Yes (YAML) |
-| Agent | `agents/*.md` | `ace-*.md` | Yes (YAML) |
-| Workflow | `ace/workflows/*.md` | `kebab-case.md` | No |
-| Template | `ace/templates/*.md` | `kebab-case.md` | No |
-| Reference | `ace/references/*.md` | `kebab-case.md` | No |
+| Command | `commands/renn.*.md` | `renn.kebab-case.md` | Yes (YAML) |
+| Agent | `agents/*.md` | `renn-*.md` | Yes (YAML) |
+| Workflow | `renn/workflows/*.md` | `kebab-case.md` | No |
+| Template | `renn/templates/*.md` | `kebab-case.md` | No |
+| Reference | `renn/references/*.md` | `kebab-case.md` | No |
 
 ---
 
@@ -20,7 +20,7 @@ Reference for creating commands, agents, workflows, templates, and references th
 
 ```yaml
 ---
-name: ace.command-name
+name: renn.command-name
 description: One-line action description
 argument-hint: "<required> [optional]"
 allowed-tools:
@@ -39,15 +39,15 @@ What this does, why it matters, context budget (~15% orchestrator).
 </objective>
 
 <execution_context>
-@~/.claude/ace/workflows/relevant-workflow.md
-@~/.claude/ace/references/relevant-reference.md
+@~/.claude/renn/workflows/relevant-workflow.md
+@~/.claude/renn/references/relevant-reference.md
 </execution_context>
 
 <context>
 $ARGUMENTS
 
-@.ace/pulse.md
-@.ace/track.md
+@.renn/pulse.md
+@.renn/track.md
 </context>
 
 <process>
@@ -69,7 +69,7 @@ $ARGUMENTS
 
 ```yaml
 ---
-name: ace-agent-name
+name: renn-agent-name
 description: What this agent does when spawned
 tools: Read, Write, Bash, Grep, Glob, Edit, Task
 color: yellow
@@ -93,7 +93,7 @@ Your job: [success definition].
 Before any operation, read project state:
 
 ```bash
-cat .ace/pulse.md 2>/dev/null
+cat .renn/pulse.md 2>/dev/null
 ```
 
 Parse: current position, decisions, blockers.
@@ -168,7 +168,7 @@ Continue with next step.
 ```markdown
 # Template Name
 
-Template for `.ace/path/filename.md` — purpose.
+Template for `.renn/path/filename.md` — purpose.
 
 ---
 
@@ -282,13 +282,13 @@ Build authentication
 
 ### Static (always load)
 ```markdown
-@~/.claude/ace/workflows/run-stage.md
-@.ace/pulse.md
+@~/.claude/renn/workflows/run-stage.md
+@.renn/pulse.md
 ```
 
 ### Conditional (if exists)
 ```markdown
-@.ace/research.md (if exists)
+@.renn/research.md (if exists)
 ```
 
 ### Path rule
@@ -365,8 +365,8 @@ feat: brownfield design support & fidelity pipeline
 | Type | Convention | Example |
 |------|------------|---------|
 | Files | kebab-case | `run-stage.md` |
-| Commands | `ace.kebab-case` | `ace.run-stage` |
-| Agents | `ace-kebab` | `ace-runner` |
+| Commands | `renn.kebab-case` | `renn.run-stage` |
+| Agents | `renn-kebab` | `renn-runner` |
 | Step names | snake_case | `name="load_state"` |
 | Bash vars | CAPS_SNAKE | `STAGE_ARG` |
 | State files | lowercase | `pulse.md` |

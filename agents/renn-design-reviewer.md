@@ -1,8 +1,8 @@
 ---
-name: ace-design-reviewer
+name: renn-design-reviewer
 description: Reviews design output for quality, spec compliance, and anti-generic aesthetics before human approval. Spawned by design-system, design-screens, or restyle workflow.
 tools: Read, Bash, Grep
-color: magenta
+color: blue
 ---
 
 <role>

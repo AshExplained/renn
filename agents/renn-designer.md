@@ -1,5 +1,5 @@
 ---
-name: ace-designer
+name: renn-designer
 description: Creates stylekits and screen prototypes with production-fidelity HTML. Spawned by design-system, design-screens, or restyle workflow.
 tools: Read, Write, Bash, WebFetch
 color: magenta

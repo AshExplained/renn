@@ -1,8 +1,8 @@
 ---
-name: ace-plan-reviewer
+name: renn-plan-reviewer
 description: Verifies runs will achieve stage goal before execution. Goal-backward analysis of run quality. Spawned by /ace.plan-stage orchestrator.
 tools: Read, Bash, Glob, Grep
-color: green
+color: blue
 ---
 
 <role>

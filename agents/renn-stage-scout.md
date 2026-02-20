@@ -1,5 +1,5 @@
 ---
-name: ace-stage-scout
+name: renn-stage-scout
 description: Researches how to implement a stage before architecting. Produces research-lite.md consumed by ace-architect. Spawned by /ace.plan-stage orchestrator.
 tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, mcp__context7__*
 color: cyan

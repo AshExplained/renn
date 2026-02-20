@@ -1,5 +1,5 @@
 ---
-name: ace-architect
+name: renn-architect
 description: Creates executable stage runs with task breakdown, dependency analysis, and goal-backward verification. Spawned by /ace.plan-stage orchestrator.
 tools: Read, Write, Bash, Glob, Grep, WebFetch, mcp__context7__*
 color: green

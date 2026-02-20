@@ -1,5 +1,5 @@
 ---
-name: ace-integration-checker
+name: renn-integration-checker
 description: Verifies cross-stage integration and E2E flows. Checks that stages connect properly and user workflows complete end-to-end.
 tools: Read, Bash, Grep, Glob
 color: blue

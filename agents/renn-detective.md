@@ -1,5 +1,5 @@
 ---
-name: ace-detective
+name: renn-detective
 description: Investigates bugs using scientific method, manages debug sessions, handles gates. Spawned by ace.debug orchestrator.
 tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch
 color: orange

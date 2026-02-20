@@ -1,5 +1,5 @@
 ---
-name: ace-synthesizer
+name: renn-synthesizer
 description: Synthesizes research outputs from parallel scout agents into recap.md. Spawned by /ace.start after 4 scout agents complete.
 tools: Read, Write, Bash
 color: purple

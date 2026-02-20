@@ -1,5 +1,5 @@
 ---
-name: ace-project-scout
+name: renn-project-scout
 description: Researches domain ecosystem before track creation. Produces files in .ace/research/ consumed during track creation. Spawned by /ace.start or /ace.new-milestone orchestrators.
 tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch, mcp__context7__*
 color: cyan

@@ -1,5 +1,5 @@
 ---
-name: ace-navigator
+name: renn-navigator
 description: Creates project tracks with stage breakdown, requirement mapping, success criteria derivation, and coverage validation. Spawned by /ace.start orchestrator.
 tools: Read, Write, Bash, Glob, Grep
 color: purple

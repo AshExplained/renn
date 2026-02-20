@@ -1,5 +1,5 @@
 ---
-name: ace-runner
+name: renn-runner
 description: Executes ACE runs with atomic commits, drift handling, gate protocols, and state management. Spawned by run-stage orchestrator or run command.
 tools: Read, Write, Edit, Bash, Grep, Glob
 color: yellow

@@ -1,8 +1,8 @@
 ---
-name: ace-auditor
+name: renn-auditor
 description: Verifies stage goal achievement through goal-backward analysis. Checks codebase delivers what stage promised, not just that tasks completed. Creates proof.md report.
 tools: Read, Bash, Grep, Glob
-color: green
+color: blue
 ---
 
 <role>

@@ -85,31 +85,33 @@ function getGlobalDir(runtime, explicitDir = null) {
 // Gradient banner
 function buildBanner() {
   const logo = [
-    ' █████╗  ██████╗███████╗',
-    '██╔══██╗██╔════╝██╔════╝',
-    '███████║██║     █████╗  ',
-    '██╔══██║██║     ██╔══╝  ',
-    '██║  ██║╚██████╗███████╗',
-    '╚═╝  ╚═╝ ╚═════╝╚══════╝',
+    '██████╗ ███████╗███╗   ██╗███╗   ██╗',
+    '██╔══██╗██╔════╝████╗  ██║████╗  ██║',
+    '██████╔╝█████╗  ██╔██╗ ██║██╔██╗ ██║',
+    '██╔══██╗██╔══╝  ██║╚██╗██║██║╚██╗██║',
+    '██║  ██║███████╗██║ ╚████║██║ ╚████║',
+    '╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚═╝  ╚═══╝',
   ];
 
   const asciiLogo = [
-    '    _    ____ _____',
-    '   / \\  / ___| ____|',
-    '  / _ \\| |   |  _|',
-    ' / ___ \\ |___| |___',
-    '/_/   \\_\\____|_____|',
+    '  ____  _____ _   _ _   _',
+    ' |  _ \\| ____| \\ | | \\ | |',
+    ' | |_) |  _| |  \\| |  \\| |',
+    ' |  _ <| |___| |\\  | |\\  |',
+    ' |_| \\_\\_____|_| \\_|_| \\_|',
   ];
 
-  // Row-based gradient from bright cyan to deep cyan
+  // Row-based gradient from light pink to snow white
   const gradientColors = [
-    '38;2;0;255;255', // bright cyan
-    '38;2;0;230;240',
-    '38;2;0;210;225',
-    '38;2;0;190;210',
-    '38;2;0;170;195',
-    '38;2;0;150;180', // deep cyan
+    '38;2;255;182;193', // light pink
+    '38;2;255;192;203', // pink
+    '38;2;255;209;220', // lighter pink
+    '38;2;255;228;235', // very light pink
+    '38;2;255;240;245', // near white
+    '38;2;255;250;250', // snow white
   ];
+
+  const lotus = useUnicode ? '\uD83C\uDF38 ' : '';
 
   const lines = [];
   lines.push('');
@@ -124,9 +126,9 @@ function buildBanner() {
   }
 
   lines.push('');
-  lines.push(`  ${dim}Agentic Code Execution${reset}  ${dim}v${pkg.version}${reset}`);
-  lines.push(`  A stage-driven, context-engineered agentic code`);
-  lines.push(`  execution system for Claude Code, OpenCode, and Gemini.`);
+  lines.push(
+    `  ${lotus}${dim}Grow ideas into shipped software${reset}  ${dim}v${pkg.version}${reset}`
+  );
   lines.push('');
 
   return lines.join('\n');
@@ -168,7 +170,7 @@ if (require.main === module) {
   // Show help if requested
   if (hasHelp) {
     console.log(
-      `  ${yellow}Usage:${reset} npx ace-experience [options]\n\n  ${yellow}Options:${reset}\n    ${cyan}-g, --global${reset}              Install globally (to config directory)\n    ${cyan}-l, --local${reset}               Install locally (to current directory)\n    ${cyan}--claude${reset}                  Install for Claude Code only\n    ${cyan}--opencode${reset}                Install for OpenCode only\n    ${cyan}--gemini${reset}                  Install for Gemini only\n    ${cyan}--all${reset}                     Install for all runtimes\n    ${cyan}-u, --uninstall${reset}           Uninstall ACE (remove all ACE files)\n    ${cyan}-c, --config-dir <path>${reset}   Specify custom config directory\n    ${cyan}-h, --help${reset}                Show this help message\n    ${cyan}--force-statusline${reset}        Replace existing statusline config\n\n  ${yellow}Examples:${reset}\n    ${dim}# Interactive install (prompts for runtime and location)${reset}\n    npx ace-experience\n\n    ${dim}# Install for Claude Code globally${reset}\n    npx ace-experience --claude --global\n\n    ${dim}# Install for all runtimes globally${reset}\n    npx ace-experience --all --global\n\n    ${dim}# Install to custom config directory${reset}\n    npx ace-experience --claude --global --config-dir ~/.claude-bc\n\n    ${dim}# Install to current project only${reset}\n    npx ace-experience --claude --local\n\n    ${dim}# Uninstall ACE from Claude Code globally${reset}\n    npx ace-experience --claude --global --uninstall\n`
+      `  ${yellow}Usage:${reset} npx renn [options]\n\n  ${yellow}Options:${reset}\n    ${cyan}-g, --global${reset}              Install globally (to config directory)\n    ${cyan}-l, --local${reset}               Install locally (to current directory)\n    ${cyan}--claude${reset}                  Install for Claude Code only\n    ${cyan}--opencode${reset}                Install for OpenCode only\n    ${cyan}--gemini${reset}                  Install for Gemini only\n    ${cyan}--all${reset}                     Install for all runtimes\n    ${cyan}-u, --uninstall${reset}           Uninstall RENN (remove all RENN files)\n    ${cyan}-c, --config-dir <path>${reset}   Specify custom config directory\n    ${cyan}-h, --help${reset}                Show this help message\n    ${cyan}--force-statusline${reset}        Replace existing statusline config\n\n  ${yellow}Examples:${reset}\n    ${dim}# Interactive install (prompts for runtime and location)${reset}\n    npx renn\n\n    ${dim}# Install for Claude Code globally${reset}\n    npx renn --claude --global\n\n    ${dim}# Install for all runtimes globally${reset}\n    npx renn --all --global\n\n    ${dim}# Install to custom config directory${reset}\n    npx renn --claude --global --config-dir ~/.claude-bc\n\n    ${dim}# Install to current project only${reset}\n    npx renn --claude --local\n\n    ${dim}# Uninstall RENN from Claude Code globally${reset}\n    npx renn --claude --global --uninstall\n`
     );
     process.exit(0);
   }
@@ -419,8 +421,8 @@ function convertClaudeToOpencodeFrontmatter(content) {
   convertedContent = convertedContent.replace(/\bAskUserQuestion\b/g, 'question');
   convertedContent = convertedContent.replace(/\bSlashCommand\b/g, 'skill');
   convertedContent = convertedContent.replace(/\bTodoWrite\b/g, 'todowrite');
-  // Replace /ace.command with /ace-command for opencode (flat command structure)
-  convertedContent = convertedContent.replace(/\/ace\./g, '/ace-');
+  // Replace /renn.command with /renn-command for opencode (flat command structure)
+  convertedContent = convertedContent.replace(/\/renn\./g, '/renn-');
   // Replace ~/.claude with ~/.config/opencode
   convertedContent = convertedContent.replace(/~\/\.claude\b/g, '~/.config/opencode');
 
@@ -530,16 +532,16 @@ function convertClaudeToGeminiToml(content) {
 }
 
 /**
- * Copy ace.*.md commands to OpenCode's flat command/ directory
- * Converts ace.{name}.md → ace-{name}.md (dot to dash)
+ * Copy renn.*.md commands to OpenCode's flat command/ directory
+ * Converts renn.{name}.md → renn-{name}.md (dot to dash)
  */
 function copyCommandsForOpencode(commandsSrc, destDir, pathPrefix, runtime) {
   if (!fs.existsSync(commandsSrc)) return;
 
-  // Remove old ace-*.md files before copying new ones
+  // Remove old renn-*.md files before copying new ones
   if (fs.existsSync(destDir)) {
     for (const file of fs.readdirSync(destDir)) {
-      if (file.startsWith('ace-') && file.endsWith('.md')) {
+      if (file.startsWith('renn-') && file.endsWith('.md')) {
         fs.unlinkSync(path.join(destDir, file));
       }
     }
@@ -550,11 +552,11 @@ function copyCommandsForOpencode(commandsSrc, destDir, pathPrefix, runtime) {
   const entries = fs.readdirSync(commandsSrc);
 
   for (const file of entries) {
-    if (!file.startsWith('ace.') || !file.endsWith('.md')) continue;
+    if (!file.startsWith('renn.') || !file.endsWith('.md')) continue;
 
     const srcPath = path.join(commandsSrc, file);
-    // ace.run-stage.md → ace-run-stage.md
-    const destName = file.replace(/^ace\./, 'ace-');
+    // renn.run-stage.md → renn-run-stage.md
+    const destName = file.replace(/^renn\./, 'renn-');
     const destPath = path.join(destDir, destName);
 
     let content = fs.readFileSync(srcPath, 'utf8');
@@ -568,16 +570,16 @@ function copyCommandsForOpencode(commandsSrc, destDir, pathPrefix, runtime) {
 }
 
 /**
- * Copy ace.*.md commands to Claude/Gemini commands/ directory
+ * Copy renn.*.md commands to Claude/Gemini commands/ directory
  */
 function copyCommandFiles(commandsSrc, commandsDir, pathPrefix, runtime) {
   if (!fs.existsSync(commandsSrc)) return;
 
   fs.mkdirSync(commandsDir, { recursive: true });
 
-  // Clean existing ace.*.md and ace.*.toml files before copying
+  // Clean existing renn.*.md and renn.*.toml files before copying
   for (const file of fs.readdirSync(commandsDir)) {
-    if (file.startsWith('ace.') && (file.endsWith('.md') || file.endsWith('.toml'))) {
+    if (file.startsWith('renn.') && (file.endsWith('.md') || file.endsWith('.toml'))) {
       fs.unlinkSync(path.join(commandsDir, file));
     }
   }
@@ -585,7 +587,7 @@ function copyCommandFiles(commandsSrc, commandsDir, pathPrefix, runtime) {
   const entries = fs.readdirSync(commandsSrc);
 
   for (const file of entries) {
-    if (!file.startsWith('ace.') || !file.endsWith('.md')) continue;
+    if (!file.startsWith('renn.') || !file.endsWith('.md')) continue;
 
     const srcPath = path.join(commandsSrc, file);
 
@@ -648,7 +650,7 @@ function copyWithPathReplacement(srcDir, destDir, pathPrefix, runtime) {
 }
 
 /**
- * Clean up orphaned files from previous ACE versions
+ * Clean up orphaned files from previous RENN versions
  */
 function cleanupOrphanedFiles(configDir) {
   const orphanedFiles = [
@@ -706,7 +708,7 @@ function cleanupOrphanedHooks(settings) {
 }
 
 /**
- * Uninstall ACE from the specified directory for a specific runtime
+ * Uninstall RENN from the specified directory for a specific runtime
  */
 function uninstall(isGlobal, runtime = 'claude') {
   const isOpencode = runtime === 'opencode';
@@ -725,7 +727,7 @@ function uninstall(isGlobal, runtime = 'claude') {
   if (runtime === 'gemini') runtimeLabel = 'Gemini';
 
   console.log(
-    `  Uninstalling ACE from ${cyan}${runtimeLabel}${reset} at ${cyan}${locationLabel}${reset}\n`
+    `  Uninstalling RENN from ${cyan}${runtimeLabel}${reset} at ${cyan}${locationLabel}${reset}\n`
   );
 
   if (!fs.existsSync(targetDir)) {
@@ -736,63 +738,63 @@ function uninstall(isGlobal, runtime = 'claude') {
 
   let removedCount = 0;
 
-  // 1. Remove ACE commands directory
+  // 1. Remove RENN commands directory
   if (isOpencode) {
     const commandDir = path.join(targetDir, 'command');
     if (fs.existsSync(commandDir)) {
       const files = fs.readdirSync(commandDir);
       for (const file of files) {
-        if (file.startsWith('ace-') && file.endsWith('.md')) {
+        if (file.startsWith('renn-') && file.endsWith('.md')) {
           fs.unlinkSync(path.join(commandDir, file));
           removedCount++;
         }
       }
-      console.log(`  ${green}\u2713${reset} Removed ACE commands from command/`);
+      console.log(`  ${green}\u2713${reset} Removed RENN commands from command/`);
     }
   } else {
     const commandsDir = path.join(targetDir, 'commands');
     if (fs.existsSync(commandsDir)) {
       for (const file of fs.readdirSync(commandsDir)) {
-        if (file.startsWith('ace.') && (file.endsWith('.md') || file.endsWith('.toml'))) {
+        if (file.startsWith('renn.') && (file.endsWith('.md') || file.endsWith('.toml'))) {
           fs.unlinkSync(path.join(commandsDir, file));
           removedCount++;
         }
       }
-      console.log(`  ${green}\u2713${reset} Removed ACE commands from commands/`);
+      console.log(`  ${green}\u2713${reset} Removed RENN commands from commands/`);
     }
   }
 
-  // 2. Remove ace directory (workflows, templates, references)
-  const aceDir = path.join(targetDir, 'ace');
-  if (fs.existsSync(aceDir)) {
-    fs.rmSync(aceDir, { recursive: true });
+  // 2. Remove renn directory (workflows, templates, references)
+  const rennDir = path.join(targetDir, 'renn');
+  if (fs.existsSync(rennDir)) {
+    fs.rmSync(rennDir, { recursive: true });
     removedCount++;
-    console.log(`  ${green}\u2713${reset} Removed ace/`);
+    console.log(`  ${green}\u2713${reset} Removed renn/`);
   }
 
-  // 3. Remove ACE agents (ace-*.md files only)
+  // 3. Remove RENN agents (renn-*.md files only)
   const agentsDir = path.join(targetDir, 'agents');
   if (fs.existsSync(agentsDir)) {
     const files = fs.readdirSync(agentsDir);
     let agentCount = 0;
     for (const file of files) {
-      if (file.startsWith('ace-') && file.endsWith('.md')) {
+      if (file.startsWith('renn-') && file.endsWith('.md')) {
         fs.unlinkSync(path.join(agentsDir, file));
         agentCount++;
       }
     }
     if (agentCount > 0) {
       removedCount++;
-      console.log(`  ${green}\u2713${reset} Removed ${agentCount} ACE agents`);
+      console.log(`  ${green}\u2713${reset} Removed ${agentCount} RENN agents`);
     }
   }
 
-  // 4. Remove ACE hooks
+  // 4. Remove RENN hooks
   const hooksDir = path.join(targetDir, 'hooks');
   if (fs.existsSync(hooksDir)) {
-    const aceHooks = ['ace-statusline.js', 'ace-check-update.js'];
+    const rennHooks = ['renn-statusline.js', 'renn-check-update.js'];
     let hookCount = 0;
-    for (const hook of aceHooks) {
+    for (const hook of rennHooks) {
       const hookPath = path.join(hooksDir, hook);
       if (fs.existsSync(hookPath)) {
         fs.unlinkSync(hookPath);
@@ -801,7 +803,7 @@ function uninstall(isGlobal, runtime = 'claude') {
     }
     if (hookCount > 0) {
       removedCount++;
-      console.log(`  ${green}\u2713${reset} Removed ${hookCount} ACE hooks`);
+      console.log(`  ${green}\u2713${reset} Removed ${hookCount} RENN hooks`);
     }
   }
 
@@ -811,34 +813,34 @@ function uninstall(isGlobal, runtime = 'claude') {
     const settings = readSettings(settingsPath);
     let settingsModified = false;
 
-    // Remove ACE statusline
+    // Remove RENN statusline
     if (
       settings.statusLine &&
       settings.statusLine.command &&
-      settings.statusLine.command.includes('ace-statusline')
+      settings.statusLine.command.includes('renn-statusline')
     ) {
       delete settings.statusLine;
       settingsModified = true;
-      console.log(`  ${green}\u2713${reset} Removed ACE statusline from settings`);
+      console.log(`  ${green}\u2713${reset} Removed RENN statusline from settings`);
     }
 
-    // Remove ACE hooks from SessionStart
+    // Remove RENN hooks from SessionStart
     if (settings.hooks && settings.hooks.SessionStart) {
       const before = settings.hooks.SessionStart.length;
       settings.hooks.SessionStart = settings.hooks.SessionStart.filter((entry) => {
         if (entry.hooks && Array.isArray(entry.hooks)) {
-          const hasAceHook = entry.hooks.some(
+          const hasRennHook = entry.hooks.some(
             (h) =>
               h.command &&
-              (h.command.includes('ace-check-update') || h.command.includes('ace-statusline'))
+              (h.command.includes('renn-check-update') || h.command.includes('renn-statusline'))
           );
-          return !hasAceHook;
+          return !hasRennHook;
         }
         return true;
       });
       if (settings.hooks.SessionStart.length < before) {
         settingsModified = true;
-        console.log(`  ${green}\u2713${reset} Removed ACE hooks from settings`);
+        console.log(`  ${green}\u2713${reset} Removed RENN hooks from settings`);
       }
       if (settings.hooks.SessionStart.length === 0) delete settings.hooks.SessionStart;
       if (Object.keys(settings.hooks).length === 0) delete settings.hooks;
@@ -864,7 +866,7 @@ function uninstall(isGlobal, runtime = 'claude') {
             if (config.permission[permType]) {
               const keys = Object.keys(config.permission[permType]);
               for (const key of keys) {
-                if (key.includes('ace')) {
+                if (key.includes('renn')) {
                   delete config.permission[permType][key];
                   modified = true;
                 }
@@ -882,7 +884,7 @@ function uninstall(isGlobal, runtime = 'claude') {
         if (modified) {
           fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
           removedCount++;
-          console.log(`  ${green}\u2713${reset} Removed ACE permissions from opencode.json`);
+          console.log(`  ${green}\u2713${reset} Removed RENN permissions from opencode.json`);
         }
       } catch (_e) {
         // Ignore JSON parse errors
@@ -891,16 +893,16 @@ function uninstall(isGlobal, runtime = 'claude') {
   }
 
   if (removedCount === 0) {
-    console.log(`  ${yellow}\u26a0${reset} No ACE files found to remove.`);
+    console.log(`  ${yellow}\u26a0${reset} No RENN files found to remove.`);
   }
 
   console.log(
-    `\n  ${green}Done!${reset} ACE has been uninstalled from ${runtimeLabel}.\n  Your other files and settings have been preserved.\n`
+    `\n  ${green}Done!${reset} RENN has been uninstalled from ${runtimeLabel}.\n  Your other files and settings have been preserved.\n`
   );
 }
 
 /**
- * Configure OpenCode permissions to allow reading ACE reference docs
+ * Configure OpenCode permissions to allow reading RENN reference docs
  */
 function configureOpencodePermissions() {
   const opencodeConfigDir = getOpencodeGlobalDir();
@@ -920,18 +922,18 @@ function configureOpencodePermissions() {
   if (!config.permission) config.permission = {};
 
   const defaultConfigDir = path.join(os.homedir(), '.config', 'opencode');
-  const acePath =
+  const rennPath =
     opencodeConfigDir === defaultConfigDir
-      ? '~/.config/opencode/ace/*'
-      : `${opencodeConfigDir}/ace/*`;
+      ? '~/.config/opencode/renn/*'
+      : `${opencodeConfigDir}/renn/*`;
 
   let modified = false;
 
   if (!config.permission.read || typeof config.permission.read !== 'object') {
     config.permission.read = {};
   }
-  if (config.permission.read[acePath] !== 'allow') {
-    config.permission.read[acePath] = 'allow';
+  if (config.permission.read[rennPath] !== 'allow') {
+    config.permission.read[rennPath] = 'allow';
     modified = true;
   }
 
@@ -941,15 +943,15 @@ function configureOpencodePermissions() {
   ) {
     config.permission.external_directory = {};
   }
-  if (config.permission.external_directory[acePath] !== 'allow') {
-    config.permission.external_directory[acePath] = 'allow';
+  if (config.permission.external_directory[rennPath] !== 'allow') {
+    config.permission.external_directory[rennPath] = 'allow';
     modified = true;
   }
 
   if (!modified) return;
 
   fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
-  console.log(`  ${green}\u2713${reset} Configured read permission for ACE docs`);
+  console.log(`  ${green}\u2713${reset} Configured read permission for RENN docs`);
 }
 
 /**
@@ -1027,11 +1029,11 @@ function install(isGlobal, runtime = 'claude') {
 
     const commandsSrc = path.join(src, 'commands');
     copyCommandsForOpencode(commandsSrc, commandDir, pathPrefix, runtime);
-    if (verifyInstalled(commandDir, 'command/ace-*')) {
-      const count = fs.readdirSync(commandDir).filter((f) => f.startsWith('ace-')).length;
+    if (verifyInstalled(commandDir, 'command/renn-*')) {
+      const count = fs.readdirSync(commandDir).filter((f) => f.startsWith('renn-')).length;
       console.log(`  ${green}\u2713${reset} Installed ${count} commands to command/`);
     } else {
-      failures.push('command/ace-*');
+      failures.push('command/renn-*');
     }
   } else {
     const commandsDir = path.join(targetDir, 'commands');
@@ -1041,7 +1043,7 @@ function install(isGlobal, runtime = 'claude') {
     copyCommandFiles(commandsSrc, commandsDir, pathPrefix, runtime);
     const count = fs
       .readdirSync(commandsDir)
-      .filter((f) => f.startsWith('ace.') && (f.endsWith('.md') || f.endsWith('.toml'))).length;
+      .filter((f) => f.startsWith('renn.') && (f.endsWith('.md') || f.endsWith('.toml'))).length;
     if (count > 0) {
       console.log(`  ${green}\u2713${reset} Installed ${count} commands`);
     } else {
@@ -1049,14 +1051,14 @@ function install(isGlobal, runtime = 'claude') {
     }
   }
 
-  // Copy ace module (workflows, templates, references)
-  const moduleSrc = path.join(src, 'ace');
-  const moduleDest = path.join(targetDir, 'ace');
+  // Copy renn module (workflows, templates, references)
+  const moduleSrc = path.join(src, 'renn');
+  const moduleDest = path.join(targetDir, 'renn');
   copyWithPathReplacement(moduleSrc, moduleDest, pathPrefix, runtime);
-  if (verifyInstalled(moduleDest, 'ace')) {
-    console.log(`  ${green}\u2713${reset} Installed ace`);
+  if (verifyInstalled(moduleDest, 'renn')) {
+    console.log(`  ${green}\u2713${reset} Installed renn`);
   } else {
-    failures.push('ace');
+    failures.push('renn');
   }
 
   // Copy agents
@@ -1065,10 +1067,10 @@ function install(isGlobal, runtime = 'claude') {
     const agentsDest = path.join(targetDir, 'agents');
     fs.mkdirSync(agentsDest, { recursive: true });
 
-    // Remove old ACE agents before copying new ones
+    // Remove old RENN agents before copying new ones
     if (fs.existsSync(agentsDest)) {
       for (const file of fs.readdirSync(agentsDest)) {
-        if (file.startsWith('ace-') && file.endsWith('.md')) {
+        if (file.startsWith('renn-') && file.endsWith('.md')) {
           fs.unlinkSync(path.join(agentsDest, file));
         }
       }
@@ -1097,7 +1099,7 @@ function install(isGlobal, runtime = 'claude') {
   }
 
   // Write VERSION file
-  const versionDest = path.join(targetDir, 'ace', 'VERSION');
+  const versionDest = path.join(targetDir, 'renn', 'VERSION');
   fs.writeFileSync(versionDest, pkg.version);
   if (verifyFileInstalled(versionDest, 'VERSION')) {
     console.log(`  ${green}\u2713${reset} Wrote VERSION (${pkg.version})`);
@@ -1134,11 +1136,11 @@ function install(isGlobal, runtime = 'claude') {
   const settingsPath = path.join(targetDir, 'settings.json');
   const settings = cleanupOrphanedHooks(readSettings(settingsPath));
   const statuslineCommand = isGlobal
-    ? buildHookCommand(targetDir, 'ace-statusline.js')
-    : 'node ' + dirName + '/hooks/ace-statusline.js';
+    ? buildHookCommand(targetDir, 'renn-statusline.js')
+    : 'node ' + dirName + '/hooks/renn-statusline.js';
   const updateCheckCommand = isGlobal
-    ? buildHookCommand(targetDir, 'ace-check-update.js')
-    : 'node ' + dirName + '/hooks/ace-check-update.js';
+    ? buildHookCommand(targetDir, 'renn-check-update.js')
+    : 'node ' + dirName + '/hooks/renn-check-update.js';
 
   // Enable experimental agents for Gemini CLI
   if (isGemini) {
@@ -1154,12 +1156,12 @@ function install(isGlobal, runtime = 'claude') {
     if (!settings.hooks) settings.hooks = {};
     if (!settings.hooks.SessionStart) settings.hooks.SessionStart = [];
 
-    const hasAceUpdateHook = settings.hooks.SessionStart.some(
+    const hasRennUpdateHook = settings.hooks.SessionStart.some(
       (entry) =>
-        entry.hooks && entry.hooks.some((h) => h.command && h.command.includes('ace-check-update'))
+        entry.hooks && entry.hooks.some((h) => h.command && h.command.includes('renn-check-update'))
     );
 
-    if (!hasAceUpdateHook) {
+    if (!hasRennUpdateHook) {
       settings.hooks.SessionStart.push({
         hooks: [
           {
@@ -1205,7 +1207,7 @@ function finishInstall(
   if (runtime === 'opencode') program = 'OpenCode';
   if (runtime === 'gemini') program = 'Gemini';
 
-  const command = isOpencode ? '/ace-help' : '/ace.help';
+  const command = isOpencode ? '/renn-help' : '/renn.help';
   console.log(`\n  ${green}Done!${reset} Launch ${program} and run ${cyan}${command}${reset}.\n`);
 }
 
@@ -1240,7 +1242,7 @@ function handleStatusline(settings, isInteractive, callback) {
   });
 
   console.log(
-    `\n  ${yellow}\u26a0${reset} Existing statusline detected\n\n  Your current statusline:\n    ${dim}command: ${existingCmd}${reset}\n\n  ACE includes a statusline showing:\n    \u2022 Model name\n    \u2022 Current task (from todo list)\n    \u2022 Context window usage (color-coded)\n\n  ${cyan}1${reset}) Keep existing\n  ${cyan}2${reset}) Replace with ACE statusline\n`
+    `\n  ${yellow}\u26a0${reset} Existing statusline detected\n\n  Your current statusline:\n    ${dim}command: ${existingCmd}${reset}\n\n  RENN includes a statusline showing:\n    \u2022 Model name\n    \u2022 Current task (from todo list)\n    \u2022 Context window usage (color-coded)\n\n  ${cyan}1${reset}) Keep existing\n  ${cyan}2${reset}) Replace with RENN statusline\n`
   );
 
   rl.question(`  Choice ${dim}[1]${reset}: `, (answer) => {
@@ -1339,7 +1341,7 @@ function promptLocation(runtimes) {
 }
 
 /**
- * Install ACE for all selected runtimes
+ * Install RENN for all selected runtimes
  */
 function installAllRuntimes(runtimes, isGlobal, isInteractive) {
   const results = [];

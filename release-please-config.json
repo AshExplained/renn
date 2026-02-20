@@ -2,6 +2,7 @@
   "packages": {
     ".": {
       "release-type": "node",
+      "package-name": "renn",
       "changelog-sections": [
         { "type": "feat", "section": "Added" },
         { "type": "fix", "section": "Fixed" },

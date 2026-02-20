@@ -10,8 +10,8 @@ Configuration options for `.renn/` directory behavior.
 },
 "git": {
   "branching_strategy": "none",
-  "stage_branch_template": "ace/stage-{stage}-{slug}",
-  "milestone_branch_template": "ace/{milestone}-{slug}"
+  "stage_branch_template": "renn/stage-{stage}-{slug}",
+  "milestone_branch_template": "renn/{milestone}-{slug}"
 }
 ```
 
@@ -20,8 +20,8 @@ Configuration options for `.renn/` directory behavior.
 | `commit_docs` | `true` | Whether to commit planning artifacts to git |
 | `search_gitignored` | `false` | Add `--no-ignore` to broad rg searches |
 | `git.branching_strategy` | `"none"` | Git branching approach: `"none"`, `"stage"`, or `"milestone"` |
-| `git.stage_branch_template` | `"ace/stage-{stage}-{slug}"` | Branch template for stage strategy |
-| `git.milestone_branch_template` | `"ace/{milestone}-{slug}"` | Branch template for milestone strategy |
+| `git.stage_branch_template` | `"renn/stage-{stage}-{slug}"` | Branch template for stage strategy |
+| `git.milestone_branch_template` | `"renn/{milestone}-{slug}"` | Branch template for milestone strategy |
 </config_schema>
 
 <commit_docs_behavior>
@@ -43,7 +43,7 @@ Configuration options for `.renn/` directory behavior.
 COMMIT_DOCS=$(cat .renn/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
 
 # Auto-detect gitignored (overrides config)
-git check-ignore -q .ace 2>/dev/null && COMMIT_DOCS=false
+git check-ignore -q .renn 2>/dev/null && COMMIT_DOCS=false
 ```
 
 **Auto-detection:** If `.renn/` is gitignored, `commit_docs` is automatically `false` regardless of config.json. This prevents git errors when users have `.renn/` in `.gitignore`.
@@ -106,25 +106,25 @@ To use uncommitted mode:
 | Strategy | When branch created | Branch scope | Merge point |
 |----------|---------------------|--------------|-------------|
 | `none` | Never | N/A | N/A |
-| `stage` | At `ace.run-stage` start | Single stage | User merges after stage |
-| `milestone` | At first `ace.run-stage` of milestone | Entire milestone | At `ace.complete-milestone` |
+| `stage` | At `renn.run-stage` start | Single stage | User merges after stage |
+| `milestone` | At first `renn.run-stage` of milestone | Entire milestone | At `renn.complete-milestone` |
 
 **When `git.branching_strategy: "none"` (default):**
 - All work commits to current branch
 - Standard RENN behavior
 
 **When `git.branching_strategy: "stage"`:**
-- `ace.run-stage` creates/switches to a branch before execution
-- Branch name from `stage_branch_template` (e.g., `ace/stage-03-authentication`)
+- `renn.run-stage` creates/switches to a branch before execution
+- Branch name from `stage_branch_template` (e.g., `renn/stage-03-authentication`)
 - All run commits go to that branch
 - User merges branches manually after stage completion
-- `ace.complete-milestone` offers to merge all stage branches
+- `renn.complete-milestone` offers to merge all stage branches
 
 **When `git.branching_strategy: "milestone"`:**
-- First `ace.run-stage` of milestone creates the milestone branch
-- Branch name from `milestone_branch_template` (e.g., `ace/v1.0-mvp`)
+- First `renn.run-stage` of milestone creates the milestone branch
+- Branch name from `milestone_branch_template` (e.g., `renn/v1.0-mvp`)
 - All stages in milestone commit to same branch
-- `ace.complete-milestone` offers to merge milestone branch to main
+- `renn.complete-milestone` offers to merge milestone branch to main
 
 **Template variables:**
 
@@ -141,10 +141,10 @@ To use uncommitted mode:
 BRANCHING_STRATEGY=$(cat .renn/config.json 2>/dev/null | grep -o '"branching_strategy"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "none")
 
 # Get stage branch template
-STAGE_BRANCH_TEMPLATE=$(cat .renn/config.json 2>/dev/null | grep -o '"stage_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "ace/stage-{stage}-{slug}")
+STAGE_BRANCH_TEMPLATE=$(cat .renn/config.json 2>/dev/null | grep -o '"stage_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "renn/stage-{stage}-{slug}")
 
 # Get milestone branch template
-MILESTONE_BRANCH_TEMPLATE=$(cat .renn/config.json 2>/dev/null | grep -o '"milestone_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "ace/{milestone}-{slug}")
+MILESTONE_BRANCH_TEMPLATE=$(cat .renn/config.json 2>/dev/null | grep -o '"milestone_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "renn/{milestone}-{slug}")
 ```
 
 **Branch creation:**
@@ -165,7 +165,7 @@ if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
 fi
 ```
 
-**Merge options at ace.complete-milestone:**
+**Merge options at renn.complete-milestone:**
 
 | Option | Git command | Result |
 |--------|-------------|--------|

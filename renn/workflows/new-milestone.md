@@ -62,10 +62,10 @@ Keep Accumulated Context section (decisions, blockers) from previous milestone.
 </step>
 
 <step name="cleanup_and_commit">
-Check ace config:
+Check renn config:
 ```bash
 COMMIT_PLANNING_DOCS=$(cat .renn/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
-git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
+git check-ignore -q .renn 2>/dev/null && COMMIT_PLANNING_DOCS=false
 ```
 
 If `COMMIT_PLANNING_DOCS=false`: Skip git operations
@@ -517,7 +517,7 @@ If "adjust": Return to scoping.
 
 **Commit requirements:**
 
-Check ace config (same pattern as cleanup_and_commit).
+Check renn config (same pattern as cleanup_and_commit).
 
 If committing:
 ```bash
@@ -657,7 +657,7 @@ Use AskUserQuestion:
 
 **Commit track (after approval):**
 
-Check ace config (same pattern as cleanup_and_commit).
+Check renn config (same pattern as cleanup_and_commit).
 
 If committing:
 ```bash

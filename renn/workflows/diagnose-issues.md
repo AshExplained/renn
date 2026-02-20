@@ -160,7 +160,7 @@ Update status in frontmatter to "diagnosed".
 
 ```bash
 COMMIT_PLANNING_DOCS=$(cat .renn/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
-git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
+git check-ignore -q .renn 2>/dev/null && COMMIT_PLANNING_DOCS=false
 ```
 
 **If `COMMIT_PLANNING_DOCS=false`:** Skip git operations
@@ -213,7 +213,7 @@ Agents only diagnose—plan-stage --gaps handles fixes (no fix application).
 
 **Agent times out:**
 - Check DEBUG-{slug}.md for partial progress
-- Can resume with ace.debug
+- Can resume with renn.debug
 
 **All agents fail:**
 - Something systemic (permissions, git, etc.)

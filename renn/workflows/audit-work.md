@@ -308,7 +308,7 @@ Clear Current Test section:
 
 ```bash
 COMMIT_DOCS=$(cat .renn/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
-git check-ignore -q .ace 2>/dev/null && COMMIT_DOCS=false
+git check-ignore -q .renn 2>/dev/null && COMMIT_DOCS=false
 ```
 
 **If `COMMIT_DOCS=false`:** Skip git operations

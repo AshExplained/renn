@@ -118,7 +118,7 @@ Stages execute in numeric order: 2 → 2.1 → 2.2 → 3 → 3.1 → 4
 **Success criteria:**
 - 2-5 observable behaviors per stage (from user's perspective)
 - Cross-checked against requirements during track creation
-- Flow downstream to `must_haves` in ace.plan
+- Flow downstream to `must_haves` in renn.plan
 - Verified by audit-stage after execution
 - Format: "User can [action]" or "[Thing] works/exists"
 

@@ -228,7 +228,7 @@ Do not compress. Capture everything gathered.
 **Commit brief.md:**
 
 ```bash
-mkdir -p .ace
+mkdir -p .renn
 git add .renn/brief.md
 git commit -m "$(cat <<'EOF'
 docs: initialize project

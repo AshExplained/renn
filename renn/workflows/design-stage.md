@@ -45,9 +45,9 @@ Extract from $ARGUMENTS:
 
 - Stage number (integer or decimal like `2.1`) -- OPTIONAL in project-level mode
 - `--skip-ux-interview` flag to skip UX interview
-- `--restyle` flag to enter restyle mode (invoked by ace.restyle command)
-- `--phase-1-only` flag to stop after Phase 1 (invoked by ace.design-system command)
-- `--phase-2-only` flag to skip to Phase 2 (invoked by ace.design-screens command)
+- `--restyle` flag to enter restyle mode (invoked by renn.restyle command)
+- `--phase-1-only` flag to stop after Phase 1 (invoked by renn.design-system command)
+- `--phase-2-only` flag to skip to Phase 2 (invoked by renn.design-screens command)
 
 **Determine mode:**
 
@@ -329,7 +329,7 @@ Task(
 </step>
 
 <step name="detect_ui_stage">
-**If `--phase-2-only` flag is set:** Skip UI detection entirely. The user explicitly invoked `ace.design-screens` which is a design command -- UI stage is guaranteed. Set `UI_STAGE=true`. Continue directly to handle_ux_interview (which will also be skipped by --skip-ux-interview).
+**If `--phase-2-only` flag is set:** Skip UI detection entirely. The user explicitly invoked `renn.design-screens` which is a design command -- UI stage is guaranteed. Set `UI_STAGE=true`. Continue directly to handle_ux_interview (which will also be skipped by --skip-ux-interview).
 
 **If PROJECT_LEVEL=true:** Skip UI detection. The validate_stage step already scanned all stages from track.md for [UI] tags and confirmed at least one UI stage exists. Set `UI_STAGE=true`. The `UI_STAGES` list and `ALL_UI_GOALS` from validate_stage are available for downstream steps (handle_ux_interview and handle_design). Continue to handle_ux_interview.
 
@@ -580,7 +580,7 @@ Display: `UX brief synthesized and saved to ${STAGE_DIR}/${STAGE}-ux-brief.md. P
 
 ```bash
 COMMIT_PLANNING_DOCS=$(cat .renn/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
-git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
+git check-ignore -q .renn 2>/dev/null && COMMIT_PLANNING_DOCS=false
 ```
 
 ### UI Detection

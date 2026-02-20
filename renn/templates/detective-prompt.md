@@ -53,7 +53,7 @@ Create: .renn/debug/{slug}.md
 
 ## Usage
 
-**From ace.debug:**
+**From renn.debug:**
 ```python
 Task(
   prompt=filled_template,

@@ -287,7 +287,7 @@ Commit the codebase map:
 
 ```bash
 COMMIT_PLANNING_DOCS=$(cat .renn/config.json 2>/dev/null | grep -o '"commit_docs"[[:space:]]*:[[:space:]]*[^,}]*' | grep -o 'true\|false' || echo "true")
-git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
+git check-ignore -q .renn 2>/dev/null && COMMIT_PLANNING_DOCS=false
 ```
 
 **If `COMMIT_PLANNING_DOCS=false`:** Skip git operations
@@ -344,14 +344,14 @@ Created .renn/codebase/:
 
 **Initialize project** — use codebase context for planning
 
-`ace.start`
+`renn.start`
 
 <sub>`/clear` first → fresh context window</sub>
 
 ---
 
 **Also available:**
-- Re-run mapping: `ace.map-codebase`
+- Re-run mapping: `renn.map-codebase`
 - Review specific file: `cat .renn/codebase/STACK.md`
 - Edit any document before proceeding
 

@@ -85,8 +85,8 @@ AskUserQuestion([
     multiSelect: false,
     options: [
       { label: "None (Recommended)", description: "Commit directly to current branch" },
-      { label: "Per Stage", description: "Create branch for each stage (ace/stage-{N}-{name})" },
-      { label: "Per Milestone", description: "Create branch for entire milestone (ace/{version}-{name})" }
+      { label: "Per Stage", description: "Create branch for each stage (renn/stage-{N}-{name})" },
+      { label: "Per Milestone", description: "Create branch for entire milestone (renn/{version}-{name})" }
     ]
   }
 ])

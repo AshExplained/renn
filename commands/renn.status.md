@@ -526,5 +526,5 @@ Ready to plan the next milestone.
 - [ ] What's next clearly explained
 - [ ] Smart routing: /renn.run-stage if runs exist, /renn.plan-stage if not
 - [ ] User confirms before any action
-- [ ] Seamless handoff to appropriate ace command
+- [ ] Seamless handoff to appropriate renn command
       </success_criteria>

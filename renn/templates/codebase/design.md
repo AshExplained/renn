@@ -332,5 +332,5 @@ Template for `.renn/codebase/DESIGN.md` - captures existing visual design patter
 - Reviewer calibration (knows what the existing design looks like for comparison)
 
 **How this gets populated:**
-Design mapper agent during `ace.map-codebase` (conditional -- only spawned when 2+ UI indicators detected). The mapper explores CSS/config files, component directories, and theme providers, then writes this document directly to `.renn/codebase/DESIGN.md`.
+Design mapper agent during `renn.map-codebase` (conditional -- only spawned when 2+ UI indicators detected). The mapper explores CSS/config files, component directories, and theme providers, then writes this document directly to `.renn/codebase/DESIGN.md`.
 </guidelines>

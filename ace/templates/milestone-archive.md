@@ -6,9 +6,9 @@ This template is used by the complete-milestone workflow to create archive files
 
 ## File Template
 
-# Milestone v{{VERSION}}: {{MILESTONE_NAME}}
+# Milestone {{MILESTONE_ID}}: {{MILESTONE_NAME}}
 
-**Status:** ✅ SHIPPED {{DATE}}
+**Status:** SHIPPED {{DATE}}
 **Stages:** {{STAGE_START}}-{{STAGE_END}}
 **Total Runs:** {{TOTAL_RUNS}}
 
@@ -97,7 +97,7 @@ _For current project status, see .ace/track.md_
 
 <guidelines>
 **When to create milestone archives:**
-- After completing all stages in a milestone (v1.0, v1.1, v2.0, etc.)
+- After completing all stages in a milestone (M01, M02, M03, etc.)
 - Triggered by complete-milestone workflow
 - Before planning next milestone work
 
@@ -112,12 +112,12 @@ _For current project status, see .ace/track.md_
 
 **Archive location:**
 
-- Save to `.ace/milestones/v{VERSION}-{NAME}.md`
-- Example: `.ace/milestones/v1.0-mvp.md`
+- Save to `.ace/milestones/{MILESTONE_ID}-track.md`
+- Example: `.ace/milestones/M01-track.md`
 
 **After archiving:**
 
 - Update track.md to collapse completed milestone in `<details>` tag
-- Update brief.md to brownfield format with Current State section
+- Update brief.md with shipped specs moved to Validated
 - Continue stage numbering in next milestone (never restart at 01)
 </guidelines>

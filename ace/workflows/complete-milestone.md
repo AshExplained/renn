@@ -1,6 +1,6 @@
 <purpose>
 
-Mark a shipped version (v1.0, v1.1, v2.0) as complete. This creates a historical record in milestones.md, performs full brief.md evolution review, reorganizes track.md with milestone groupings, and tags the release in git.
+Mark a shipped milestone as complete. This creates a historical record in milestones.md, performs full brief.md evolution review, reorganizes track.md with milestone groupings, and creates a local git tag.
 
 This is the ritual that separates "development" from "shipped."
 
@@ -22,8 +22,8 @@ This is the ritual that separates "development" from "shipped."
 
 When a milestone completes, this workflow:
 
-1. Extracts full milestone details to `.ace/milestones/v[X.Y]-track.md`
-2. Archives specs to `.ace/milestones/v[X.Y]-specs.md`
+1. Extracts full milestone details to `.ace/milestones/[MILESTONE]-track.md`
+2. Archives specs to `.ace/milestones/[MILESTONE]-specs.md`
 3. Updates track.md to replace milestone details with one-line summary
 4. Deletes specs.md (fresh one created for next milestone)
 5. Performs full brief.md evolution review
@@ -66,7 +66,7 @@ ls .ace/stages/*/recap.md 2>/dev/null | wc -l
 Present:
 
 ```
-Milestone: [Name from user, e.g., "v1.0 MVP"]
+Milestone: [ID and Name from user, e.g., "M03 Authentication"]
 
 Appears to include:
 - Stage 1: Foundation (2/2 runs complete)
@@ -88,7 +88,7 @@ cat .ace/config.json 2>/dev/null
 <if style="turbo">
 
 ```
-⚡ Auto-approved: Milestone scope verification
+Auto-approved: Milestone scope verification
 
 [Show breakdown summary without prompting]
 
@@ -146,8 +146,8 @@ Milestone Stats:
 - Tasks: [N] total (estimated from stage recaps)
 - Files modified: [M]
 - Lines of code: [LOC] [language]
-- Timeline: [Days] days ([Start] → [End])
-- Git range: feat(XX.XX) → feat(YY.YY)
+- Timeline: [Days] days ([Start] -> [End])
+- Git range: feat(XX.XX) -> feat(YY.YY)
 ```
 
 </step>
@@ -194,7 +194,7 @@ If exists, prepend new entry (reverse chronological order).
 Use template from `templates/milestone.md`:
 
 ```markdown
-## v[Version] [Name] (Shipped: YYYY-MM-DD)
+## [MILESTONE] [Name] (Shipped: YYYY-MM-DD)
 
 **Delivered:** [One sentence from user]
 
@@ -211,7 +211,9 @@ Use template from `templates/milestone.md`:
 - [Stages] stages, [Runs] runs, [Tasks] tasks
 - [Days] days from [start milestone or start project] to ship
 
-**Git range:** `feat(XX.XX)` → `feat(YY.YY)`
+**Git range:** `[FIRST_COMMIT]` -> `[LAST_COMMIT]`
+
+**Tag:** `[MILESTONE]-[slug]`
 
 **What's next:** [Ask user: what's the next goal?]
 
@@ -232,10 +234,12 @@ cat .ace/stages/*-*/*-recap.md
 
 **Full review checklist:**
 
-1. **"What This Is" accuracy:**
-   - Read current description
-   - Compare to what was actually built
-   - Update if the product has meaningfully changed
+1. **Project identity check:**
+   - Read the `# Heading` (project name) and `## What This Is` description
+   - Cross-reference against `package.json` description (if exists) and `.ace/codebase/ARCHITECTURE.md` (if exists)
+   - Does the heading still name the full project, or has it narrowed to a phase/milestone?
+   - Does "What This Is" describe the product as it exists today, or an earlier version?
+   - Update heading and description if the project has grown beyond what they capture
 
 2. **Core Value check:**
    - Is the stated core value still the right priority?
@@ -245,8 +249,8 @@ cat .ace/stages/*-*/*-recap.md
 3. **Specs audit:**
 
    **Validated section:**
-   - All Active specs shipped in this milestone → Move to Validated
-   - Format: `- ✓ [Spec] — v[X.Y]`
+   - All Active specs shipped in this milestone -> Move to Validated
+   - Format: `- [Spec] -- shipped [MILESTONE]`
 
    **Active section:**
    - Remove specs that moved to Validated
@@ -254,7 +258,7 @@ cat .ace/stages/*-*/*-recap.md
    - Keep specs that weren't addressed yet
 
    **Out of Scope audit:**
-   - Review each item — is the reasoning still valid?
+   - Review each item -- is the reasoning still valid?
    - Remove items that lack current relevance
    - Add any specs invalidated during this milestone
 
@@ -266,7 +270,7 @@ cat .ace/stages/*-*/*-recap.md
 5. **Key Decisions audit:**
    - Extract all decisions from milestone stage recaps
    - Add to Key Decisions table with outcomes where known
-   - Mark ✓ Good, ⚠️ Revisit, or — Pending for each
+   - Mark Good, Revisit, or Pending for each
 
 6. **Constraints check:**
    - Any constraints that changed during development?
@@ -278,7 +282,7 @@ Make all edits inline. Update "Last updated" footer:
 
 ```markdown
 ---
-*Last updated: [date] after v[X.Y] milestone*
+*Last updated: [date] after [MILESTONE] milestone*
 ```
 
 **Step complete when:**
@@ -305,37 +309,37 @@ Add milestone headers and collapse completed work:
 
 ## Milestones
 
-- ✅ **v1.0 MVP** — Stages 1-4 (shipped YYYY-MM-DD)
-- 🚧 **v1.1 Security** — Stages 5-6 (in progress)
-- 📋 **v2.0 Redesign** — Stages 7-10 (planned)
+- SHIPPED **M01 MVP** -- Stages 1-4 (shipped YYYY-MM-DD)
+- SHIPPED **M02 Security** -- Stages 5-6 (shipped YYYY-MM-DD)
+- **M03 Redesign** -- Stages 7-10 (in progress)
 
 ## Stages
 
 <details>
-<summary>✅ v1.0 MVP (Stages 1-4) — SHIPPED YYYY-MM-DD</summary>
+<summary>SHIPPED M01 MVP (Stages 1-4) -- SHIPPED YYYY-MM-DD</summary>
 
-- [x] Stage 1: Foundation (2/2 runs) — completed YYYY-MM-DD
-- [x] Stage 2: Authentication (2/2 runs) — completed YYYY-MM-DD
-- [x] Stage 3: Core Features (3/3 runs) — completed YYYY-MM-DD
-- [x] Stage 4: Polish (1/1 run) — completed YYYY-MM-DD
+- [x] Stage 1: Foundation (2/2 runs) -- completed YYYY-MM-DD
+- [x] Stage 2: Authentication (2/2 runs) -- completed YYYY-MM-DD
+- [x] Stage 3: Core Features (3/3 runs) -- completed YYYY-MM-DD
+- [x] Stage 4: Polish (1/1 run) -- completed YYYY-MM-DD
 
 </details>
 
-### 🚧 v[Next] [Name] (In Progress / Planned)
+### M03 [Name] (In Progress / Planned)
 
-- [ ] Stage 5: [Name] ([N] runs)
-- [ ] Stage 6: [Name] ([N] runs)
+- [ ] Stage 7: [Name] ([N] runs)
+- [ ] Stage 8: [Name] ([N] runs)
 
 ## Progress
 
 | Stage             | Milestone | Runs Complete | Status      | Completed  |
 | ----------------- | --------- | ------------- | ----------- | ---------- |
-| 1. Foundation     | v1.0      | 2/2           | Complete    | YYYY-MM-DD |
-| 2. Authentication | v1.0      | 2/2           | Complete    | YYYY-MM-DD |
-| 3. Core Features  | v1.0      | 3/3           | Complete    | YYYY-MM-DD |
-| 4. Polish         | v1.0      | 1/1           | Complete    | YYYY-MM-DD |
-| 5. Security Audit | v1.1      | 0/1           | Not started | -          |
-| 6. Hardening      | v1.1      | 0/2           | Not started | -          |
+| 1. Foundation     | M01       | 2/2           | Complete    | YYYY-MM-DD |
+| 2. Authentication | M01       | 2/2           | Complete    | YYYY-MM-DD |
+| 3. Core Features  | M01       | 3/3           | Complete    | YYYY-MM-DD |
+| 4. Polish         | M01       | 1/1           | Complete    | YYYY-MM-DD |
+| 5. Security Audit | M02       | 0/1           | Not started | -          |
+| 6. Hardening      | M02       | 0/2           | Not started | -          |
 ```
 
 </step>
@@ -346,7 +350,7 @@ Extract completed milestone details and create archive file.
 
 **Process:**
 
-1. Create archive file path: `.ace/milestones/v[X.Y]-track.md`
+1. Create archive file path: `.ace/milestones/[MILESTONE]-track.md`
 
 2. Read `~/.claude/ace/templates/milestone-archive.md` template
 
@@ -360,18 +364,18 @@ Extract completed milestone details and create archive file.
    - Specs that were validated
 
 5. Fill template {{PLACEHOLDERS}}:
-   - {{VERSION}} — Milestone version (e.g., "1.0")
-   - {{MILESTONE_NAME}} — From track.md milestone header
-   - {{DATE}} — Today's date
-   - {{STAGE_START}} — First stage number in milestone
-   - {{STAGE_END}} — Last stage number in milestone
-   - {{TOTAL_RUNS}} — Count of all runs in milestone
-   - {{MILESTONE_DESCRIPTION}} — From track.md overview
-   - {{STAGES_SECTION}} — Full stage details extracted
-   - {{DECISIONS_FROM_BRIEF}} — Key decisions from brief.md
-   - {{ISSUES_RESOLVED_DURING_MILESTONE}} — From recaps
+   - {{MILESTONE_ID}} -- Milestone identifier (e.g., "M11")
+   - {{MILESTONE_NAME}} -- From track.md milestone header
+   - {{DATE}} -- Today's date
+   - {{STAGE_START}} -- First stage number in milestone
+   - {{STAGE_END}} -- Last stage number in milestone
+   - {{TOTAL_RUNS}} -- Count of all runs in milestone
+   - {{MILESTONE_DESCRIPTION}} -- From track.md overview
+   - {{STAGES_SECTION}} -- Full stage details extracted
+   - {{DECISIONS_FROM_BRIEF}} -- Key decisions from brief.md
+   - {{ISSUES_RESOLVED_DURING_MILESTONE}} -- From recaps
 
-6. Write filled template to `.ace/milestones/v[X.Y]-track.md`
+6. Write filled template to `.ace/milestones/[MILESTONE]-track.md`
 
 7. Delete track.md (fresh one created for next milestone):
    ```bash
@@ -380,17 +384,17 @@ Extract completed milestone details and create archive file.
 
 8. Verify archive exists:
    ```bash
-   ls .ace/milestones/v[X.Y]-track.md
+   ls .ace/milestones/[MILESTONE]-track.md
    ```
 
 9. Confirm track archive complete:
 
    ```
-   ✅ v[X.Y] track archived to milestones/v[X.Y]-track.md
-   ✅ track.md deleted (fresh one for next milestone)
+   Track archived to milestones/[MILESTONE]-track.md
+   track.md deleted (fresh one for next milestone)
    ```
 
-**Note:** Stage directories (`.ace/stages/`) are NOT deleted. They accumulate across milestones as the raw execution history. Stage numbering continues (v1.0 stages 1-4, v1.1 stages 5-8, etc.).
+**Note:** Stage directories (`.ace/stages/`) are NOT deleted. They accumulate across milestones as the raw execution history. Stage numbering continues (M01 stages 1-4, M02 stages 5-8, etc.).
 
 </step>
 
@@ -405,7 +409,7 @@ Archive specs and prepare for fresh specs in next milestone.
    cat .ace/specs.md
    ```
 
-2. Create archive file: `.ace/milestones/v[X.Y]-specs.md`
+2. Create archive file: `.ace/milestones/[MILESTONE]-specs.md`
 
 3. Transform specs for archive:
    - Mark all v1 specs as `[x]` complete
@@ -418,12 +422,12 @@ Archive specs and prepare for fresh specs in next milestone.
 
 4. Write archive file with header:
    ```markdown
-   # Specs Archive: v[X.Y] [Milestone Name]
+   # Specs Archive: [MILESTONE] [Milestone Name]
 
    **Archived:** [DATE]
-   **Status:** ✅ SHIPPED
+   **Status:** SHIPPED
 
-   This is the archived specs for v[X.Y].
+   This is the archived specs for [MILESTONE].
    For current specs, see `.ace/specs.md` (created for next milestone).
 
    ---
@@ -439,7 +443,7 @@ Archive specs and prepare for fresh specs in next milestone.
    **Dropped:** [list any specs removed and why]
 
    ---
-   *Archived: [DATE] as part of v[X.Y] milestone completion*
+   *Archived: [DATE] as part of [MILESTONE] milestone completion*
    ```
 
 5. Delete original specs.md:
@@ -449,8 +453,8 @@ Archive specs and prepare for fresh specs in next milestone.
 
 6. Confirm:
    ```
-   ✅ Specs archived to milestones/v[X.Y]-specs.md
-   ✅ specs.md deleted (fresh one needed for next milestone)
+   Specs archived to milestones/[MILESTONE]-specs.md
+   specs.md deleted (fresh one needed for next milestone)
    ```
 
 **Important:** The next milestone workflow starts with `/ace.new-milestone` which includes specs definition. brief.md's Validated section carries the cumulative record across milestones.
@@ -463,15 +467,15 @@ Move the milestone audit file to the archive (if it exists):
 
 ```bash
 # Move audit to milestones folder (if exists)
-[ -f .ace/v[X.Y]-MILESTONE-AUDIT.md ] && mv .ace/v[X.Y]-MILESTONE-AUDIT.md .ace/milestones/
+[ -f .ace/[MILESTONE]-MILESTONE-AUDIT.md ] && mv .ace/[MILESTONE]-MILESTONE-AUDIT.md .ace/milestones/
 ```
 
 Confirm:
 ```
-✅ Audit archived to milestones/v[X.Y]-MILESTONE-AUDIT.md
+Audit archived to milestones/[MILESTONE]-MILESTONE-AUDIT.md
 ```
 
-(Skip silently if no audit file exists — audit is optional)
+(Skip silently if no audit file exists -- audit is optional)
 
 </step>
 
@@ -496,7 +500,7 @@ See: .ace/brief.md (updated [today])
 Stage: [Next stage] of [Total] ([Stage name])
 Run: Not started
 Status: Ready to plan
-Last activity: [today] — v[X.Y] milestone complete
+Last activity: [today] -- [MILESTONE] milestone complete
 
 Progress: [updated progress bar]
 ```
@@ -522,7 +526,7 @@ BRANCHING_STRATEGY=$(cat .ace/config.json 2>/dev/null | grep -o '"branching_stra
 
 **If strategy is "none":** Skip to git_tag step.
 
-**For "stage" strategy — find stage branches:**
+**For "stage" strategy -- find stage branches:**
 
 ```bash
 STAGE_BRANCH_TEMPLATE=$(cat .ace/config.json 2>/dev/null | grep -o '"stage_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "ace/stage-{stage}-{slug}")
@@ -534,7 +538,7 @@ BRANCH_PREFIX=$(echo "$STAGE_BRANCH_TEMPLATE" | sed 's/{.*//')
 STAGE_BRANCHES=$(git branch --list "${BRANCH_PREFIX}*" 2>/dev/null | sed 's/^\*//' | tr -d ' ')
 ```
 
-**For "milestone" strategy — find milestone branch:**
+**For "milestone" strategy -- find milestone branch:**
 
 ```bash
 MILESTONE_BRANCH_TEMPLATE=$(cat .ace/config.json 2>/dev/null | grep -o '"milestone_branch_template"[[:space:]]*:[[:space:]]*"[^"]*"' | sed 's/.*:.*"\([^"]*\)"/\1/' || echo "ace/{milestone}-{slug}")
@@ -548,7 +552,7 @@ MILESTONE_BRANCH=$(git branch --list "${BRANCH_PREFIX}*" 2>/dev/null | sed 's/^\
 
 **If no branches found:** Skip to git_tag step.
 
-**If branches exist — present merge options:**
+**If branches exist -- present merge options:**
 
 ```
 ## Git Branches Detected
@@ -559,9 +563,9 @@ Branches found:
 {list of branches}
 
 Options:
-1. **Merge to main** — Merge branch(es) to main
-2. **Delete without merging** — Branches already merged or not needed
-3. **Keep branches** — Leave for manual handling
+1. **Merge to main** -- Merge branch(es) to main
+2. **Delete without merging** -- Branches already merged or not needed
+3. **Keep branches** -- Leave for manual handling
 ```
 
 Use AskUserQuestion:
@@ -593,7 +597,7 @@ if [ "$BRANCHING_STRATEGY" = "stage" ]; then
   for branch in $STAGE_BRANCHES; do
     echo "Squash merging $branch..."
     git merge --squash "$branch"
-    git commit -m "feat: $branch for v[X.Y]"
+    git commit -m "feat: $branch for [MILESTONE]"
   done
 fi
 
@@ -601,7 +605,7 @@ fi
 if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
   echo "Squash merging $MILESTONE_BRANCH..."
   git merge --squash "$MILESTONE_BRANCH"
-  git commit -m "feat: $MILESTONE_BRANCH for v[X.Y]"
+  git commit -m "feat: $MILESTONE_BRANCH for [MILESTONE]"
 fi
 
 git checkout "$CURRENT_BRANCH"
@@ -619,14 +623,14 @@ git checkout main
 if [ "$BRANCHING_STRATEGY" = "stage" ]; then
   for branch in $STAGE_BRANCHES; do
     echo "Merging $branch..."
-    git merge --no-ff "$branch" -m "Merge branch '$branch' for v[X.Y]"
+    git merge --no-ff "$branch" -m "Merge branch '$branch' for [MILESTONE]"
   done
 fi
 
 # For milestone strategy - merge milestone branch
 if [ "$BRANCHING_STRATEGY" = "milestone" ]; then
   echo "Merging $MILESTONE_BRANCH..."
-  git merge --no-ff "$MILESTONE_BRANCH" -m "Merge branch '$MILESTONE_BRANCH' for v[X.Y]"
+  git merge --no-ff "$MILESTONE_BRANCH" -m "Merge branch '$MILESTONE_BRANCH' for [MILESTONE]"
 fi
 
 git checkout "$CURRENT_BRANCH"
@@ -658,11 +662,23 @@ Report: "Branches preserved for manual handling"
 
 <step name="git_tag">
 
-Create git tag for milestone:
+Create a local git tag for the milestone.
+
+**Derive tag name from milestone:**
+
+The tag uses the milestone ID and a kebab-cased slug of the milestone name from track.md.
 
 ```bash
-git tag -a v[X.Y] -m "$(cat <<'EOF'
-v[X.Y] [Name]
+# Example: milestone ID = M11, milestone name = "Watch Command"
+# Tag = M11-watch-command
+TAG_NAME="[MILESTONE_ID]-[kebab-slug-of-name]"
+```
+
+**Create the annotated tag locally:**
+
+```bash
+git tag -a [TAG_NAME] -m "$(cat <<'EOF'
+[MILESTONE] [Name]
 
 Delivered: [One sentence]
 
@@ -676,15 +692,22 @@ EOF
 )"
 ```
 
-Confirm: "Tagged: v[X.Y]"
+Confirm: "Tagged locally: [TAG_NAME]"
 
-Ask: "Push tag to remote? (y/n)"
+**Ask whether to push:**
+
+```
+Push tag to remote? The commits it points to may or may not be on origin yet.
+(yes / no)
+```
 
 If yes:
 
 ```bash
-git push origin v[X.Y]
+git push origin [TAG_NAME]
 ```
+
+If no: Tag stays local. Can be pushed later manually or by `/ace.ship`.
 
 </step>
 
@@ -705,9 +728,9 @@ git check-ignore -q .ace 2>/dev/null && COMMIT_PLANNING_DOCS=false
 
 ```bash
 # Stage archive files (new)
-git add .ace/milestones/v[X.Y]-track.md
-git add .ace/milestones/v[X.Y]-specs.md
-git add .ace/milestones/v[X.Y]-MILESTONE-AUDIT.md 2>/dev/null || true
+git add .ace/milestones/[MILESTONE]-track.md
+git add .ace/milestones/[MILESTONE]-specs.md
+git add .ace/milestones/[MILESTONE]-MILESTONE-AUDIT.md 2>/dev/null || true
 
 # Stage updated files
 git add .ace/milestones.md
@@ -719,12 +742,12 @@ git add -u .ace/
 
 # Commit with descriptive message
 git commit -m "$(cat <<'EOF'
-chore: complete v[X.Y] milestone
+chore: complete [MILESTONE] milestone
 
 Archived:
-- milestones/v[X.Y]-track.md
-- milestones/v[X.Y]-specs.md
-- milestones/v[X.Y]-MILESTONE-AUDIT.md (if audit was run)
+- milestones/[MILESTONE]-track.md
+- milestones/[MILESTONE]-specs.md
+- milestones/[MILESTONE]-MILESTONE-AUDIT.md (if audit was run)
 
 Deleted (fresh for next milestone):
 - track.md
@@ -732,33 +755,33 @@ Deleted (fresh for next milestone):
 
 Updated:
 - milestones.md (new entry)
-- brief.md (specs → Validated)
+- brief.md (specs -> Validated)
 - pulse.md (reset for next milestone)
 
-Tagged: v[X.Y]
+Tagged: [TAG_NAME]
 EOF
 )"
 ```
 
-Confirm: "Committed: chore: complete v[X.Y] milestone"
+Confirm: "Committed: chore: complete [MILESTONE] milestone"
 
 </step>
 
 <step name="offer_next">
 
 ```
-✅ Milestone v[X.Y] [Name] complete
+[MILESTONE] [Name] complete
 
 Shipped:
 - [N] stages ([M] runs, [P] tasks)
 - [One sentence of what shipped]
 
 Archived:
-- milestones/v[X.Y]-track.md
-- milestones/v[X.Y]-specs.md
+- milestones/[MILESTONE]-track.md
+- milestones/[MILESTONE]-specs.md
 
 Summary: .ace/milestones.md
-Tag: v[X.Y]
+Tag: [TAG_NAME]
 
 ---
 
@@ -783,26 +806,40 @@ Tag: v[X.Y]
 
 <milestone_naming>
 
-**Version conventions:**
-- **v1.0** — Initial MVP
-- **v1.1, v1.2, v1.3** — Minor updates, new features, fixes
-- **v2.0, v3.0** — Major rewrites, breaking changes, significant new direction
+**Milestone IDs use M-format (M01, M02, M03, etc.):**
+
+This is universal across all projects regardless of versioning strategy. ACE milestones are project management markers, not software version numbers.
+
+- **M01** -- First milestone (often MVP)
+- **M02, M03** -- Subsequent milestones
+- **M10, M11** -- Higher milestones
 
 **Name conventions:**
-- v1.0 MVP
-- v1.1 Security
-- v1.2 Performance
-- v2.0 Redesign
-- v2.0 iOS Launch
+- M01 MVP
+- M02 Security
+- M03 Performance
+- M04 Redesign
+- M05 iOS Launch
 
 Keep names short (1-2 words describing the focus).
+
+**Tag format:**
+- `M01-mvp`
+- `M02-security`
+- `M11-watch-command`
+
+**Why M-format instead of semver:**
+- Semver tags (v1.0, v2.0) may be owned by an external version manager (release-please, semantic-release, changesets, etc.)
+- M-format never collides with any versioning scheme
+- Works identically for greenfield and brownfield projects
+- Milestone tags mark planning boundaries; version tags mark software releases -- separate concerns
 
 </milestone_naming>
 
 <what_qualifies>
 
 **Create milestones for:**
-- Initial release (v1.0)
+- Initial release (M01)
 - Public releases
 - Major feature sets shipped
 - Before archiving planning
@@ -813,7 +850,7 @@ Keep names short (1-2 words describing the focus).
 - Internal dev iterations (unless truly shipped internally)
 
 If uncertain, ask: "Is this deployed/usable/shipped in some form?"
-If yes → milestone. If no → keep working.
+If yes -> milestone. If no -> keep working.
 
 </what_qualifies>
 
@@ -826,12 +863,13 @@ Milestone completion is successful when:
 - [ ] All shipped specs moved to Validated in brief.md
 - [ ] Key Decisions updated with outcomes
 - [ ] track.md reorganized with milestone grouping
-- [ ] Track archive created (milestones/v[X.Y]-track.md)
-- [ ] Specs archive created (milestones/v[X.Y]-specs.md)
+- [ ] Track archive created (milestones/[MILESTONE]-track.md)
+- [ ] Specs archive created (milestones/[MILESTONE]-specs.md)
 - [ ] specs.md deleted (fresh for next milestone)
 - [ ] pulse.md updated with fresh project reference
-- [ ] Git tag created (v[X.Y])
-- [ ] Milestone commit made (includes archive files and deletion)
+- [ ] Git tag created locally ([MILESTONE]-[slug])
+- [ ] User asked about pushing tag to remote
+- [ ] Milestone commit made (if commit_docs=true)
 - [ ] User knows next step (/ace.new-milestone)
 
 </success_criteria>

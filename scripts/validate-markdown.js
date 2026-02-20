@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * ACE Markdown Validator
+ * RENN Markdown Validator
  *
- * Validates structural correctness of ACE markdown files:
+ * Validates structural correctness of RENN markdown files:
  * - YAML frontmatter schema (commands and agents)
  * - Required sections per file type
  * - Semantic XML tag closure
@@ -31,10 +31,10 @@ function getFileType(filePath) {
   const rel = path.relative(ROOT, filePath).replace(/\\/g, '/');
   if (rel.startsWith('commands/')) return 'command';
   if (rel.startsWith('agents/')) return 'agent';
-  if (rel.startsWith('ace/workflows/')) return 'workflow';
-  if (rel.startsWith('ace/references/')) return 'reference';
-  if (rel.startsWith('ace/templates/')) return 'template';
-  return null; // Not an ACE structural file
+  if (rel.startsWith('renn/workflows/')) return 'workflow';
+  if (rel.startsWith('renn/references/')) return 'reference';
+  if (rel.startsWith('renn/templates/')) return 'template';
+  return null; // Not a RENN structural file
 }
 
 // ─── YAML frontmatter parsing ───
@@ -134,8 +134,8 @@ function validateCommand(filePath, content) {
     }
   }
 
-  if (fm.name && !/^ace\.[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(fm.name)) {
-    errors.push(`${filePath}: Command name "${fm.name}" must match ace.kebab-case`);
+  if (fm.name && !/^renn\.[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(fm.name)) {
+    errors.push(`${filePath}: Command name "${fm.name}" must match renn.kebab-case`);
   }
 
   for (const section of COMMAND_REQUIRED_SECTIONS) {
@@ -159,8 +159,8 @@ function validateAgent(filePath, content) {
     }
   }
 
-  if (fm.name && !/^ace-[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(fm.name)) {
-    errors.push(`${filePath}: Agent name "${fm.name}" must match ace-kebab`);
+  if (fm.name && !/^renn-[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(fm.name)) {
+    errors.push(`${filePath}: Agent name "${fm.name}" must match renn-kebab`);
   }
 
   for (const section of AGENT_REQUIRED_SECTIONS) {
@@ -250,15 +250,15 @@ function validateReferenceFormat(filePath, content) {
     const line = lines[i];
     const lineNum = i + 1;
 
-    // Flag bare relative @-references to ace framework paths
+    // Flag bare relative @-references to renn framework paths
     const bareRelative = line.match(
-      /@(?:\.\.?\/|)(?:ace\/(?:workflows|references|templates)\/[^\s)]+)/g
+      /@(?:\.\.?\/|)(?:renn\/(?:workflows|references|templates)\/[^\s)]+)/g
     );
     if (bareRelative) {
       for (const ref of bareRelative) {
         if (!ref.includes('~/.claude/')) {
           errors.push(
-            `${filePath}:${lineNum}: Bad @-reference "${ref}" — must use @~/.claude/ace/... prefix`
+            `${filePath}:${lineNum}: Bad @-reference "${ref}" — must use @~/.claude/renn/... prefix`
           );
         }
       }
@@ -379,7 +379,7 @@ function validateCommandDelegation(filePath, content, fileType) {
   const lineCount = content.split('\n').length;
   if (lineCount <= 500) return;
 
-  const hasWorkflowRef = /@~\/\.claude\/ace\/workflows\//.test(content);
+  const hasWorkflowRef = /@~\/\.claude\/renn\/workflows\//.test(content);
   if (!hasWorkflowRef) {
     warnings.push(
       `${filePath}: Command is ${lineCount} lines with no workflow reference — consider delegating logic to a workflow`
@@ -595,7 +595,7 @@ if (require.main === module) {
     validateFile(path.resolve(file));
   }
 
-  console.log(`\nACE Markdown Validator — ${filesChecked} files checked\n`);
+  console.log(`\nRENN Markdown Validator — ${filesChecked} files checked\n`);
 
   if (warnings.length > 0) {
     console.log(`⚠ ${warnings.length} warning(s):`);

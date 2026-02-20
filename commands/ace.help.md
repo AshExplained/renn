@@ -233,6 +233,16 @@ Ship your project to a deployment target.
 
 Usage: `/ace.ship`
 
+**`/ace.watch`**
+Set up monitoring for your deployed project.
+
+- Reads project context from brief.md and ship-target.md
+- If no ACE context exists, asks you directly for stack and platform info
+- Researches monitoring tools (free-tier-first) and generates a setup checklist
+- Walks the checklist with auto-execution and human-gated steps
+
+Usage: `/ace.watch`
+
 ### Progress Tracking
 
 **`/ace.status`**
@@ -499,6 +509,8 @@ For projects with UI stages, add design commands before `/ace.plan-stage`:
 /ace.complete-milestone 1.0.0
 /clear
 /ace.ship               # Ship to production (optional)
+/clear
+/ace.watch              # Set up monitoring (optional)
 /clear
 /ace.new-milestone      # Start next milestone
 ```

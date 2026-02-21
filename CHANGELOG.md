@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2](https://github.com/AshExplained/renn/compare/renn-studio-v0.6.1...renn-studio-v0.6.2) (2026-02-21)
+
+
+### Fixed
+
+* **47.03:** remove stale ACE acronym from help command ([5876d1a](https://github.com/AshExplained/renn/commit/5876d1a030ecd57f4497f5f8792aa32c6e082141))
+* clarify milestone completion prompt wording ([faa9b54](https://github.com/AshExplained/renn/commit/faa9b54f29df5e98d3d93790e5c023851db1d791))
+* correct install command in README ([752417c](https://github.com/AshExplained/renn/commit/752417c2131772527d8131b2c5d2645556580eee))
+* correct install command to use npm package name renn-studio ([44d6e2f](https://github.com/AshExplained/renn/commit/44d6e2f04c5208b323c1b63140d4b26d8bbff37f))
+* grant pull-requests write permission for Claude code review ([18d18fd](https://github.com/AshExplained/renn/commit/18d18fd51265b1814482818b06aba67846c588f0))
+* grant pull-requests write permission for Claude code review ([c9d7a6f](https://github.com/AshExplained/renn/commit/c9d7a6febf21c6bfca46df1c9bc3abf7578092b9))
+* post-rebrand cleanup and brand refinements ([3632f9d](https://github.com/AshExplained/renn/commit/3632f9dfd4dafde4ed3f06e30a10350fc7fe3dfc))
+
 ## [0.6.1](https://github.com/AshExplained/renn/compare/renn-studio-v0.6.0...renn-studio-v0.6.1) (2026-02-21)
 
 

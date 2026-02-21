@@ -31,3 +31,4 @@ node_modules/
 .internal/
 .renn
 .claude/
+.ace

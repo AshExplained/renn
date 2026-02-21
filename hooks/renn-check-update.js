@@ -45,7 +45,7 @@ const child = spawn(
 
   let latest = null;
   try {
-    latest = execSync('npm view renn version', { encoding: 'utf8', timeout: 10000, windowsHide: true }).trim();
+    latest = execSync('npm view renn-studio version', { encoding: 'utf8', timeout: 10000, windowsHide: true }).trim();
   } catch (e) {}
 
   const result = {

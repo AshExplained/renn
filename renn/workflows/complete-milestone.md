@@ -102,7 +102,7 @@ Proceed directly to gather_stats step.
 <if style="guided" OR="custom with gates.confirm_milestone_scope true">
 
 ```
-Ready to mark this milestone as shipped?
+Ready to mark this milestone as complete to be shipped?
 (yes / wait / adjust scope)
 ```
 
